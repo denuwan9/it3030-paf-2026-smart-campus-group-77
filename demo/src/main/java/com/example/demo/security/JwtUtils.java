@@ -20,14 +20,20 @@ public class JwtUtils {
     @Value("${app.jwt.secret}")
     private String jwtSecret;
 
+    @Value("${app.jwt.supabase-secret}")
+    private String supabaseSecret;
+
     @Value("${app.jwt.expiration-ms}")
     private int jwtExpirationMs;
 
     private Key key;
+    private Key supabaseKey;
 
     @PostConstruct
     public void init() {
         this.key = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        // Supabase secret might be shorter or longer, but we'll use it as the source for the key
+        this.supabaseKey = Keys.hmacShaKeyFor(supabaseSecret.getBytes());
     }
 
     public String generateToken(Authentication authentication) {
@@ -41,14 +47,18 @@ public class JwtUtils {
                 .compact();
     }
 
+    public Claims getClaimsFromToken(String token) {
+        return Jwts.parserBuilder().setSigningKey(supabaseKey).build()
+                .parseClaimsJws(token).getBody();
+    }
+
     public String getEmailFromToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token).getBody().getSubject();
+        return getClaimsFromToken(token).getSubject();
     }
 
     public boolean validateToken(String authToken) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
+            Jwts.parserBuilder().setSigningKey(supabaseKey).build().parseClaimsJws(authToken);
             return true;
         } catch (MalformedJwtException e) {
             logger.error("Invalid JWT token: {}", e.getMessage());
