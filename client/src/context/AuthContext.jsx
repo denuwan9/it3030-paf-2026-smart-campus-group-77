@@ -17,7 +17,8 @@ export const AuthProvider = ({ children }) => {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth event:', event);
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -37,7 +38,6 @@ export const AuthProvider = ({ children }) => {
       if (error) throw error;
       return { data, error: null };
     } catch (error) {
-      console.error('Google login error:', error.message);
       return { data: null, error };
     }
   };
