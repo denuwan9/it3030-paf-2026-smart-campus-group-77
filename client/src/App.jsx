@@ -22,11 +22,6 @@ const App = () => {
   return (
     <Router>
       <AuthProvider>
-        <nav className="p-4 bg-gray-800 text-white flex gap-6">
-          <Link to="/">Home</Link>
-          <Link to="/profile">My Profile</Link>
-          <Link to="/admin/users">User Management</Link>
-        </nav>
 
         <Routes>
           <Route path="/" element={<Home />} />
