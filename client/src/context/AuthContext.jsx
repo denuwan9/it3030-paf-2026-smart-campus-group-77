@@ -27,7 +27,51 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const loginWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({ provider: 'google' });
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({ 
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      console.error('Google login error:', error.message);
+      return { data: null, error };
+    }
+  };
+
+  const signIn = async (email, password) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
+  };
+
+  const signUp = async (email, password, metadata = {}) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            role: 'USER',
+            ...metadata
+          }
+        }
+      });
+      if (error) throw error;
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
   };
 
   const logout = async () => {
@@ -40,7 +84,16 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, loading, loginWithGoogle, logout, getUserRole }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      session, 
+      loading, 
+      loginWithGoogle, 
+      signIn,
+      signUp,
+      logout, 
+      getUserRole 
+    }}>
       {children}
     </AuthContext.Provider>
   );
