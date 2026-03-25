@@ -32,7 +32,21 @@ public class User {
     private String email;
 
     @NotBlank(message = "Role is required")
-    private String role; // ROLE_USER, ROLE_ADMIN
+    private String role; // ROLE_USER, ROLE_TECHNICIAN, ROLE_ADMIN
+
+    /**
+     * Soft-delete flag. When {@code false}, the account is deactivated
+     * and the user cannot authenticate. Defaults to {@code true} on creation.
+     */
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean isActive = true;
+
+    /** Timestamp recorded when the user self-deactivates their account. */
+    private LocalDateTime deactivatedAt;
+
+    /** OAuth2 provider used for sign-in (e.g. "google"). */
+    private String provider;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -41,3 +55,4 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private UserPreferences preferences;
 }
+
