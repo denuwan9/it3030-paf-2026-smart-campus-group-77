@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -41,12 +42,13 @@ public class UserSyncService {
         if (existing.isPresent()) {
             User user = existing.get();
             // Keep the display name in sync with Google profile.
-            if (!user.getName().equals(name)) {
+            if (!Objects.equals(user.getName(), name)) {
                 user.setName(name);
                 return userRepository.save(user);
             }
             return user;
         }
+
 
         logger.info("First-time login — creating user record for: {}", email);
         User newUser = User.builder()

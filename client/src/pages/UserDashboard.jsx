@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
   Search, 
@@ -18,6 +19,7 @@ import {
 } from 'lucide-react';
 
 const UserDashboard = () => {
+
   const { user, session, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
@@ -27,7 +29,7 @@ const UserDashboard = () => {
     const syncUser = async () => {
       if (session?.access_token) {
         try {
-          await fetch('http://localhost:8080/api/users/me', {
+          await fetch('http://localhost:8081/api/users/me', {
             headers: {
               'Authorization': `Bearer ${session.access_token}`
             }
@@ -89,7 +91,9 @@ const UserDashboard = () => {
           <NavItem icon={BookOpen} label="Resources" isOpen={isSidebarOpen} />
           <NavItem icon={Calendar} label="My Bookings" isOpen={isSidebarOpen} />
           <NavItem icon={AlertTriangle} label="Report Incident" isOpen={isSidebarOpen} />
-          <NavItem icon={UserIcon} label="Profile" isOpen={isSidebarOpen} />
+          <Link to="/profile">
+            <NavItem icon={UserIcon} label="Profile" isOpen={isSidebarOpen} />
+          </Link>
         </nav>
 
         <div className="p-4 border-t border-gray-100">
@@ -155,12 +159,12 @@ const UserDashboard = () => {
             
             <div className="h-10 w-[1px] bg-gray-200 mx-2"></div>
             
-            <div className="flex items-center gap-3 pl-2">
+            <Link to="/profile" className="flex items-center gap-3 pl-2 hover:bg-gray-50 p-2 rounded-2xl transition-colors group">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold leading-none">{user?.user_metadata?.full_name || user?.email?.split('@')[0]}</p>
+                <p className="text-sm font-bold leading-none group-hover:text-indigo-600 transition-colors">{user?.user_metadata?.full_name || user?.email?.split('@')[0]}</p>
                 <p className="text-[10px] text-gray-500 font-medium uppercase mt-1 tracking-wider">Student Console</p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 p-[2px]">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 p-[2px] group-hover:scale-105 transition-transform">
                 <div className="w-full h-full rounded-[10px] bg-white flex items-center justify-center overflow-hidden">
                    {user?.user_metadata?.avatar_url ? (
                      <img src={user.user_metadata.avatar_url} alt="avatar" className="w-full h-full object-cover" />
@@ -169,11 +173,12 @@ const UserDashboard = () => {
                    )}
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         </header>
 
         {/* Dashboard Content */}
+
         <div className="p-8 max-w-7xl mx-auto space-y-8">
           {/* Welcome Header */}
           <section className="bg-indigo-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-200">

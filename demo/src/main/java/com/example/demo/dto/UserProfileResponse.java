@@ -12,6 +12,8 @@ public record UserProfileResponse(
         String name,
         String email,
         String role,
+        String phoneNumber,
+        String profilePictureUrl,
         boolean isActive,
         String provider,
         LocalDateTime createdAt

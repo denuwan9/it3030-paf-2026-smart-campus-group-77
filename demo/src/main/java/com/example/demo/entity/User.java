@@ -34,6 +34,16 @@ public class User {
     @NotBlank(message = "Role is required")
     private String role; // ROLE_USER, ROLE_TECHNICIAN, ROLE_ADMIN
 
+    private String phoneNumber;
+
+    private String profilePictureUrl;
+
+    /**
+     * Local password for non-Google users.
+     * Stored as a BCrypt hash.
+     */
+    private String password;
+
     /**
      * Soft-delete flag. When {@code false}, the account is deactivated
      * and the user cannot authenticate. Defaults to {@code true} on creation.

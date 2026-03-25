@@ -1,15 +1,19 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.ApiResponse;
+import com.example.demo.dto.PasswordUpdateRequest;
 import com.example.demo.dto.UserProfileResponse;
+import com.example.demo.dto.UserProfileUpdateRequest;
 import com.example.demo.entity.UserPreferences;
 import com.example.demo.service.UserService;
+
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
 
 /**
  * REST controller for the authenticated user's own profile operations.
@@ -38,11 +42,42 @@ public class UserController {
      */
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<UserProfileResponse>> getCurrentUser(Authentication authentication) {
-        String email = authentication.getName();
+    public ResponseEntity<ApiResponse<UserProfileResponse>> getCurrentUser(@AuthenticationPrincipal String email) {
         UserProfileResponse profile = userService.getCurrentUserProfile(email);
         return ResponseEntity.ok(ApiResponse.ok("User profile retrieved successfully.", profile));
     }
+
+
+    // ── Endpoint 2: PUT /api/users/profile ───────────────────────────────────
+
+    /**
+     * Updates the authenticated user's profile details.
+     */
+    @PutMapping("/profile")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<UserProfileResponse>> updateProfile(
+            @AuthenticationPrincipal String email,
+            @Valid @RequestBody UserProfileUpdateRequest request) {
+        UserProfileResponse updated = userService.updateProfile(email, request);
+        return ResponseEntity.ok(ApiResponse.ok("Profile updated successfully.", updated));
+    }
+
+
+    // ── Endpoint 3: PUT /api/users/security/password ─────────────────────────
+
+    /**
+     * Updates the authenticated user's password.
+     */
+    @PutMapping("/security/password")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<Void>> updatePassword(
+            @AuthenticationPrincipal String email,
+            @Valid @RequestBody PasswordUpdateRequest request) {
+        userService.updatePassword(email, request);
+        return ResponseEntity.ok(ApiResponse.ok("Password updated successfully."));
+    }
+
+
 
     // ── Endpoint 4: DELETE /api/users/profile/deactivate ─────────────────────
 
@@ -61,22 +96,22 @@ public class UserController {
      */
     @DeleteMapping("/profile/deactivate")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<Void>> deactivateAccount(Authentication authentication) {
-        String email = authentication.getName();
+    public ResponseEntity<ApiResponse<Void>> deactivateAccount(@AuthenticationPrincipal String email) {
         userService.deactivateCurrentUser(email);
         return ResponseEntity.ok(ApiResponse.ok(
                 "Your account has been deactivated. Contact an administrator to reactivate."));
     }
+
 
     // ── Preferences (unchanged) ───────────────────────────────────────────────
 
     @PostMapping("/preferences")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<UserPreferences> createPreferences(
-            Authentication authentication,
+            @AuthenticationPrincipal String email,
             @Valid @RequestBody UserPreferences preferences) {
-        String email = authentication.getName();
         return ResponseEntity.ok(userService.saveUserPreferences(email, preferences));
     }
+
 }
 

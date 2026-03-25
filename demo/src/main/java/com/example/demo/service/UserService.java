@@ -1,6 +1,8 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.PasswordUpdateRequest;
 import com.example.demo.dto.UserProfileResponse;
+import com.example.demo.dto.UserProfileUpdateRequest;
 import com.example.demo.entity.User;
 import com.example.demo.entity.UserPreferences;
 import com.example.demo.exception.BadRequestException;
@@ -10,7 +12,9 @@ import com.example.demo.repository.UserPreferencesRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -31,6 +35,10 @@ public class UserService {
 
     @Autowired
     private UserPreferencesRepository userPreferencesRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     // ──────────────────────────────────────────────────────────────────────────
     // Endpoint 1 — GET /api/users/me
@@ -136,9 +144,48 @@ public class UserService {
         logger.info("User {} self-deactivated their account.", email);
     }
 
+    /**
+     * Updates profile fields: name, phone, and avatar URL.
+     */
+    @Transactional
+    public UserProfileResponse updateProfile(String email, UserProfileUpdateRequest request) {
+        User user = getUserByEmail(email);
+
+        logger.info("Updating profile for user {}: name={}, phone={}", email, request.name(), request.phoneNumber());
+
+        user.setName(request.name());
+        user.setPhoneNumber(request.phoneNumber());
+        user.setProfilePictureUrl(request.profilePictureUrl());
+
+        return toProfileResponse(userRepository.save(user));
+    }
+
+    /**
+     * Updates user password after verifying the old one.
+     * Prevents password updates for Google-only users who haven't set a local password yet.
+     */
+    @Transactional
+    public void updatePassword(String email, PasswordUpdateRequest request) {
+        User user = getUserByEmail(email);
+
+        // Check if the old password matches
+        if (user.getPassword() == null) {
+            throw new BadRequestException("This account does not have a local password set (Google Auth).");
+        }
+
+        if (!passwordEncoder.matches(request.oldPassword(), user.getPassword())) {
+            throw new BadRequestException("Current password does not match.");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+        logger.info("Restricted: Password changed for user {}", email);
+    }
+
     // ──────────────────────────────────────────────────────────────────────────
     // Existing helpers (kept for backwards-compatibility with AdminUserController)
     // ──────────────────────────────────────────────────────────────────────────
+
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -175,10 +222,13 @@ public class UserService {
                 u.getName(),
                 u.getEmail(),
                 u.getRole(),
+                u.getPhoneNumber(),
+                u.getProfilePictureUrl(),
                 u.isActive(),
                 u.getProvider(),
                 u.getCreatedAt()
         );
     }
+
 }
 
