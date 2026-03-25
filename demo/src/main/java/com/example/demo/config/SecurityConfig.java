@@ -97,15 +97,15 @@ public class SecurityConfig {
                 .successHandler((request, response, authentication) -> {
                     String jwt = jwtUtils.generateToken(authentication);
 
-                    // Redirect to the React app with the token as a query parameter.
-                    // The frontend should immediately exchange/store it (e.g. in memory/localStorage).
-                    response.sendRedirect("http://localhost:3000/oauth2/callback?token=" + jwt);
+                    // Redirect to the Vite React app on port 5173
+                    response.sendRedirect("http://localhost:5173/dashboard?token=" + jwt);
                 })
 
-                // On OAuth2 failure redirect back to login with an error flag.
+                // On OAuth2 failure redirect back to login
                 .failureHandler((request, response, exception) -> {
-                    response.sendRedirect("http://localhost:3000/login?error=oauth_failed");
+                    response.sendRedirect("http://localhost:5173/login?error=oauth_failed");
                 })
+
             )
 
             // ── JWT filter ────────────────────────────────────────────────────

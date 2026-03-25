@@ -4,10 +4,14 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Component;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.entity.User;
+
 
 import jakarta.annotation.PostConstruct;
 import java.security.Key;
@@ -30,6 +34,10 @@ public class JwtUtils {
 
     @Value("${app.jwt.supabase-secret}")
     private String supabaseSecret;
+
+    @Autowired
+    private UserRepository userRepository;
+
 
     @Value("${app.jwt.expiration-ms}")
     private int jwtExpirationMs;
@@ -146,13 +154,20 @@ public class JwtUtils {
         Date now     = new Date();
         Date expires = new Date(now.getTime() + jwtExpirationMs);
 
+        // Include the local database ID if available
+        Long userId = userRepository.findByEmail(email)
+                .map(User::getId)
+                .orElse(null);
+
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
+                .claim("userId", userId)
                 .setIssuedAt(now)
                 .setExpiration(expires)
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
     }
+
 }
 
