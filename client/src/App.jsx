@@ -5,6 +5,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LoginButton from './components/LoginButton';
 import ProfilePage from './pages/ProfilePage';
 import AdminUserManagementPage from './pages/AdminUserManagementPage';
+import UserDashboard from './pages/UserDashboard';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 
@@ -13,7 +14,9 @@ const Home = () => (
     <h1 className="text-3xl font-bold">Smart Campus Home</h1>
     <p className="mt-4">This is a public page.</p>
     <div className="mt-8">
-      <LoginButton />
+      <Link to="/login" className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 transition">
+        Go to Login
+      </Link>
     </div>
   </div>
 );
@@ -28,6 +31,7 @@ const App = () => {
           
           {/* Protected Routes for Users */}
           <Route element={<ProtectedRoute requiredRole="USER" />}>
+            <Route path="/dashboard" element={<UserDashboard />} />
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
 
