@@ -28,24 +28,24 @@ public class JwtUtils {
     @Value("${app.jwt.secret}")
     private String jwtSecret;
 
+    @Value("${app.jwt.supabase-secret}")
+    private String supabaseSecret;
+
     @Value("${app.jwt.expiration-ms}")
     private int jwtExpirationMs;
 
     private Key signingKey;
+    private Key supabaseKey;
 
     @PostConstruct
     public void init() {
-        // The hex-encoded secret must be at least 256 bits (32 bytes) for HS256.
         this.signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        // Supabase secrets are sometimes UUIDs or short strings; we ensure they are handled safely.
+        this.supabaseKey = Keys.hmacShaKeyFor(supabaseSecret.getBytes());
     }
 
     // ─── Token generation ─────────────────────────────────────────────────────
 
-    /**
-     * Generates a JWT from a successful Spring Security {@link Authentication}.
-     * Supports both {@link OidcUser} principals (OAuth2 flow) and plain
-     * {@link String} principals (re-authenticated from a previous JWT).
-     */
     public String generateToken(Authentication authentication) {
         String email;
         String role = "ROLE_USER";
@@ -53,7 +53,6 @@ public class JwtUtils {
         if (authentication.getPrincipal() instanceof OidcUser oidcUser) {
             email = oidcUser.getEmail();
         } else {
-            // Principal is the email string set by JwtAuthenticationFilter.
             email = (String) authentication.getPrincipal();
         }
 
@@ -64,46 +63,81 @@ public class JwtUtils {
         return buildToken(email, role);
     }
 
-    /**
-     * Generates a JWT directly from an email + role string.
-     * Useful for programmatic token issuance (e.g. tests, admin endpoints).
-     */
     public String generateToken(String email, String role) {
         return buildToken(email, role);
     }
 
     // ─── Token validation ─────────────────────────────────────────────────────
 
+    /**
+     * Attempts to validate the token against both the internal secret 
+     * and the Supabase secret.
+     */
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token);
+            getClaimsFromToken(token);
             return true;
-        } catch (MalformedJwtException e) {
-            logger.error("Invalid JWT token: {}", e.getMessage());
-        } catch (ExpiredJwtException e) {
-            logger.error("JWT token is expired: {}", e.getMessage());
-        } catch (UnsupportedJwtException e) {
-            logger.error("JWT token is unsupported: {}", e.getMessage());
-        } catch (IllegalArgumentException e) {
-            logger.error("JWT claims string is empty: {}", e.getMessage());
+        } catch (io.jsonwebtoken.security.SignatureException e) {
+            logger.error("JWT Signature Validation Failed: The secret key probably doesn't match Supabase! {}", e.getMessage());
+            return false;
+        } catch (Exception e) {
+            logger.error("JWT validation failed: {} - {}", e.getClass().getSimpleName(), e.getMessage());
+            return false;
         }
-        return false;
     }
 
+    /**
+     * Parses the JWT and returns the claims. Tries the internal key first,
+     * then falls back to the Supabase key.
+     */
     public Claims getClaimsFromToken(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(signingKey)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(signingKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (Exception e) {
+            // Fallback to Supabase secret
+            return Jwts.parserBuilder()
+                    .setSigningKey(supabaseKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        }
     }
 
     public String getEmailFromToken(String token) {
-        return getClaimsFromToken(token).getSubject();
+        Claims claims = getClaimsFromToken(token);
+        // Supabase uses 'email' claim, standard OIDC uses 'sub' (if email is subject) or 'email'
+        String email = claims.get("email", String.class);
+        return (email != null) ? email : claims.getSubject();
     }
 
     public String getRoleFromToken(String token) {
         return getClaimsFromToken(token).get("role", String.class);
+    }
+
+    /**
+     * Extracts the user's name from standard 'name' claim or Supabase 'user_metadata'.
+     */
+    public String getNameFromToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+        
+        // 1. Try standard 'name' claim
+        String name = claims.get("name", String.class);
+        if (name != null) return name;
+
+        // 2. Try Supabase user_metadata
+        Object metadata = claims.get("user_metadata");
+        if (metadata instanceof java.util.Map) {
+            Object fullName = ((java.util.Map<?, ?>) metadata).get("full_name");
+            if (fullName instanceof String) return (String) fullName;
+        }
+
+        // 3. Fallback to email prefix
+        String email = getEmailFromToken(token);
+        return (email != null && email.contains("@")) ? email.split("@")[0] : "User";
     }
 
     // ─── Private helpers ──────────────────────────────────────────────────────

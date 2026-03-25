@@ -14,6 +14,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import com.example.demo.service.UserSyncService;
+
 
 import java.io.IOException;
 import java.util.Collections;
@@ -38,6 +40,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtils jwtUtils;
 
+    @Autowired
+    private UserSyncService userSyncService;
+
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -49,6 +55,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwt != null && jwtUtils.validateToken(jwt)) {
                 String email = jwtUtils.getEmailFromToken(jwt);
                 String role  = jwtUtils.getRoleFromToken(jwt);
+                String name  = jwtUtils.getNameFromToken(jwt);
+
+                // Sync user to local database if they don't exist.
+                // findOrCreate ensures the public.users record is always present.
+                userSyncService.findOrCreate(email, name);
 
                 // Fall back to default role if the claim is missing.
                 if (role == null || role.isBlank()) {

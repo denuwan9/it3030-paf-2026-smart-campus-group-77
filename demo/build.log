@@ -1,0 +1,210 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------------< com.example:demo >--------------------------
+[INFO] Building  0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.5.0:clean (default-clean) @ demo ---
+[INFO] Deleting J:\My Projects\denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2\demo\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ demo ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ demo ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 26 source files with javac [debug parameters release 17] to target\classes
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserSyncService.java:[44,22] cannot find symbol
+  symbol:   method getName()
+  location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserSyncService.java:[45,21] cannot find symbol
+  symbol:   method setName(java.lang.String)
+  location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserSyncService.java:[52,28] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[99,18] cannot find symbol
+  symbol:   method isActive()
+  location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[104,73] cannot find symbol
+  symbol:   method getEmail()
+  location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[104,90] cannot find symbol
+  symbol:   method getRole()
+  location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[105,13] cannot find symbol
+  symbol:   method setRole(java.lang.String)
+  location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[129,18] cannot find symbol
+  symbol:   method isActive()
+  location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[133,13] cannot find symbol
+  symbol:   method setActive(boolean)
+  location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[134,13] cannot find symbol
+  symbol:   method setDeactivatedAt(java.time.LocalDateTime)
+  location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[160,20] cannot find symbol
+  symbol:   method setUser(com.example.demo.entity.User)
+  location: variable preferences of type com.example.demo.entity.UserPreferences
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[174,18] cannot find symbol
+  symbol:   method getId()
+  location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[175,18] cannot find symbol
+  symbol:   method getName()
+  location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[176,18] cannot find symbol
+  symbol:   method getEmail()
+  location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[177,18] cannot find symbol
+  symbol:   method getRole()
+  location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[178,18] cannot find symbol
+  symbol:   method isActive()
+  location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[179,18] cannot find symbol
+  symbol:   method getProvider()
+  location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[180,18] cannot find symbol
+  symbol:   method getCreatedAt()
+  location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/controller/NotificationController.java:[147,20] cannot find symbol
+  symbol:   method getId()
+  location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[71,49] cannot find symbol
+  symbol:   method builder()
+  location: class com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[80,22] cannot find symbol
+  symbol:   method getId()
+  location: variable saved of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[148,15] cannot find symbol
+  symbol:   method getUserId()
+  location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[153,10] cannot find symbol
+  symbol:   method setRead(boolean)
+  location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[175,18] cannot find symbol
+  symbol:   method getId()
+  location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[176,18] cannot find symbol
+  symbol:   method getUserId()
+  location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[177,18] cannot find symbol
+  symbol:   method getMessage()
+  location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[178,18] cannot find symbol
+  symbol:   method getType()
+  location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[179,18] cannot find symbol
+  symbol:   method isRead()
+  location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[180,18] cannot find symbol
+  symbol:   method getCreatedAt()
+  location: variable n of type com.example.demo.entity.Notification
+[INFO] 29 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  3.133 s
+[INFO] Finished at: 2026-03-25T19:31:22+05:30
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.14.1:compile (default-compile) on project demo: Compilation failure: Compilation failure: 
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserSyncService.java:[44,22] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserSyncService.java:[45,21] cannot find symbol
+[ERROR]   symbol:   method setName(java.lang.String)
+[ERROR]   location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserSyncService.java:[52,28] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[99,18] cannot find symbol
+[ERROR]   symbol:   method isActive()
+[ERROR]   location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[104,73] cannot find symbol
+[ERROR]   symbol:   method getEmail()
+[ERROR]   location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[104,90] cannot find symbol
+[ERROR]   symbol:   method getRole()
+[ERROR]   location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[105,13] cannot find symbol
+[ERROR]   symbol:   method setRole(java.lang.String)
+[ERROR]   location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[129,18] cannot find symbol
+[ERROR]   symbol:   method isActive()
+[ERROR]   location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[133,13] cannot find symbol
+[ERROR]   symbol:   method setActive(boolean)
+[ERROR]   location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[134,13] cannot find symbol
+[ERROR]   symbol:   method setDeactivatedAt(java.time.LocalDateTime)
+[ERROR]   location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[160,20] cannot find symbol
+[ERROR]   symbol:   method setUser(com.example.demo.entity.User)
+[ERROR]   location: variable preferences of type com.example.demo.entity.UserPreferences
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[174,18] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[175,18] cannot find symbol
+[ERROR]   symbol:   method getName()
+[ERROR]   location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[176,18] cannot find symbol
+[ERROR]   symbol:   method getEmail()
+[ERROR]   location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[177,18] cannot find symbol
+[ERROR]   symbol:   method getRole()
+[ERROR]   location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[178,18] cannot find symbol
+[ERROR]   symbol:   method isActive()
+[ERROR]   location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[179,18] cannot find symbol
+[ERROR]   symbol:   method getProvider()
+[ERROR]   location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/UserService.java:[180,18] cannot find symbol
+[ERROR]   symbol:   method getCreatedAt()
+[ERROR]   location: variable u of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/controller/NotificationController.java:[147,20] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable user of type com.example.demo.entity.User
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[71,49] cannot find symbol
+[ERROR]   symbol:   method builder()
+[ERROR]   location: class com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[80,22] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable saved of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[148,15] cannot find symbol
+[ERROR]   symbol:   method getUserId()
+[ERROR]   location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[153,10] cannot find symbol
+[ERROR]   symbol:   method setRead(boolean)
+[ERROR]   location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[175,18] cannot find symbol
+[ERROR]   symbol:   method getId()
+[ERROR]   location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[176,18] cannot find symbol
+[ERROR]   symbol:   method getUserId()
+[ERROR]   location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[177,18] cannot find symbol
+[ERROR]   symbol:   method getMessage()
+[ERROR]   location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[178,18] cannot find symbol
+[ERROR]   symbol:   method getType()
+[ERROR]   location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[179,18] cannot find symbol
+[ERROR]   symbol:   method isRead()
+[ERROR]   location: variable n of type com.example.demo.entity.Notification
+[ERROR] /J:/My Projects/denuwan9-it3030-paf-2026-smart-campus-group-WE_238_3.2/demo/src/main/java/com/example/demo/service/NotificationService.java:[180,18] cannot find symbol
+[ERROR]   symbol:   method getCreatedAt()
+[ERROR]   location: variable n of type com.example.demo.entity.Notification
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

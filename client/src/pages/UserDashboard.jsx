@@ -18,9 +18,28 @@ import {
 } from 'lucide-react';
 
 const UserDashboard = () => {
-  const { user, logout } = useAuth();
+  const { user, session, logout } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  // Sync with backend on mount
+  React.useEffect(() => {
+    const syncUser = async () => {
+      if (session?.access_token) {
+        try {
+          await fetch('http://localhost:8080/api/users/me', {
+            headers: {
+              'Authorization': `Bearer ${session.access_token}`
+            }
+          });
+          console.log('User synced with backend successfully.');
+        } catch (error) {
+          console.error('Failed to sync user with backend:', error);
+        }
+      }
+    };
+    syncUser();
+  }, [session]);
 
   const stats = [
     { label: 'Active Bookings', value: '12', icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50' },
