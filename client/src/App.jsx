@@ -12,21 +12,30 @@ import { useAuth } from './context/AuthContext';
 import { Navigate } from 'react-router-dom';
 
 const Home = () => {
-  const { user, getUserRole } = useAuth();
+  const { user, getUserRole, loading } = useAuth();
+  
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500 font-medium tracking-tight">Loading session...</div>;
+  }
   
   if (user) {
     return <Navigate to={getUserRole() === 'ADMIN' ? '/admin/users' : '/dashboard'} replace />;
   }
 
-  return (
-    <div className="p-8">
-      <h1 className="text-3xl font-bold">Smart Campus Home</h1>
-      <p className="mt-4">This is a public page.</p>
-      <div className="mt-8">
-        <LoginButton />
-      </div>
-    </div>
-  );
+  return <Navigate to="/login" replace />;
+};
+
+const AuthRoute = ({ children }) => {
+  const { user, getUserRole, loading } = useAuth();
+  
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center bg-gray-50 text-gray-500 font-medium tracking-tight">Loading session...</div>;
+  }
+
+  if (user) {
+    return <Navigate to={getUserRole() === 'ADMIN' ? '/admin/users' : '/dashboard'} replace />;
+  }
+  return children;
 };
 
 const App = () => {
@@ -48,8 +57,9 @@ const App = () => {
             <Route path="/admin/users" element={<AdminUserManagementPage />} />
           </Route>
 
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/login" element={<AuthRoute><LoginPage /></AuthRoute>} />
+          <Route path="/signup" element={<AuthRoute><SignupPage /></AuthRoute>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </AuthProvider>
     </Router>
