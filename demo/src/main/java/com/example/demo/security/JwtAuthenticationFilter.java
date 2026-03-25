@@ -1,8 +1,5 @@
 package com.example.demo.security;
 
-import com.example.demo.entity.User;
-import com.example.demo.service.UserSyncService;
-import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +18,19 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Collections;
 
+/**
+ * Stateless JWT authentication filter.
+ *
+ * <p>For every inbound request this filter:
+ * <ol>
+ *   <li>Extracts the {@code Bearer} token from the {@code Authorization} header.</li>
+ *   <li>Validates the token signature and expiry using {@link JwtUtils}.</li>
+ *   <li>Reads the {@code sub} (email) and {@code role} claims directly from the
+ *       token — <strong>no database lookup required</strong>.</li>
+ *   <li>Populates the Spring Security context so that downstream {@code @PreAuthorize}
+ *       and {@code hasRole()} checks work correctly.</li>
+ * </ol>
+ */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
@@ -28,26 +38,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private JwtUtils jwtUtils;
 
-    @Autowired
-    private UserSyncService userSyncService;
-
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
             throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
+
             if (jwt != null && jwtUtils.validateToken(jwt)) {
-                Claims claims = jwtUtils.getClaimsFromToken(jwt);
-                
-                // Sync user with local database and get the user object with its role
-                User user = userSyncService.syncUserFromClaims(claims);
+                String email = jwtUtils.getEmailFromToken(jwt);
+                String role  = jwtUtils.getRoleFromToken(jwt);
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        user.getEmail(), null, 
-                        Collections.singletonList(new SimpleGrantedAuthority(user.getRole())));
-                
+                // Fall back to default role if the claim is missing.
+                if (role == null || role.isBlank()) {
+                    role = "ROLE_USER";
+                }
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                email,
+                                null,
+                                Collections.singletonList(new SimpleGrantedAuthority(role)));
+
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
@@ -67,3 +81,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 }
+
