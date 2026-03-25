@@ -5,6 +5,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import LoginButton from './components/LoginButton';
 import ProfilePage from './pages/ProfilePage';
 import AdminUserManagementPage from './pages/AdminUserManagementPage';
+import LoginPage from './pages/LoginPage';
+import SignupPage from './pages/SignupPage';
 
 const Home = () => (
   <div className="p-8">
@@ -39,12 +41,8 @@ const App = () => {
             <Route path="/admin/users" element={<AdminUserManagementPage />} />
           </Route>
 
-          <Route path="/login" element={
-            <div className="p-8 text-center">
-              <h2 className="text-2xl mb-4">Please log in to continue</h2>
-              <LoginButton />
-            </div>
-          } />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
         </Routes>
       </AuthProvider>
     </Router>
