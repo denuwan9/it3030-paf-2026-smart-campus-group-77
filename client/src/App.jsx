@@ -7,26 +7,32 @@ import ProfilePage from './pages/ProfilePage';
 import AdminUserManagementPage from './pages/AdminUserManagementPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import UserDashboard from './pages/UserDashboard';
+import { useAuth } from './context/AuthContext';
+import { Navigate } from 'react-router-dom';
 
-const Home = () => (
-  <div className="p-8">
-    <h1 className="text-3xl font-bold">Smart Campus Home</h1>
-    <p className="mt-4">This is a public page.</p>
-    <div className="mt-8">
-      <LoginButton />
+const Home = () => {
+  const { user, getUserRole } = useAuth();
+  
+  if (user) {
+    return <Navigate to={getUserRole() === 'ADMIN' ? '/admin/users' : '/dashboard'} replace />;
+  }
+
+  return (
+    <div className="p-8">
+      <h1 className="text-3xl font-bold">Smart Campus Home</h1>
+      <p className="mt-4">This is a public page.</p>
+      <div className="mt-8">
+        <LoginButton />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const App = () => {
   return (
     <Router>
       <AuthProvider>
-        <nav className="p-4 bg-gray-800 text-white flex gap-6">
-          <Link to="/">Home</Link>
-          <Link to="/profile">My Profile</Link>
-          <Link to="/admin/users">User Management</Link>
-        </nav>
 
         <Routes>
           <Route path="/" element={<Home />} />
@@ -34,6 +40,7 @@ const App = () => {
           {/* Protected Routes for Users */}
           <Route element={<ProtectedRoute requiredRole="USER" />}>
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/dashboard" element={<UserDashboard />} />
           </Route>
 
           {/* Protected Routes for Admins */}

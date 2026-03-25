@@ -27,10 +27,14 @@ const LoginPage = () => {
   };
 
   const handleGoogleLogin = async () => {
-    setError('Google OAuth is currently not configured in the Supabase dashboard. Please use the Email/Password login above.');
-    // We could still attempt it, but we know it fails for this project based on the screenshot.
-    // const { error } = await loginWithGoogle();
-    // if (error) setError(error.message);
+    setLoading(true);
+    setError('');
+    const { error } = await loginWithGoogle();
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+    // If successful, Supabase handles the redirect to Google
   };
 
   return (
