@@ -21,7 +21,7 @@ const AdminDashboard = () => (
   <div className="p-8">
     <h1 className="text-2xl font-bold text-primary-500">Admin Control Panel</h1>
     <p className="mt-4 text-slate-400">System management and user oversight.</p>
-    <button onClick={() => window.location.href='/login'} className="mt-4 text-red-400 underline" onClick={useAuth().logout}>Logout</button>
+    <button onClick={useAuth().logout} className="mt-4 text-red-400 underline">Logout</button>
   </div>
 );
 
