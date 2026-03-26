@@ -1,43 +1,56 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Layouts
+import DashboardLayout from './layouts/DashboardLayout';
+
+// Pages
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import OtpPage from './pages/OtpPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ProfilePage from './pages/ProfilePage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
-import ProtectedRoute from './components/ProtectedRoute';
-import { useAuth } from './context/AuthContext';
 
-// Simple Placeholders
-const Dashboard = () => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold">User Dashboard</h1>
-    <p className="mt-4 text-slate-400">Welcome to the Smart Campus Hub.</p>
-    <button onClick={() => useAuth().logout()} className="mt-4 text-red-400 underline">Logout</button>
-  </div>
-);
+// Dashboard Pages
+import UserDashboard from './pages/dashboard/UserDashboard';
+import AdminDashboard from './pages/dashboard/AdminDashboard';
+import TechnicianDashboard from './pages/dashboard/TechnicianDashboard';
 
-const AdminDashboard = () => (
-  <div className="p-8">
-    <h1 className="text-2xl font-bold text-primary-500">Admin Control Panel</h1>
-    <p className="mt-4 text-slate-400">System management and user oversight.</p>
-    <button onClick={useAuth().logout} className="mt-4 text-red-400 underline">Logout</button>
-  </div>
-);
+// Role-based entry point
+const DashboardHome = () => {
+  const { user } = useAuth();
+  
+  if (user?.role === 'ROLE_ADMIN') return <AdminDashboard />;
+  if (user?.role === 'ROLE_TECHNICIAN') return <TechnicianDashboard />;
+  return <UserDashboard />;
+};
 
 const Unauthorized = () => (
-  <div className="h-screen flex flex-col items-center justify-center text-center p-8">
-    <h1 className="text-4xl font-bold text-red-500">403</h1>
-    <p className="text-xl mt-2">Access Denied</p>
-    <p className="text-slate-400 mt-4">You don't have permission to view this page.</p>
-    <button onClick={() => window.history.back()} className="mt-8 text-primary-400 underline">Go Back</button>
+  <div className="h-screen flex flex-col items-center justify-center p-4 text-center bg-slate-950">
+    <div className="w-20 h-20 bg-red-500/10 rounded-3xl flex items-center justify-center mb-6 border border-red-500/20">
+      <span className="text-4xl text-red-500 font-black">403</span>
+    </div>
+    <h1 className="text-3xl font-bold mb-2 text-white">Access Denied</h1>
+    <p className="text-slate-400 mb-8 max-w-sm">
+      You don't have the required permissions to access this campus module. 
+      Please contact the system administrator if you believe this is an error.
+    </p>
+    <button 
+      onClick={() => window.history.back()} 
+      className="px-8 py-2.5 bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white font-semibold rounded-xl transition-all active:scale-95"
+    >
+      Return to Safety
+    </button>
   </div>
 );
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen text-slate-50 selection:bg-primary-500/30">
+      <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-primary-500/30">
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
@@ -47,17 +60,29 @@ function App() {
           <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
-          {/* Protected User Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TECHNICIAN']} />}>
-            <Route path="/dashboard" element={<Dashboard />} />
+          {/* Protected Dashboard Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route element={<DashboardLayout />}>
+              <Route path="/dashboard" element={<DashboardHome />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              
+              {/* Module A: Resource Management */}
+              <Route path="/resources" element={<UserDashboard />} />
+              
+              {/* Admin Exclusive */}
+              <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
+                <Route path="/admin/bookings" element={<AdminDashboard />} />
+                <Route path="/admin/users" element={<AdminDashboard />} />
+              </Route>
+
+              {/* Technician Exclusive */}
+              <Route element={<ProtectedRoute allowedRoles={['ROLE_TECHNICIAN', 'ROLE_ADMIN']} />}>
+                <Route path="/tickets" element={<TechnicianDashboard />} />
+              </Route>
+            </Route>
           </Route>
 
-          {/* Protected Admin Routes */}
-          <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
-            <Route path="/admin-dashboard" element={<AdminDashboard />} />
-          </Route>
-
-          {/* Fallback */}
+          {/* Global Redirects */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="*" element={<Unauthorized />} />
         </Routes>
