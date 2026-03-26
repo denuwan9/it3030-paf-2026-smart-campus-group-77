@@ -11,6 +11,16 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Component;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.entity.User;
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.ECKey;
+import com.nimbusds.jose.jwk.JWK;
+import com.nimbusds.jose.util.DefaultResourceRetriever;
+import com.nimbusds.jose.util.Resource;
+import java.net.URI;
+import java.security.PublicKey;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 import jakarta.annotation.PostConstruct;
@@ -43,13 +53,59 @@ public class JwtUtils {
     private int jwtExpirationMs;
 
     private Key signingKey;
-    private Key supabaseKey;
+    private Key symmetricSupabaseKey;
+
+    @Value("${app.jwt.supabase-jwks-url}")
+    private String supabaseJwksUrl;
+
+    @Value("${app.supabase.anon-key:}")
+    private String supabaseAnonKey;
+
+    // Cache for JWK Set
+    private JWKSet jwkSet;
+    private long lastJwkFetchTime = 0;
+    private static final long JWK_REFRESH_INTERVAL = 24 * 60 * 60 * 1000; // 24 hours
 
     @PostConstruct
     public void init() {
         this.signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
-        // Supabase secrets are sometimes UUIDs or short strings; we ensure they are handled safely.
-        this.supabaseKey = Keys.hmacShaKeyFor(supabaseSecret.getBytes());
+        // Supabase secrets are often Base64 encoded. Try to decode if possible.
+        byte[] supabaseKeyBytes;
+        try {
+            supabaseKeyBytes = java.util.Base64.getDecoder().decode(supabaseSecret);
+        } catch (Exception e) {
+            supabaseKeyBytes = supabaseSecret.getBytes();
+        }
+        this.symmetricSupabaseKey = Keys.hmacShaKeyFor(supabaseKeyBytes);
+    }
+
+    /**
+     * Fetches public keys from Supabase JWKS endpoint.
+     */
+    private synchronized void refreshJwkSet() {
+        long now = System.currentTimeMillis();
+        if (jwkSet == null || (now - lastJwkFetchTime) > JWK_REFRESH_INTERVAL) {
+            try {
+                logger.info("Fetching JWKS from: {}", supabaseJwksUrl);
+                
+                // Use custom retriever to add apikey header
+                DefaultResourceRetriever retriever = new DefaultResourceRetriever(5000, 5000);
+                Map<String, List<String>> headers = new HashMap<>();
+                if (supabaseAnonKey != null && !supabaseAnonKey.isEmpty()) {
+                    headers.put("apikey", List.of(supabaseAnonKey));
+                    headers.put("Authorization", List.of("Bearer " + supabaseAnonKey));
+                }
+                retriever.setHeaders(headers);
+                
+                Resource resource = retriever.retrieveResource(URI.create(supabaseJwksUrl).toURL());
+                this.jwkSet = JWKSet.parse(resource.getContent());
+                
+                this.lastJwkFetchTime = now;
+                logger.info("Successfully loaded {} JWK(s)", jwkSet.getKeys().size());
+            } catch (Exception e) {
+                logger.error("Failed to load JWKS from Supabase: {} - {}", supabaseJwksUrl, e.getMessage());
+            }
+        }
     }
 
     // ─── Token generation ─────────────────────────────────────────────────────
@@ -96,22 +152,64 @@ public class JwtUtils {
 
     /**
      * Parses the JWT and returns the claims. Tries the internal key first,
-     * then falls back to the Supabase key.
+     * then handles Supabase tokens (ES256 or fallback HS256).
      */
     public Claims getClaimsFromToken(String token) {
         try {
+            // 1. Try internal key (HS256)
             return Jwts.parserBuilder()
                     .setSigningKey(signingKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            // Fallback to Supabase secret
+            // 2. If internal fails, it might be a Supabase token
+            return parseSupabaseToken(token);
+        }
+    }
+
+    private Claims parseSupabaseToken(String token) {
+        try {
+            // Check headers to see if it's ES256 (asymmetric) or HS256 (symmetric)
+            String[] parts = token.split("\\.");
+            if (parts.length < 2) throw new MalformedJwtException("Invalid JWT structure");
+            
+            String headerJson = new String(java.util.Base64.getUrlDecoder().decode(parts[0]));
+            logger.info("🔐 [JWT] Token Header: {}", headerJson);
+            
+            refreshJwkSet();
+            if (jwkSet != null) {
+                try {
+                    // Use the already decoded headerJson
+                    String kid = null;
+                    if (headerJson.contains("\"kid\":\"")) {
+                        kid = headerJson.split("\"kid\":\"")[1].split("\"")[0];
+                    }
+
+                    JWK jwk = (kid != null) ? jwkSet.getKeyByKeyId(kid) : jwkSet.getKeys().get(0);
+                    if (jwk instanceof ECKey ecKey) {
+                        PublicKey publicKey = ecKey.toPublicKey();
+                        return Jwts.parserBuilder()
+                                .setSigningKey(publicKey)
+                                .build()
+                                .parseClaimsJws(token)
+                                .getBody();
+                    }
+                } catch (Exception jwkEx) {
+                    // Fallback to symmetric if JWKS fails or matches no key
+                }
+            }
+
+            // Fallback: Try symmetric Supabase secret (HS256)
             return Jwts.parserBuilder()
-                    .setSigningKey(supabaseKey)
+                    .setSigningKey(symmetricSupabaseKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
+
+        } catch (Exception ex) {
+            logger.error("JWT validation failed for both internal and Supabase keys: {}", ex.getMessage());
+            throw ex;
         }
     }
 
@@ -123,7 +221,12 @@ public class JwtUtils {
     }
 
     public String getRoleFromToken(String token) {
-        return getClaimsFromToken(token).get("role", String.class);
+        String role = getClaimsFromToken(token).get("role", String.class);
+        // Map Supabase 'authenticated' role to our 'ROLE_USER'
+        if ("authenticated".equalsIgnoreCase(role)) {
+            return "ROLE_USER";
+        }
+        return role;
     }
 
     /**
@@ -132,7 +235,7 @@ public class JwtUtils {
     public String getNameFromToken(String token) {
         Claims claims = getClaimsFromToken(token);
         
-        // 1. Try standard 'name' claim
+        // 1. Try standard 'name' claim (OIDC or our internal claim)
         String name = claims.get("name", String.class);
         if (name != null) return name;
 
@@ -148,21 +251,60 @@ public class JwtUtils {
         return (email != null && email.contains("@")) ? email.split("@")[0] : "User";
     }
 
+    public String getAvatarUrlFromToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+
+        // 1. Try our internal claim
+        String avatarUrl = claims.get("avatarUrl", String.class);
+        if (avatarUrl != null) return avatarUrl;
+
+        // 2. Try Supabase user_metadata
+        Object metadata = claims.get("user_metadata");
+        if (metadata instanceof java.util.Map) {
+            Object url = ((java.util.Map<?, ?>) metadata).get("avatar_url");
+            if (url instanceof String) return (String) url;
+        }
+
+        return null;
+    }
+
+    public String getProviderFromToken(String token) {
+        Claims claims = getClaimsFromToken(token);
+
+        // 1. Try our internal claim
+        String provider = claims.get("provider", String.class);
+        if (provider != null) return provider;
+
+        // 2. Try Supabase app_metadata
+        Object metadata = claims.get("app_metadata");
+        if (metadata instanceof java.util.Map) {
+            Object p = ((java.util.Map<?, ?>) metadata).get("provider");
+            if (p instanceof String) return (String) p;
+        }
+
+        return "local";
+    }
+
     // ─── Private helpers ──────────────────────────────────────────────────────
 
     private String buildToken(String email, String role) {
         Date now     = new Date();
         Date expires = new Date(now.getTime() + jwtExpirationMs);
 
-        // Include the local database ID if available
-        Long userId = userRepository.findByEmail(email)
-                .map(User::getId)
-                .orElse(null);
+        // Find the user in the local DB to get more info for the token
+        User user = userRepository.findByEmail(email).orElse(null);
+        Long userId = (user != null) ? user.getId() : null;
+        String name = (user != null) ? user.getName() : null;
+        String avatarUrl = (user != null) ? user.getProfilePictureUrl() : null;
+        String provider = (user != null) ? user.getProvider() : "local";
 
         return Jwts.builder()
                 .setSubject(email)
                 .claim("role", role)
                 .claim("userId", userId)
+                .claim("name", name)
+                .claim("avatarUrl", avatarUrl)
+                .claim("provider", provider)
                 .setIssuedAt(now)
                 .setExpiration(expires)
                 .signWith(signingKey, SignatureAlgorithm.HS256)

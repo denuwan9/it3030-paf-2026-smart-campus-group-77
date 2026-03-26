@@ -51,6 +51,7 @@ public class UserService {
      * @throws ResourceNotFoundException if no matching user record exists
      */
     public UserProfileResponse getCurrentUserProfile(String email) {
+        logger.info("🔍 [User] DB Lookup for profile email: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Authenticated user not found in database: " + email));

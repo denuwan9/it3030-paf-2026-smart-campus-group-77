@@ -58,10 +58,21 @@ const ProfilePage = () => {
           provider: data.provider || 'EMAIL'
         });
       } catch (error) {
-        console.error('Error fetching profile:', error);
-        // Only show error if it's not an authentication issue (handled by ProtectedRoute)
-        if (error.response?.status !== 401 && error.response?.status !== 403) {
-          showToast('error', 'Failed to load profile data.');
+        console.error('❌ [Profile] Error fetching profile:', error);
+        
+        if (error.response) {
+          const { status, data } = error.response;
+          console.error(`📡 [Profile] Server responded with ${status}:`, data);
+          
+          if (status === 401) showToast('error', 'Session expired. Please log in again.');
+          else if (status === 403) showToast('error', 'You do not have permission to view this profile.');
+          else if (status === 404) showToast('error', 'User record not found in system.');
+          else showToast('error', `Failed to load profile data (${status})`);
+        } else if (error.request) {
+          console.error('🌐 [Profile] No response received from backend. Is the server running at http://localhost:8081?');
+          showToast('error', 'Cannot connect to backend server.');
+        } else {
+          showToast('error', 'An unexpected error occurred.');
         }
       } finally {
         setLoading(false);

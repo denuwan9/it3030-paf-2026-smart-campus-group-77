@@ -42,12 +42,14 @@ public class CustomOidcUserService extends OidcUserService {
             // 2. Persist / update the user in Supabase (first-time login creates the row).
             String email = oidcUser.getEmail();
             String name  = oidcUser.getFullName();
+            String avatarUrl = oidcUser.getPicture();
+            String provider = "google";
 
             if (name == null || name.isBlank()) {
                 name = email.split("@")[0];
             }
 
-            userSyncService.findOrCreate(email, name);
+            userSyncService.findOrCreate(email, name, avatarUrl, provider);
 
         } catch (Exception ex) {
             // Log but do not block login — the JWT redirect handler will still run.

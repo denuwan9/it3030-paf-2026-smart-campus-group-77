@@ -43,6 +43,7 @@ public class UserController {
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<ApiResponse<UserProfileResponse>> getCurrentUser(@AuthenticationPrincipal String email) {
+        System.out.println("🚀 [API] Entering GET /users/me for user: " + email);
         UserProfileResponse profile = userService.getCurrentUserProfile(email);
         return ResponseEntity.ok(ApiResponse.ok("User profile retrieved successfully.", profile));
     }

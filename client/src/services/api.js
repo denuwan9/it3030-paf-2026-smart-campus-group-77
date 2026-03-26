@@ -12,7 +12,10 @@ api.interceptors.request.use(async (config) => {
   const { data: { session } } = await supabase.auth.getSession();
   
   if (session?.access_token) {
+    console.log("🔐 [API] Attaching JWT to request:", session.access_token.substring(0, 15) + "..."); 
     config.headers.Authorization = `Bearer ${session.access_token}`;
+  } else {
+    console.warn("⚠️ [API] No active session found.");
   }
   
   return config;

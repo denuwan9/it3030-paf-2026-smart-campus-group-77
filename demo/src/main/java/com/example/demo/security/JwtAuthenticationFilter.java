@@ -56,10 +56,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String email = jwtUtils.getEmailFromToken(jwt);
                 String role  = jwtUtils.getRoleFromToken(jwt);
                 String name  = jwtUtils.getNameFromToken(jwt);
+                String avatarUrl = jwtUtils.getAvatarUrlFromToken(jwt);
+                String provider = jwtUtils.getProviderFromToken(jwt);
+
+                logger.info("🔐 [JWT] Successful validation for: {} | role: {} | provider: {}", email, role, provider);
 
                 // Sync user to local database if they don't exist.
                 // findOrCreate ensures the public.users record is always present.
-                userSyncService.findOrCreate(email, name);
+                userSyncService.findOrCreate(email, name, avatarUrl, provider);
 
                 // Fall back to default role if the claim is missing.
                 if (role == null || role.isBlank()) {
@@ -74,6 +78,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                logger.info("✅ [JWT] SecurityContext populated for user: {}", email);
+            } else if (jwt != null) {
+                logger.warn("❌ [JWT] Token validation failed for request to: {}", request.getRequestURI());
             }
         } catch (Exception e) {
             logger.error("Cannot set user authentication: {}", e.getMessage());

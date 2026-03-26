@@ -31,19 +31,41 @@ public class UserSyncService {
      * Looks up the user by {@code email}. If not found, creates a new record
      * with a default {@code ROLE_USER} role.
      *
-     * @param email the Google account e-mail address (unique identifier)
-     * @param name  the display name from the OIDC {@code name} claim
+     * @param email      the Google account e-mail address (unique identifier)
+     * @param name       the display name from the OIDC {@code name} claim
+     * @param avatarUrl  the profile picture URL
+     * @param provider   the login provider (e.g. "google")
      * @return the persisted {@link User} entity (never {@code null})
      */
     @Transactional
-    public User findOrCreate(String email, String name) {
+    public User findOrCreate(String email, String name, String avatarUrl, String provider) {
         Optional<User> existing = userRepository.findByEmail(email);
 
         if (existing.isPresent()) {
             User user = existing.get();
-            // Keep the display name in sync with Google profile.
+            boolean changed = false;
+
+            // Keep the display name in sync
             if (!Objects.equals(user.getName(), name)) {
                 user.setName(name);
+                changed = true;
+            }
+
+            // Keep the profile picture in sync
+            if (!Objects.equals(user.getProfilePictureUrl(), avatarUrl) && avatarUrl != null) {
+                user.setProfilePictureUrl(avatarUrl);
+                changed = true;
+            }
+
+            // Update provider if it was local and is now something else
+            if (user.getProvider() == null || user.getProvider().equals("local")) {
+                if (provider != null && !provider.equals("local")) {
+                    user.setProvider(provider);
+                    changed = true;
+                }
+            }
+
+            if (changed) {
                 return userRepository.save(user);
             }
             return user;
@@ -54,6 +76,8 @@ public class UserSyncService {
         User newUser = User.builder()
                 .email(email)
                 .name(name)
+                .profilePictureUrl(avatarUrl)
+                .provider(provider != null ? provider : "google")
                 .role("ROLE_USER")
                 .build();
         return userRepository.save(newUser);
