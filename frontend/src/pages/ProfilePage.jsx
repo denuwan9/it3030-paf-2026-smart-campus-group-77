@@ -1,7 +1,6 @@
-import React from 'react';
 import { motion } from 'framer-motion';
-import { useAuth } from '../../context/AuthContext';
-import { Mail, Shield, Calendar, MapPin, Building, Phone } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Mail, Shield, Calendar, MapPin, Building, Phone, User } from 'lucide-react';
 
 const ProfilePage = () => {
   const { user } = useAuth();

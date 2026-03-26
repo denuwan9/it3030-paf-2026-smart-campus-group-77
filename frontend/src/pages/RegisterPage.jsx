@@ -11,8 +11,8 @@ import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
   email: z.string().email('Invalid email address')
-    .refine(val => val.endsWith('@sliit.lk') || val.endsWith('.sliit.lk'), {
-      message: 'Please use your institution email (@sliit.lk)'
+    .refine(val => val.endsWith('@sliit.lk') || val.endsWith('@my.sliit.lk'), {
+      message: 'Please use your institution email (@sliit.lk or @my.sliit.lk)'
     }),
   password: z.string().min(8, 'Password must be at least 8 characters')
     .regex(/[A-Z]/, 'Must contain at least one uppercase letter')

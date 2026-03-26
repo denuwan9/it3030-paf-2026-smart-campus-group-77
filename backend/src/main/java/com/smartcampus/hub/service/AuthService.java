@@ -33,8 +33,8 @@ public class AuthService {
         }
 
         // Domain restriction check (SLIIT specific)
-        if (!request.getEmail().toLowerCase().endsWith("@sliit.lk") && !request.getEmail().toLowerCase().endsWith(".sliit.lk")) {
-            // Uncomment if mandatory: throw new RuntimeException("Only SLIIT emails are allowed");
+        if (!request.getEmail().toLowerCase().endsWith("@sliit.lk") && !request.getEmail().toLowerCase().endsWith("@my.sliit.lk")) {
+            throw new RuntimeException("Only SLIIT institutional emails (@sliit.lk or @my.sliit.lk) are allowed");
         }
 
         User user = User.builder()

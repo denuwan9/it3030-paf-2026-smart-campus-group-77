@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
 import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserService;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.stereotype.Service;
 
@@ -30,6 +31,15 @@ public class CustomOidcUserService extends OidcUserService {
 
     private OidcUser processOidcUser(OidcUser oidcUser) {
         String email = oidcUser.getEmail();
+        
+        // Domain restriction check (SLIIT specific)
+        if (email == null || (!email.toLowerCase().endsWith("@sliit.lk") && !email.toLowerCase().endsWith("@my.sliit.lk"))) {
+            throw new OAuth2AuthenticationException(
+                new OAuth2Error("invalid_domain"), 
+                "Unauthorized: Only SLIIT institutional emails (@sliit.lk or @my.sliit.lk) are permitted."
+            );
+        }
+
         String name = oidcUser.getFullName();
         
         Optional<User> userOptional = userRepository.findByEmail(email);

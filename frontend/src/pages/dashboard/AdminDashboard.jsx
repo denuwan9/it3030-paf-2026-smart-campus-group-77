@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { StatCard } from '../../components/StatCard';
+import StatCard from '../../components/StatCard';
 import { Package, Calendar, Ticket, ArrowUpRight, TrendingUp, Users } from 'lucide-react';
 import StatusBadge from '../../components/StatusBadge';
 
