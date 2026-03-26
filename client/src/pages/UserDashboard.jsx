@@ -21,8 +21,20 @@ import {
 const UserDashboard = () => {
 
   const { user, session, logout } = useAuth();
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setIsSidebarOpen(false);
+      } else if (window.innerWidth >= 768) {
+        setIsSidebarOpen(true);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Sync with backend on mount
   React.useEffect(() => {
@@ -75,9 +87,21 @@ const UserDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex font-sans text-gray-900">
+      {/* Sidebar Overlay for Mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-20 md:hidden transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
       <aside 
-        className={`${isSidebarOpen ? 'w-64' : 'w-20'} bg-white border-r border-gray-200 transition-all duration-300 flex flex-col fixed h-full z-20`}
+        className={`
+          fixed inset-y-0 left-0 bg-white border-r border-gray-200 transition-all duration-300 
+          flex flex-col z-30
+          ${isSidebarOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0 md:w-20'}
+        `}
       >
         <div className="p-6 flex items-center gap-3">
           <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
@@ -108,7 +132,7 @@ const UserDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className={`flex-1 transition-all duration-300 ${isSidebarOpen ? 'ml-64' : 'ml-20'}`}>
+      <main className={`flex-1 transition-all duration-300 min-w-0 ${isSidebarOpen ? 'md:ml-64' : 'md:ml-20'}`}>
         {/* Top Navbar */}
         <header className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 px-8 flex items-center justify-between sticky top-0 z-10">
           <div className="flex items-center gap-6 flex-1">
@@ -179,9 +203,9 @@ const UserDashboard = () => {
 
         {/* Dashboard Content */}
 
-        <div className="p-8 max-w-7xl mx-auto space-y-8">
+        <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6 md:space-y-8">
           {/* Welcome Header */}
-          <section className="bg-indigo-600 rounded-3xl p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-200">
+          <section className="bg-indigo-600 rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-200">
             <div className="relative z-10">
               <h1 className="text-3xl font-extrabold tracking-tight mb-2">
                 Good morning, {user?.user_metadata?.full_name?.split(' ')[0] || 'Member'}! 👋
@@ -195,7 +219,7 @@ const UserDashboard = () => {
           </section>
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
             {stats.map((stat, i) => (
               <div key={i} className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm hover:shadow-md transition-shadow group cursor-default">
                 <div className="flex items-center justify-between mb-4">
@@ -221,7 +245,7 @@ const UserDashboard = () => {
                   <Clock className="w-5 h-5 text-indigo-500" />
                   Recent Activity
                 </h2>
-                <button className="text-sm font-bold text-indigo-600 hover:text-indigo-700transition-colors">View all</button>
+                <button className="text-sm font-bold text-indigo-600 hover:text-indigo-700 transition-colors">View all</button>
               </div>
               <div className="flex-1 overflow-x-auto">
                 <table className="w-full text-left">
