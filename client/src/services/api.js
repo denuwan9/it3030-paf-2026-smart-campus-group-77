@@ -23,6 +23,20 @@ api.interceptors.request.use(async (config) => {
   return Promise.reject(error);
 });
 
+// Add a response interceptor to handle 403 Forbidden (Domain Restrictions)
+api.interceptors.response.use((response) => response, async (error) => {
+  if (error.response?.status === 403) {
+    console.warn("🛑 [API] 403 Forbidden: Domain or Permission error. Handling via application logic.");
+  }
+  return Promise.reject(error);
+});
+
+export const authService = {
+  login: (email, password) => api.post('/auth/login', { email, password }),
+  signup: (data) => api.post('/auth/signup', data),
+  verifyOtp: (email, code) => api.post('/auth/verify-otp', { email, code }),
+};
+
 export const userService = {
   getCurrentUser: () => api.get('/users/me'),
   updateProfile: (data) => api.put('/users/profile', data),

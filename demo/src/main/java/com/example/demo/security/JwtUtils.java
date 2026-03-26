@@ -68,13 +68,25 @@ public class JwtUtils {
 
     @PostConstruct
     public void init() {
+        if (jwtSecret == null || jwtSecret.length() < 32) {
+            logger.warn("⚠️ [JWT] The app.jwt.secret is too short or missing. Verification may fail!");
+        } else {
+            logger.info("🔐 [JWT] Initializing with secret starting with: {}...", jwtSecret.substring(0, 4));
+        }
+
         this.signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
-        // Supabase secrets are often Base64 encoded. Try to decode if possible.
+        
+        // Supabase secrets are often Base64 encoded.
         byte[] supabaseKeyBytes;
         try {
-            supabaseKeyBytes = java.util.Base64.getDecoder().decode(supabaseSecret);
+            if (supabaseSecret != null && !supabaseSecret.isEmpty()) {
+                supabaseKeyBytes = java.util.Base64.getDecoder().decode(supabaseSecret);
+                logger.info("🔐 [JWT] Successfully base64-decoded supabase-secret");
+            } else {
+                supabaseKeyBytes = jwtSecret.getBytes();
+            }
         } catch (Exception e) {
-            supabaseKeyBytes = supabaseSecret.getBytes();
+            supabaseKeyBytes = (supabaseSecret != null) ? supabaseSecret.getBytes() : jwtSecret.getBytes();
         }
         this.symmetricSupabaseKey = Keys.hmacShaKeyFor(supabaseKeyBytes);
     }
@@ -310,8 +322,20 @@ public class JwtUtils {
         String provider = (user != null) ? user.getProvider() : "local";
         boolean isVerified = (user != null) && user.isVerified();
 
+        // Supabase strictly requires 'sub' to be a UUID
+        String sub = (user != null && user.getSupabaseId() != null) ? user.getSupabaseId() : email;
+        
+        // If sub is not a UUID (like legacy email sub), Supabase setSession will fail.
+        // We'll try to ensure it's a UUID if it doesn't look like one.
+        if (sub != null && !sub.matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$")) {
+            // Generate a deterministic UUID from email for legacy compatibility
+            sub = java.util.UUID.nameUUIDFromBytes(email.getBytes()).toString();
+        }
+
         return Jwts.builder()
-                .setSubject(email)
+                .setSubject(sub)
+                .setAudience("authenticated")
+                .claim("email", email)
                 .claim("role", role)
                 .claim("userId", userId)
                 .claim("name", name)

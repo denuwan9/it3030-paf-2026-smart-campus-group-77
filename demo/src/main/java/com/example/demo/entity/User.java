@@ -29,6 +29,9 @@ public class User {
 
     @Column(name = "student_id")
     private String studentId;
+ 
+    @Column(name = "supabase_id")
+    private String supabaseId;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
@@ -48,6 +51,12 @@ public class User {
     @Column(name = "is_verified")
     private boolean isVerified = false;
 
+    @Column(name = "otp_code")
+    private String otpCode;
+
+    @Column(name = "otp_expiry")
+    private java.time.LocalDateTime otpExpiry;
+
     /**
      * Local password for non-Google users.
      * Stored as a BCrypt hash.
@@ -59,7 +68,7 @@ public class User {
      * and the user cannot authenticate. Defaults to {@code true} on creation.
      */
     @Builder.Default
-    @Column(nullable = false)
+    @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
     /** Timestamp recorded when the user self-deactivates their account. */

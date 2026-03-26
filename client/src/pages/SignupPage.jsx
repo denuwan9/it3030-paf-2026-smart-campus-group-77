@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { authService } from '../services/api';
 import '../styles/Auth.css';
 
 const SignupPage = () => {
@@ -24,34 +25,31 @@ const SignupPage = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8081/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          fullName: formData.fullName,
-          email: formData.email,
-          password: formData.password
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        // Handle validation errors from backend
-        const errorMessage = data.error || Object.values(data).join(', ');
-        throw new Error(errorMessage || 'Signup failed');
-      }
-
-      // Also trigger Supabase signup in background to allow them to login later
-      // This ensures they have a Supabase Auth account too
-      await signUp(formData.email, formData.password, {
+      // 1. Trigger Supabase signup FIRST to get the UUID
+      const { data: supabaseData, error: supabaseError } = await signUp(formData.email, formData.password, {
         full_name: formData.fullName
       });
 
+      if (supabaseError) throw supabaseError;
+      const supabaseId = supabaseData.user?.id;
+
+      // 2. Call our backend with the Supabase UUID via authService
+      try {
+        await authService.signup({
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password,
+          supabaseId: supabaseId
+        });
+      } catch (apiError) {
+        // Handle validation errors from backend
+        const errorMessage = apiError.response?.data?.message || apiError.response?.data?.error || 'Backend synchronization failed';
+        throw new Error(errorMessage);
+      }
+
       alert('Registration successful! Please check your email for confirmation to unlock your campus portal.');
-      navigate('/login');
+      // Redirect to OTP page
+      navigate(`/verify-otp?email=${encodeURIComponent(formData.email)}`);
     } catch (err) {
       setError(err.message);
     } finally {

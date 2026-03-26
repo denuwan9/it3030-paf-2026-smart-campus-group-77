@@ -19,9 +19,8 @@ const ProtectedRoute = ({ children, requiredRole, requireVerified = true }) => {
   const userRole = getUserRole();
   if (requiredRole && userRole !== requiredRole) {
     // Role mismatch - redirect to their respective dashboard
-    if (userRole === 'ROLE_ADMIN') return <Navigate to="/admin/users" replace />;
-    if (userRole === 'ROLE_TECHNICIAN') return <Navigate to="/tech-dashboard" replace />;
-    return <Navigate to="/dashboard" replace />;
+    if (userRole === 'ROLE_ADMIN' || userRole === 'ADMIN') return <Navigate to="/admin-dashboard" replace />;
+    return <Navigate to="/user-dashboard" replace />;
   }
 
   // Check verification status if required
@@ -31,10 +30,10 @@ const ProtectedRoute = ({ children, requiredRole, requireVerified = true }) => {
   if (requireVerified && !isVerified) {
     // Redirect to dashboard but with a flag
     // Avoid infinite redirect if already on dashboard
-    if (location.pathname === '/dashboard' || location.pathname === '/user-dashboard') {
+    if (location.pathname === '/user-dashboard' || location.pathname === '/dashboard') {
       return children || <Outlet />;
     }
-    return <Navigate to="/dashboard" state={{ unverified: true }} replace />;
+    return <Navigate to="/user-dashboard" state={{ unverified: true }} replace />;
   }
 
   return children || <Outlet />;

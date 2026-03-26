@@ -38,18 +38,18 @@ public class CustomOidcUserService extends OidcUserService {
         // 1. Delegate to Spring's default implementation to exchange the OIDC token.
         OidcUser oidcUser = super.loadUser(userRequest);
 
+        // 2. Persist / update the user in Supabase (first-time login creates the row).
+        String email = oidcUser.getEmail().toLowerCase();
+
+        if (email == null || (!email.endsWith("@sliit.lk") && !email.endsWith("@my.sliit.lk"))) {
+            logger.warn("🛑 [Auth] Blocked unauthorized Google account: {}", email);
+            throw new org.springframework.security.oauth2.core.OAuth2AuthenticationException(
+                new org.springframework.security.oauth2.core.OAuth2Error("unauthorized_domain"),
+                "Access restricted! Please use your SLIIT Google account."
+            );
+        }
+
         try {
-            // 2. Persist / update the user in Supabase (first-time login creates the row).
-            String email = oidcUser.getEmail().toLowerCase();
-
-            if (email == null || (!email.endsWith("@sliit.lk") && !email.endsWith("@my.sliit.lk"))) {
-                logger.warn("🛑 [Auth] Blocked unauthorized Google account: {}", email);
-                throw new org.springframework.security.oauth2.core.OAuth2AuthenticationException(
-                    new org.springframework.security.oauth2.core.OAuth2Error("unauthorized_domain"),
-                    "Access restricted! Please use your SLIIT Google account."
-                );
-            }
-
             String name  = oidcUser.getFullName();
             String avatarUrl = oidcUser.getPicture();
             String provider = "google";
@@ -59,10 +59,9 @@ public class CustomOidcUserService extends OidcUserService {
             }
 
             userSyncService.findOrCreate(email, name, avatarUrl, provider);
-
         } catch (Exception ex) {
-            // Log but do not block login — the JWT redirect handler will still run.
-            logger.error("Failed to provision user in local database: {}", ex.getMessage(), ex);
+            // Log local DB sync errors but allow login to proceed (user still has a valid Google session)
+            logger.error("⚠️ [Auth] Non-fatal DB sync error for {}: {}", email, ex.getMessage());
         }
 
         return oidcUser;

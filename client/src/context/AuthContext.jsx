@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
+import { authService } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -17,16 +18,32 @@ export const AuthProvider = ({ children }) => {
     });
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      const currentUser = session?.user ?? null;
+      
+      // Domain Restriction: Force logout if not SLIIT email
+      if (currentUser?.email) {
+        const email = currentUser.email.toLowerCase();
+        if (!email.endsWith('@sliit.lk') && !email.endsWith('@my.sliit.lk')) {
+          console.error("🛑 [Auth] Unauthorized domain detected. Forcing logout.");
+          alert("Only SLIIT campus members can join this hub! Redirecting to login...");
+          await supabase.auth.signOut();
+          setSession(null);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+      }
+
       setSession(session);
-      setUser(session?.user ?? null);
+      setUser(currentUser);
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const loginWithGoogle = async () => {
+  const loginWithGoogle = useCallback(async () => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({ 
         provider: 'google',
@@ -40,22 +57,36 @@ export const AuthProvider = ({ children }) => {
       console.error('Google login error:', error.message);
       return { data: null, error };
     }
-  };
+  }, []);
 
-  const signIn = async (email, password) => {
+  const signIn = useCallback(async (email, password) => {
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      // Use our backend for login to enforce is_verified and other campus logic
+      const response = await authService.login(email, password);
+      const { token, role } = response.data;
+
+      // Sync with Supabase session (since our backend uses the same JWT secret)
+      const { data, error } = await supabase.auth.setSession({
+        access_token: token,
+        refresh_token: token, // Placeholder for flow
       });
+
       if (error) throw error;
+      
+      // Update local state with role from backend
+      if (data.user) {
+        data.user.user_metadata = { ...data.user.user_metadata, role };
+        setUser(data.user);
+      }
+
       return { data, error: null };
     } catch (error) {
-      return { data: null, error };
+      console.error('Login error:', error.response?.data?.message || error.message);
+      return { data: null, error: error.response?.data || error };
     }
-  };
+  }, []);
 
-  const signUp = async (email, password, metadata = {}) => {
+  const signUp = useCallback(async (email, password, metadata = {}) => {
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -72,28 +103,30 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { data: null, error };
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await supabase.auth.signOut();
-  };
+  }, []);
 
   // Helper to get role from user metadata (assuming it's stored there)
-  const getUserRole = () => {
+  const getUserRole = useCallback(() => {
     return user?.user_metadata?.role || 'USER';
-  };
+  }, [user]);
+
+  const authValue = useMemo(() => ({
+    user, 
+    session, 
+    loading, 
+    loginWithGoogle, 
+    signIn,
+    signUp,
+    logout, 
+    getUserRole 
+  }), [user, session, loading, loginWithGoogle, signIn, signUp, logout, getUserRole]);
 
   return (
-    <AuthContext.Provider value={{ 
-      user, 
-      session, 
-      loading, 
-      loginWithGoogle, 
-      signIn,
-      signUp,
-      logout, 
-      getUserRole 
-    }}>
+    <AuthContext.Provider value={authValue}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -20,10 +20,11 @@ import {
 
 const UserDashboard = () => {
 
-  const { user, session, logout } = useAuth();
+  const { user, session, logout, loading } = useAuth();
   const [isSidebarOpen, setIsSidebarOpen] = useState(window.innerWidth >= 768);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
+  // Sync with backend on mount
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 768) {
@@ -37,43 +38,84 @@ const UserDashboard = () => {
   }, []);
 
   // Sync with backend on mount
-  React.useEffect(() => {
+  useEffect(() => {
+    console.log("🔄 [Dashboard] Checking session sync. Stable logout:", !!logout);
     const syncUser = async () => {
       if (session?.access_token) {
+        console.log("📡 [Dashboard] Attempting sync for:", session?.user?.email);
         try {
-          await fetch('http://localhost:8081/api/users/me', {
+          const email = session?.user?.email?.toLowerCase();
+          
+          if (!email) {
+            console.warn('⚠️ [Dashboard] User email not found in session.');
+            return;
+          }
+
+          if (!email.endsWith('@sliit.lk') && !email.endsWith('@my.sliit.lk')) {
+             throw new Error("Unauthorized domain");
+          }
+
+          const response = await fetch('http://localhost:8081/api/users/me', {
             headers: {
               'Authorization': `Bearer ${session.access_token}`
             }
           });
+
+          if (response.status === 403) {
+            console.error('🛑 [Dashboard] Unauthorized domain detected by backend.');
+            await logout();
+            return;
+          }
+          
+          if (!response.ok) throw new Error('Sync failed');
           console.log('User synced with backend successfully.');
         } catch (error) {
           console.error('Failed to sync user with backend:', error);
+          if (error.message === "Unauthorized domain") {
+            await logout();
+          }
         }
       }
     };
     syncUser();
-  }, [session]);
+  }, [session?.access_token, logout]);
 
-  const stats = [
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-500 font-medium animate-pulse">Syncing your campus profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const displayName = useMemo(() => {
+    const full = user?.user_metadata?.full_name;
+    if (full) return full.split(' ')[0];
+    return user?.email?.split('@')[0] || 'Member';
+  }, [user]);
+
+  const stats = useMemo(() => [
     { label: 'Active Bookings', value: '12', icon: Calendar, color: 'text-blue-600', bg: 'bg-blue-50' },
     { label: 'Pending Requests', value: '03', icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-50' },
     { label: 'Open Incidents', value: '01', icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50' },
-  ];
+  ], []);
 
-  const activities = [
+  const activities = useMemo(() => [
     { id: 1, type: 'Booking', title: 'Study Room 4B', date: '2024-03-25', status: 'Approved', amount: '2 Hours' },
     { id: 2, type: 'Incident', title: 'A/C Leakage - Lab 2', date: '2024-03-24', status: 'Pending', amount: '-' },
     { id: 3, type: 'Booking', title: 'Projector - Hall A', date: '2024-03-23', status: 'Rejected', amount: '3 Hours' },
     { id: 4, type: 'Booking', title: 'Study Room 2C', date: '2024-03-22', status: 'Approved', amount: '1 Hour' },
     { id: 5, type: 'Incident', title: 'Wifi Slow - Library', date: '2024-03-21', status: 'Resolved', amount: '-' },
-  ];
+  ], []);
 
-  const notifications = [
+  const notifications = useMemo(() => [
     { id: 1, text: 'Booking Approved: Study Room 4B', time: '5m ago', type: 'success' },
     { id: 2, text: 'Technician assigned to your ticket #1024', time: '1h ago', type: 'info' },
     { id: 3, text: 'New resource available: 3D Printer Lab 5', time: '3h ago', type: 'update' },
-  ];
+  ], []);
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -185,7 +227,7 @@ const UserDashboard = () => {
             
             <Link to="/profile" className="flex items-center gap-3 pl-2 hover:bg-gray-50 p-2 rounded-2xl transition-colors group">
               <div className="text-right hidden sm:block">
-                <p className="text-sm font-bold leading-none group-hover:text-indigo-600 transition-colors">{user?.user_metadata?.full_name || user?.email?.split('@')[0]}</p>
+                <p className="text-sm font-bold leading-none group-hover:text-indigo-600 transition-colors uppercase tracking-tight">{displayName}</p>
                 <p className="text-[10px] text-gray-500 font-medium uppercase mt-1 tracking-wider">Student Console</p>
               </div>
               <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-500 to-purple-500 p-[2px] group-hover:scale-105 transition-transform">
@@ -208,7 +250,7 @@ const UserDashboard = () => {
           <section className="bg-indigo-600 rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-2xl shadow-indigo-200">
             <div className="relative z-10">
               <h1 className="text-3xl font-extrabold tracking-tight mb-2">
-                Good morning, {user?.user_metadata?.full_name?.split(' ')[0] || 'Member'}! 👋
+                Good morning, {displayName}! 👋
               </h1>
               <p className="text-indigo-100 font-medium opacity-90">
                 You have {stats[1].value} pending requests that need your attention today.

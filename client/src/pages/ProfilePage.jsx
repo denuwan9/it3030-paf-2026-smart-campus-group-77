@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 
 const ProfilePage = () => {
-  const { user, session } = useAuth();
+  const { user, session, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   
   const [activeTab, setActiveTab] = useState('profile');
@@ -50,7 +50,9 @@ const ProfilePage = () => {
     const fetchProfile = async () => {
       try {
         const response = await userService.getCurrentUser();
-        const data = response.data.data;
+        const data = response?.data?.data;
+        if (!data) throw new Error('No profile data found');
+        
         setProfileData({
           name: data.name || '',
           email: data.email || '',
@@ -141,10 +143,13 @@ const ProfilePage = () => {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-gray-500 font-medium animate-pulse">Loading your profile...</p>
+        </div>
       </div>
     );
   }
