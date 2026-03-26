@@ -31,15 +31,18 @@ public class CustomOidcUserService extends OidcUserService {
     }
 
     private OidcUser processOidcUser(OidcUser oidcUser) {
-        String email = oidcUser.getEmail();
+        String email = oidcUser.getEmail() != null ? oidcUser.getEmail().toLowerCase().trim() : null;
+        System.out.println("Processing OIDC Login for email: [" + email + "]");
         
         // Domain restriction check (SLIIT specific)
-        if (email == null || (!email.toLowerCase().endsWith("@sliit.lk") && !email.toLowerCase().endsWith("@my.sliit.lk"))) {
+        if (email == null || (!email.endsWith("@sliit.lk") && !email.endsWith("@my.sliit.lk"))) {
+            System.err.println("Domain Blocked: " + email);
             throw new OAuth2AuthenticationException(
                 new OAuth2Error("invalid_domain"), 
                 "Unauthorized: Only SLIIT institutional emails (@sliit.lk or @my.sliit.lk) are permitted."
             );
         }
+        System.out.println("Domain Approved: " + email);
 
         String name = oidcUser.getFullName();
         

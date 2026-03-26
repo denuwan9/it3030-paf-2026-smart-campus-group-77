@@ -35,7 +35,6 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final UserDetailsService userDetailsService;
     private final CustomOidcUserService oidcUserService;
-    private final CustomOAuth2UserService oauth2UserService;
     private final CustomOAuth2SuccessHandler oauth2SuccessHandler;
 
     @Bean
@@ -54,10 +53,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .userInfoEndpoint(userInfo -> userInfo
-                                .oidcUserService(oidcUserService)
-                                .userService(oauth2UserService)
-                        )
+                        .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService))
                         .successHandler(oauth2SuccessHandler)
                 )
                 .sessionManagement(session -> session

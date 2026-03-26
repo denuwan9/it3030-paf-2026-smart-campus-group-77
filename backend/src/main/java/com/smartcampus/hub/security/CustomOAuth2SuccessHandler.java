@@ -31,10 +31,24 @@ public class CustomOAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHa
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-        OidcUser oidcUser = (OidcUser) authentication.getPrincipal();
-        String email = oidcUser.getEmail();
+        String email = null;
+        Object principal = authentication.getPrincipal();
         
-        User user = userRepository.findByEmail(email)
+        if (principal instanceof OidcUser) {
+            email = ((OidcUser) principal).getEmail();
+        } else if (principal instanceof org.springframework.security.oauth2.core.user.OAuth2User) {
+            email = ((org.springframework.security.oauth2.core.user.OAuth2User) principal).getAttribute("email");
+        }
+        
+        System.out.println("Validating OAuth2 Session for: [" + email + "]");
+        
+        if (email == null || (!email.toLowerCase().endsWith("@sliit.lk") && !email.toLowerCase().endsWith("@my.sliit.lk"))) {
+            System.err.println("Access Denied in SuccessHandler: " + email);
+            response.sendRedirect(frontendUrl + "/login?error=invalid_domain");
+            return;
+        }
+
+        User user = userRepository.findByEmail(email.toLowerCase().trim())
                 .orElseThrow(() -> new RuntimeException("User not found after OAuth login"));
         
         String token = jwtUtils.generateToken(user);
