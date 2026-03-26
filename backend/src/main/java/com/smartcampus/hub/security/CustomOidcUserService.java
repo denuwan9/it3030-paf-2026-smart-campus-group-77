@@ -25,6 +25,7 @@ public class CustomOidcUserService extends OidcUserService {
 
     @Override
     public OidcUser loadUser(OidcUserRequest userRequest) throws OAuth2AuthenticationException {
+        System.out.println("Processing OIDC Login Attempt...");
         OidcUser oidcUser = super.loadUser(userRequest);
         return processOidcUser(oidcUser);
     }
