@@ -1,8 +1,10 @@
 package com.smartcampus.hub.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartcampus.hub.security.CustomOAuth2SuccessHandler;
 import com.smartcampus.hub.security.CustomOidcUserService;
 import com.smartcampus.hub.security.JwtAuthenticationFilter;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,13 +20,19 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizationRequestResolver;
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -36,6 +44,7 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final CustomOidcUserService oidcUserService;
     private final CustomOAuth2SuccessHandler oauth2SuccessHandler;
+    private final ClientRegistrationRepository clientRegistrationRepository;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -53,8 +62,22 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
+                        .authorizationEndpoint(auth -> auth
+                                .authorizationRequestResolver(authorizationRequestResolver(clientRegistrationRepository))
+                        )
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService))
                         .successHandler(oauth2SuccessHandler)
+                        .failureHandler((request, response, exception) -> {
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            response.setContentType("application/json");
+                            Map<String, Object> data = new HashMap<>();
+                            data.put("timestamp", Instant.now().toString());
+                            data.put("status", HttpServletResponse.SC_UNAUTHORIZED);
+                            data.put("error", "OAuth2 Authentication Failed");
+                            data.put("message", exception.getMessage());
+                            data.put("path", request.getRequestURI());
+                            response.getWriter().write(new ObjectMapper().writeValueAsString(data));
+                        })
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -63,6 +86,15 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    private OAuth2AuthorizationRequestResolver authorizationRequestResolver(
+            ClientRegistrationRepository clientRegistrationRepository) {
+        DefaultOAuth2AuthorizationRequestResolver resolver = new DefaultOAuth2AuthorizationRequestResolver(
+                clientRegistrationRepository, "/oauth2/authorization");
+        resolver.setAuthorizationRequestCustomizer(customizer -> customizer
+                .additionalParameters(params -> params.put("prompt", "select_account")));
+        return resolver;
     }
 
     @Bean

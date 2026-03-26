@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, Mail, Lock, Chrome } from 'lucide-react';
+import { LogIn, Mail, Lock, Chrome, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -13,7 +14,8 @@ const loginSchema = z.object({
 });
 
 const LoginPage = () => {
-  const { login, loading } = useAuth();
+  const { login, logout, loading } = useAuth();
+  const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(loginSchema),
@@ -22,14 +24,26 @@ const LoginPage = () => {
   const onSubmit = async (data) => {
     const result = await login(data.email, data.password);
     if (result.success) {
-      if (result.user.role === 'ROLE_ADMIN') navigate('/admin-dashboard');
-      else if (result.user.role === 'ROLE_TECHNICIAN') navigate('/technician-dashboard');
+      if (result.user.role === 'ROLE_ADMIN') navigate('/admin/bookings');
+      else if (result.user.role === 'ROLE_TECHNICIAN') navigate('/tickets');
       else navigate('/dashboard');
     }
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+    setGoogleLoading(true);
+    // Clear any existing session to prevent "Already Logged In" conflicts
+    localStorage.clear();
+    
+    toast.loading('Opening Google Account Selection...', {
+      icon: '🔐',
+      duration: 3000
+    });
+
+    // Short delay for UX before redirecting to Spring Boot OAuth endpoint
+    setTimeout(() => {
+      window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+    }, 1000);
   };
 
   return (
@@ -51,10 +65,15 @@ const LoginPage = () => {
         <button
           onClick={handleGoogleLogin}
           type="button"
-          className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white hover:bg-slate-50 text-slate-900 font-semibold rounded-lg transition-all mb-6 shadow-md active:scale-95"
+          disabled={googleLoading || loading}
+          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-50 text-slate-900 font-bold rounded-xl transition-all mb-6 shadow-lg shadow-white/5 active:scale-95 disabled:opacity-70"
         >
-          <Chrome className="w-5 h-5 text-red-500" />
-          Continue with Google
+          {googleLoading ? (
+            <Loader2 className="w-5 h-5 animate-spin text-primary-600" />
+          ) : (
+            <Chrome className="w-5 h-5 text-red-500" />
+          )}
+          {googleLoading ? 'Connecting...' : 'Continue with Google'}
         </button>
 
         <div className="relative mb-8">
