@@ -1,0 +1,60 @@
+package com.smartcampus.hub.security;
+
+import com.smartcampus.hub.entity.Role;
+import com.smartcampus.hub.entity.User;
+import com.smartcampus.hub.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.oauth2.client.userinfo.DefaultOidcUserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.client.userinfo.OidcUserService;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.stereotype.Service;
+
+import java.time.Instant;
+import java.util.Optional;
+
+/**
+ * Custom OIDC user service to provision or sync users from Google OAuth 1st login.
+ */
+@Service
+@RequiredArgsConstructor
+public class CustomOidcUserService extends OidcUserService {
+
+    private final UserRepository userRepository;
+
+    @Override
+    public OidcUser loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        OidcUser oidcUser = super.loadUser(userRequest);
+        return processOidcUser(oidcUser);
+    }
+
+    private OidcUser processOidcUser(OidcUser oidcUser) {
+        String email = oidcUser.getEmail();
+        String name = oidcUser.getFullName();
+        
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        
+        if (userOptional.isEmpty()) {
+            User user = User.builder()
+                    .email(email)
+                    .fullName(name != null ? name : email.split("@")[0])
+                    .role(Role.ROLE_USER)
+                    .isVerified(true) // Google accounts are implicitly verified
+                    .isActive(true)
+                    .provider("google")
+                    .createdAt(Instant.now())
+                    .build();
+            userRepository.save(user);
+        } else {
+            // Update name if changed
+            User user = userOptional.get();
+            if (name != null && !name.equals(user.getFullName())) {
+                user.setFullName(name);
+                userRepository.save(user);
+            }
+        }
+        
+        return oidcUser;
+    }
+}
