@@ -24,7 +24,11 @@ public class User {
     private Long id;
 
     @NotBlank(message = "Name is required")
-    private String name;
+    @Column(name = "name")
+    private String fullName;
+
+    @Column(name = "student_id")
+    private String studentId;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
@@ -39,6 +43,10 @@ public class User {
 
     @Column(name = "profile_picture_url")
     private String profilePictureUrl;
+
+    @Builder.Default
+    @Column(name = "is_verified")
+    private boolean isVerified = false;
 
     /**
      * Local password for non-Google users.

@@ -39,6 +39,10 @@ public class UserSyncService {
      */
     @Transactional
     public User findOrCreate(String email, String name, String avatarUrl, String provider) {
+        if (email == null || (!email.toLowerCase().endsWith("@sliit.lk") && !email.toLowerCase().endsWith("@my.sliit.lk"))) {
+            logger.error("🚨 [Sync] Rejected synchronization for unauthorized email: {}", email);
+            throw new RuntimeException("Unauthorized domain!");
+        }
         Optional<User> existing = userRepository.findByEmail(email);
 
         if (existing.isPresent()) {
@@ -46,8 +50,8 @@ public class UserSyncService {
             boolean changed = false;
 
             // Keep the display name in sync
-            if (!Objects.equals(user.getName(), name)) {
-                user.setName(name);
+            if (!Objects.equals(user.getFullName(), name)) {
+                user.setFullName(name);
                 changed = true;
             }
 
@@ -75,11 +79,13 @@ public class UserSyncService {
         logger.info("First-time login — creating user record for: {}", email);
         User newUser = User.builder()
                 .email(email)
-                .name(name)
+                .fullName(name)
                 .profilePictureUrl(avatarUrl)
                 .provider(provider != null ? provider : "google")
                 .role("ROLE_USER")
+                .isVerified(true) // Google users are pre-verified
                 .build();
+        logger.info("Created new ROLE_USER for Google sync: {}", email);
         return userRepository.save(newUser);
     }
 }

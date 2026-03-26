@@ -1,28 +1,43 @@
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const ProtectedRoute = ({ requiredRole }) => {
+const ProtectedRoute = ({ children, requiredRole, requireVerified = true }) => {
   const { user, loading, getUserRole } = useAuth();
+  const location = useLocation();
 
   if (loading) {
-    return <div className="p-8 text-center">Loading authentication...</div>;
+    return <div className="loading-spinner">Loading session...</div>;
   }
 
   if (!user) {
-    // Redirect to login if literal user is not logged in
-    return <Navigate to="/login" replace />;
+    // Redirect to login but save the current location
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  // Check role if specified
   const userRole = getUserRole();
-
-  // RBAC check: ADMIN can access anything, USER can only access USER-level pages
-  if (requiredRole === 'ADMIN' && userRole !== 'ADMIN') {
-    return <div className="p-8 text-center text-red-600 font-bold">Access Denied: Admin privileges required.</div>;
+  if (requiredRole && userRole !== requiredRole) {
+    // Role mismatch - redirect to their respective dashboard
+    if (userRole === 'ROLE_ADMIN') return <Navigate to="/admin/users" replace />;
+    if (userRole === 'ROLE_TECHNICIAN') return <Navigate to="/tech-dashboard" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
-  // If role is sufficient, render the nested components
-  return <Outlet />;
+  // Check verification status if required
+  // We check Supabase's email_confirmed_at OR a custom metadata flag
+  const isVerified = user.email_confirmed_at || user.user_metadata?.is_verified;
+  
+  if (requireVerified && !isVerified) {
+    // Redirect to dashboard but with a flag
+    // Avoid infinite redirect if already on dashboard
+    if (location.pathname === '/dashboard' || location.pathname === '/user-dashboard') {
+      return children || <Outlet />;
+    }
+    return <Navigate to="/dashboard" state={{ unverified: true }} replace />;
+  }
+
+  return children || <Outlet />;
 };
 
 export default ProtectedRoute;

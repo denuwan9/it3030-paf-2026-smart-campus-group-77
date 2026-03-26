@@ -9,10 +9,11 @@ import java.time.LocalDateTime;
  */
 public record UserProfileResponse(
         Long id,
-        String name,
+        String fullName,
         String email,
         String role,
         String phoneNumber,
+        String studentId,
         String profilePictureUrl,
         boolean isActive,
         String provider,

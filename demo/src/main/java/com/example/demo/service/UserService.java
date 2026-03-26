@@ -152,10 +152,11 @@ public class UserService {
     public UserProfileResponse updateProfile(String email, UserProfileUpdateRequest request) {
         User user = getUserByEmail(email);
 
-        logger.info("Updating profile for user {}: name={}, phone={}", email, request.name(), request.phoneNumber());
+        logger.info("Updating profile for user {}: fullName={}, phone={}", email, request.fullName(), request.phoneNumber());
 
-        user.setName(request.name());
+        user.setFullName(request.fullName());
         user.setPhoneNumber(request.phoneNumber());
+        user.setStudentId(request.studentId());
         user.setProfilePictureUrl(request.profilePictureUrl());
 
         return toProfileResponse(userRepository.save(user));
@@ -220,10 +221,11 @@ public class UserService {
     private UserProfileResponse toProfileResponse(User u) {
         return new UserProfileResponse(
                 u.getId(),
-                u.getName(),
+                u.getFullName(),
                 u.getEmail(),
                 u.getRole(),
                 u.getPhoneNumber(),
+                u.getStudentId(),
                 u.getProfilePictureUrl(),
                 u.isActive(),
                 u.getProvider(),

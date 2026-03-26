@@ -6,10 +6,10 @@ import jakarta.validation.constraints.NotBlank;
  * DTO for updating user profile details.
  */
 public record UserProfileUpdateRequest(
-        @NotBlank(message = "Name is required")
-        String name,
+        @NotBlank(message = "Full name is required")
+        String fullName,
 
         String phoneNumber,
-
+        String studentId,
         String profilePictureUrl
 ) {}

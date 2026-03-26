@@ -40,7 +40,16 @@ public class CustomOidcUserService extends OidcUserService {
 
         try {
             // 2. Persist / update the user in Supabase (first-time login creates the row).
-            String email = oidcUser.getEmail();
+            String email = oidcUser.getEmail().toLowerCase();
+
+            if (email == null || (!email.endsWith("@sliit.lk") && !email.endsWith("@my.sliit.lk"))) {
+                logger.warn("🛑 [Auth] Blocked unauthorized Google account: {}", email);
+                throw new org.springframework.security.oauth2.core.OAuth2AuthenticationException(
+                    new org.springframework.security.oauth2.core.OAuth2Error("unauthorized_domain"),
+                    "Access restricted! Please use your SLIIT Google account."
+                );
+            }
+
             String name  = oidcUser.getFullName();
             String avatarUrl = oidcUser.getPicture();
             String provider = "google";

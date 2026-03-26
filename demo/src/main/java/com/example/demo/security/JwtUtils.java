@@ -177,6 +177,17 @@ public class JwtUtils {
             String headerJson = new String(java.util.Base64.getUrlDecoder().decode(parts[0]));
             logger.info("🔐 [JWT] Token Header: {}", headerJson);
             
+            // If algorithm is HS256, use the symmetric key strictly as requested
+            if (headerJson.contains("\"alg\":\"HS256\"")) {
+                logger.info("🔐 [JWT] Using Symmetric HS256 verification");
+                return Jwts.parserBuilder()
+                        .setSigningKey(symmetricSupabaseKey)
+                        .build()
+                        .parseClaimsJws(token)
+                        .getBody();
+            }
+
+            // Fallback to JWKS for ES256
             refreshJwkSet();
             if (jwkSet != null) {
                 try {
@@ -294,9 +305,10 @@ public class JwtUtils {
         // Find the user in the local DB to get more info for the token
         User user = userRepository.findByEmail(email).orElse(null);
         Long userId = (user != null) ? user.getId() : null;
-        String name = (user != null) ? user.getName() : null;
+        String name = (user != null) ? user.getFullName() : null;
         String avatarUrl = (user != null) ? user.getProfilePictureUrl() : null;
         String provider = (user != null) ? user.getProvider() : "local";
+        boolean isVerified = (user != null) && user.isVerified();
 
         return Jwts.builder()
                 .setSubject(email)
@@ -305,10 +317,16 @@ public class JwtUtils {
                 .claim("name", name)
                 .claim("avatarUrl", avatarUrl)
                 .claim("provider", provider)
+                .claim("isVerified", isVerified)
                 .setIssuedAt(now)
                 .setExpiration(expires)
                 .signWith(signingKey, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public boolean isVerifiedFromToken(String token) {
+        Boolean verified = getClaimsFromToken(token).get("isVerified", Boolean.class);
+        return verified != null && verified;
     }
 
 }

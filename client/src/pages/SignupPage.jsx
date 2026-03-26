@@ -7,8 +7,7 @@ const SignupPage = () => {
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
-    password: '',
-    studentId: ''
+    password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -24,18 +23,39 @@ const SignupPage = () => {
     setError('');
     setLoading(true);
 
-    const { error } = await signUp(formData.email, formData.password, {
-      full_name: formData.fullName,
-      student_id: formData.studentId
-    });
+    try {
+      const response = await fetch('http://localhost:8081/api/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          password: formData.password
+        }),
+      });
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
-      // Supabase might send a confirmation email or just log them in
-      alert('Registration successful! Please check your email for confirmation if required.');
+      const data = await response.json();
+
+      if (!response.ok) {
+        // Handle validation errors from backend
+        const errorMessage = data.error || Object.values(data).join(', ');
+        throw new Error(errorMessage || 'Signup failed');
+      }
+
+      // Also trigger Supabase signup in background to allow them to login later
+      // This ensures they have a Supabase Auth account too
+      await signUp(formData.email, formData.password, {
+        full_name: formData.fullName
+      });
+
+      alert('Registration successful! Please check your email for confirmation to unlock your campus portal.');
       navigate('/login');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,18 +83,6 @@ const SignupPage = () => {
             />
           </div>
 
-          <div className="form-group">
-            <label className="form-label">Student ID</label>
-            <input
-              name="studentId"
-              type="text"
-              className="form-input"
-              placeholder="IT21004567"
-              value={formData.studentId}
-              onChange={handleChange}
-              required
-            />
-          </div>
 
           <div className="form-group">
             <label className="form-label">Email Address</label>

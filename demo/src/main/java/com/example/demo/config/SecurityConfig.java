@@ -84,7 +84,7 @@ public class SecurityConfig {
 
                 // Role-gated endpoints.
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")  // ROLE_ADMIN
-                .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")  // ROLE_USER or ROLE_ADMIN
+                .requestMatchers("/api/users/**").hasAnyRole("USER", "ADMIN") // ROLE_USER or ROLE_ADMIN
 
                 // Everything else requires authentication.
                 .anyRequest().authenticated()
@@ -99,9 +99,18 @@ public class SecurityConfig {
                 // After successful Google login: issue a JWT and redirect to the frontend.
                 .successHandler((request, response, authentication) -> {
                     String jwt = jwtUtils.generateToken(authentication);
+                    
+                    String role = authentication.getAuthorities().iterator().next().getAuthority();
+                    String redirectUrl = "http://localhost:5173/user-dashboard";
+                    
+                    if ("ROLE_ADMIN".equals(role)) {
+                        redirectUrl = "http://localhost:5173/admin-dashboard";
+                    } else if ("ROLE_TECHNICIAN".equals(role)) {
+                        redirectUrl = "http://localhost:5173/tech-dashboard";
+                    }
 
-                    // Redirect to the Vite React app on port 5173
-                    response.sendRedirect("http://localhost:5173/dashboard?token=" + jwt);
+                    // Redirect to the Vite React app with the token
+                    response.sendRedirect(redirectUrl + "?token=" + jwt);
                 })
 
                 // On OAuth2 failure redirect back to login

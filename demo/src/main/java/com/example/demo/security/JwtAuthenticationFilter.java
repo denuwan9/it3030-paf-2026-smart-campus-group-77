@@ -58,15 +58,38 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String name  = jwtUtils.getNameFromToken(jwt);
                 String avatarUrl = jwtUtils.getAvatarUrlFromToken(jwt);
                 String provider = jwtUtils.getProviderFromToken(jwt);
+                
+                // Security Check: Block tokens from personal email domains even if they are valid JWTs
+                if (email != null && !email.endsWith("@sliit.lk") && !email.endsWith("@my.sliit.lk")) {
+                    logger.error("🛑 [JWT] Blocking unauthorized email domain: {}", email);
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.getWriter().write("{\"error\":\"Forbidden\",\"message\":\"Only SLIIT campus members can access this resource.\"}");
+                    return;
+                }
 
                 logger.info("🔐 [JWT] Successful validation for: {} | role: {} | provider: {}", email, role, provider);
 
                 // Sync user to local database if they don't exist.
                 // findOrCreate ensures the public.users record is always present.
-                userSyncService.findOrCreate(email, name, avatarUrl, provider);
+                com.example.demo.entity.User user = userSyncService.findOrCreate(email, name, avatarUrl, provider);
+
+                // Enforcement: If NOT verified, block access to protected SLIIT resources.
+                // EXCEPTION: Allow /api/users/me so the dashboard can show the verification notice.
+                if (!user.isVerified() && 
+                    !request.getRequestURI().startsWith("/api/auth/") && 
+                    !request.getRequestURI().equals("/api/users/me")) {
+                    
+                    logger.warn("🛑 [Auth] Unverified access attempt by: {}", email);
+                    response.setContentType("application/json");
+                    response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                    response.getWriter().write(
+                        "{\"error\":\"Forbidden\",\"message\":\"Please verify your email address to unlock your campus portal.\"}"
+                    );
+                    return; // Stop processing
+                }
 
                 // Fall back to default role if the claim is missing.
-                if (role == null || role.isBlank()) {
+                if (role == null || role.isBlank() || role.equals("USER")) {
                     role = "ROLE_USER";
                 }
 

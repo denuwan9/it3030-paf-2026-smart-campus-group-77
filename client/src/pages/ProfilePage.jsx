@@ -33,6 +33,7 @@ const ProfilePage = () => {
     name: '',
     email: '',
     phoneNumber: '',
+    studentId: '',
     profilePictureUrl: '',
     provider: ''
   });
@@ -54,6 +55,7 @@ const ProfilePage = () => {
           name: data.name || '',
           email: data.email || '',
           phoneNumber: data.phoneNumber || '',
+          studentId: data.studentId || '',
           profilePictureUrl: data.profilePictureUrl || user?.user_metadata?.avatar_url || '',
           provider: data.provider || 'EMAIL'
         });
@@ -92,8 +94,9 @@ const ProfilePage = () => {
     setSaving(true);
     try {
       await userService.updateProfile({
-        name: profileData.name,
+        fullName: profileData.name, // The backend expects 'fullName'
         phoneNumber: profileData.phoneNumber,
+        studentId: profileData.studentId,
         profilePictureUrl: profileData.profilePictureUrl
       });
       showToast('success', 'Profile updated successfully!');
@@ -256,6 +259,19 @@ const ProfilePage = () => {
                           onChange={(e) => setProfileData({...profileData, phoneNumber: e.target.value})}
                           className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-transparent focus:border-indigo-500 focus:bg-white rounded-xl outline-none transition-all text-sm font-medium"
                           placeholder="+94 7X XXX XXXX"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-black uppercase text-gray-400 ml-1">Student / Staff ID</label>
+                      <div className="relative">
+                        <ShieldCheck className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                        <input 
+                          type="text" 
+                          value={profileData.studentId}
+                          onChange={(e) => setProfileData({...profileData, studentId: e.target.value})}
+                          className="w-full pl-11 pr-4 py-3 bg-gray-50 border border-transparent focus:border-indigo-500 focus:bg-white rounded-xl outline-none transition-all text-sm font-medium"
+                          placeholder="e.g. IT21004567"
                         />
                       </div>
                     </div>
