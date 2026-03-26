@@ -24,25 +24,27 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
+    const status = error.response?.status;
     const message = error.response?.data?.message || 'An unexpected error occurred';
     
-    // Captured standard errors
-    if (error.response?.status === 401) {
+    if (status === 401) {
+      // Unauthorized: Clear session and redirect to login
       if (localStorage.getItem('token')) {
-        toast.error('Session expired. Please log in again.');
+        toast.error('Session expired. Please log in again.', { id: 'session-expired' });
         localStorage.removeItem('token');
         localStorage.removeItem('user');
+        // Use window.location.href for a clean reset of context
         window.location.href = '/login';
       }
-    } else if (error.response?.status === 403) {
-      toast.error('Access denied. You do not have permission.');
-    } else if (error.response?.status >= 500) {
-      toast.error('Server error. Please try again later.');
-    } else {
-      // For 400 Bad Request (like "Email already exists")
-      // Do not toast here if the component handles it specifically
+    } else if (status === 403) {
+      // Forbidden: Show localized error
+      toast.error('Access Denied: You do not have permission to perform this action.', { id: 'access-denied' });
+    } else if (status >= 500) {
+      // Server Error
+      toast.error('Server is currently unavailable. Please try again later.');
     }
     
+    // We reject so the calling component can still handle specific 400 errors
     return Promise.reject(error);
   }
 );

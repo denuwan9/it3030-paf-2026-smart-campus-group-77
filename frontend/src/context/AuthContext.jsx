@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   const login = async (email, password) => {
+    setLoading(true);
     try {
       const response = await axiosInstance.post('/auth/login', { email, password });
       const { token, ...userData } = response.data.data;
@@ -33,10 +34,13 @@ export const AuthProvider = ({ children }) => {
       const message = error.response?.data?.message || 'Login failed';
       toast.error(message);
       return { success: false, message };
+    } finally {
+      setLoading(false);
     }
   };
 
   const register = async (data) => {
+    setLoading(true);
     try {
       await axiosInstance.post('/auth/register', data);
       toast.success('Registration successful. Please check your email for OTP.');
@@ -45,10 +49,13 @@ export const AuthProvider = ({ children }) => {
       const message = error.response?.data?.message || 'Registration failed';
       toast.error(message);
       return { success: false, message };
+    } finally {
+      setLoading(false);
     }
   };
 
   const verifyOtp = async (email, otpCode) => {
+    setLoading(true);
     try {
       const response = await axiosInstance.post('/auth/verify-otp', { email, otpCode });
       const { token, ...userData } = response.data.data;
@@ -64,6 +71,8 @@ export const AuthProvider = ({ children }) => {
       const message = error.response?.data?.message || 'Verification failed';
       toast.error(message);
       return { success: false, message };
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -72,11 +81,16 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
-    toast.success('Logged out');
+    toast.success('Logged out successfully');
+  };
+
+  const hasRole = (roles) => {
+    if (!user) return false;
+    return roles.includes(user.role);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, verifyOtp, logout }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, verifyOtp, logout, hasRole }}>
       {children}
     </AuthContext.Provider>
   );

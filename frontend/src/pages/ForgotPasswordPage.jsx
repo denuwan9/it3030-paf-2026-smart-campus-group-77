@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, RefreshCw } from 'lucide-react';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const schema = z.object({
@@ -23,8 +24,13 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center p-4">
-      <div className="w-full max-w-md glass p-8 rounded-2xl">
+    <div className="flex items-center justify-center p-4 min-h-[80vh]">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-md glass p-8 rounded-2xl"
+      >
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center p-3 bg-primary-600/20 rounded-xl mb-4">
             <RefreshCw className="w-8 h-8 text-primary-500" />
@@ -51,9 +57,14 @@ const ForgotPasswordPage = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="btn-primary"
+            className="btn-primary flex items-center justify-center gap-2"
           >
-            {isSubmitting ? 'Sending...' : 'Send Reset Link'}
+            {isSubmitting ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Sending...
+              </>
+            ) : 'Send Reset Link'}
           </button>
         </form>
 
@@ -61,7 +72,7 @@ const ForgotPasswordPage = () => {
           <ArrowLeft className="w-4 h-4" />
           Back to Login
         </Link>
-      </div>
+      </motion.div>
     </div>
   );
 };

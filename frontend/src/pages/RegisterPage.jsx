@@ -1,10 +1,12 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserPlus, Mail, Lock, User, ShieldCheck } from 'lucide-react';
+import { motion } from 'framer-motion';
+import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
 
 const registerSchema = z.object({
   fullName: z.string().min(2, 'Full name must be at least 2 characters'),
@@ -19,13 +21,19 @@ const registerSchema = z.object({
 });
 
 const RegisterPage = () => {
-  const { register: registerUser } = useAuth();
+  const { register: registerUser, loading } = useAuth();
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  const { register, handleSubmit, control, formState: { errors } } = useForm({
     resolver: zodResolver(registerSchema),
     defaultValues: {
       role: 'ROLE_USER'
     }
+  });
+
+  const passwordValue = useWatch({
+    control,
+    name: "password",
+    defaultValue: ""
   });
 
   const onSubmit = async (data) => {
@@ -37,7 +45,12 @@ const RegisterPage = () => {
 
   return (
     <div className="flex items-center justify-center p-4 py-12">
-      <div className="w-full max-w-lg glass p-8 rounded-2xl">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-lg glass p-8 rounded-2xl"
+      >
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center p-3 bg-emerald-600/20 rounded-xl mb-4">
             <UserPlus className="w-8 h-8 text-emerald-500" />
@@ -86,6 +99,7 @@ const RegisterPage = () => {
                 className={`input-field pl-11 ${errors.password ? 'border-red-500' : ''}`}
               />
             </div>
+            <PasswordStrengthIndicator password={passwordValue} />
             {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
           </div>
 
@@ -106,10 +120,15 @@ const RegisterPage = () => {
 
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="btn-primary mt-6 !bg-emerald-600 hover:!bg-emerald-500"
+            disabled={loading}
+            className="btn-primary mt-6 !bg-emerald-600 hover:!bg-emerald-500 flex items-center justify-center gap-2"
           >
-            {isSubmitting ? 'Creating account...' : 'Create Account'}
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Creating account...
+              </>
+            ) : 'Create Account'}
           </button>
         </form>
 
@@ -117,7 +136,7 @@ const RegisterPage = () => {
           Already have an account?{' '}
           <Link to="/login" className="text-emerald-400 hover:text-emerald-300 font-semibold">Sign in here</Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };

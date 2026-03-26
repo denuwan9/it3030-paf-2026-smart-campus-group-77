@@ -5,6 +5,7 @@ import * as z from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogIn, Mail, Lock, Chrome } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -12,9 +13,9 @@ const loginSchema = z.object({
 });
 
 const LoginPage = () => {
-  const { login } = useAuth();
+  const { login, loading } = useAuth();
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(loginSchema),
   });
 
@@ -32,8 +33,13 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="flex items-center justify-center p-4">
-      <div className="w-full max-w-md glass p-8 rounded-2xl">
+    <div className="flex items-center justify-center p-4 min-h-[80vh]">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-md glass p-8 rounded-2xl"
+      >
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center p-3 bg-primary-600/20 rounded-xl mb-4">
             <LogIn className="w-8 h-8 text-primary-500" />
@@ -44,7 +50,8 @@ const LoginPage = () => {
 
         <button
           onClick={handleGoogleLogin}
-          className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white hover:bg-slate-50 text-slate-900 font-semibold rounded-lg transition-all mb-6 shadow-md"
+          type="button"
+          className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white hover:bg-slate-50 text-slate-900 font-semibold rounded-lg transition-all mb-6 shadow-md active:scale-95"
         >
           <Chrome className="w-5 h-5 text-red-500" />
           Continue with Google
@@ -89,10 +96,15 @@ const LoginPage = () => {
 
           <button
             type="submit"
-            disabled={isSubmitting}
-            className="btn-primary"
+            disabled={loading}
+            className="btn-primary flex items-center justify-center gap-2"
           >
-            {isSubmitting ? 'Signing in...' : 'Sign In'}
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Signing in...
+              </>
+            ) : 'Sign In'}
           </button>
         </form>
 
@@ -100,7 +112,7 @@ const LoginPage = () => {
           Don't have an account?{' '}
           <Link to="/register" className="text-primary-400 hover:text-primary-300 font-semibold">Sign up now</Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 };

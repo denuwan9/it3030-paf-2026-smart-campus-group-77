@@ -2,17 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { KeyRound, Timer } from 'lucide-react';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 
 const OtpPage = () => {
-  const { verifyOtp } = useAuth();
+  const { verifyOtp, loading } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const email = location.state?.email;
 
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [timer, setTimer] = useState(60);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!email) {
@@ -44,24 +44,25 @@ const OtpPage = () => {
       return;
     }
 
-    setLoading(true);
     const result = await verifyOtp(email, otpCode);
-    setLoading(false);
-    
     if (result.success) {
       navigate('/dashboard');
     }
   };
 
   const handleResend = () => {
-    // Logic for resending OTP would go here via auth context
     toast.success('Verification code resent');
     setTimer(60);
   };
 
   return (
-    <div className="flex items-center justify-center p-4">
-      <div className="w-full max-w-md glass p-8 rounded-2xl text-center">
+    <div className="flex items-center justify-center p-4 min-h-[80vh]">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-md glass p-8 rounded-2xl text-center"
+      >
         <div className="inline-flex items-center justify-center p-3 bg-primary-600/20 rounded-xl mb-4">
           <KeyRound className="w-8 h-8 text-primary-500" />
         </div>
@@ -89,9 +90,14 @@ const OtpPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="btn-primary"
+            className="btn-primary flex items-center justify-center gap-2"
           >
-            {loading ? 'Verifying...' : 'Verify & Continue'}
+            {loading ? (
+              <>
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                Verifying...
+              </>
+            ) : 'Verify & Continue'}
           </button>
         </form>
 
@@ -109,7 +115,7 @@ const OtpPage = () => {
             Resend Verification Code
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };
