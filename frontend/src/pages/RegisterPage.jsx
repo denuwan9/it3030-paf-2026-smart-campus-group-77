@@ -1,140 +1,150 @@
 import React, { useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { UserPlus, Mail, Lock, User, ShieldCheck } from 'lucide-react';
+import { UserPlus, Sparkles, Loader2, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
-import PasswordStrengthIndicator from '../components/PasswordStrengthIndicator';
-
-const registerSchema = z.object({
-  fullName: z.string().min(2, 'Full name must be at least 2 characters'),
-  email: z.string().email('Invalid email address')
-    .refine(val => val.endsWith('@sliit.lk') || val.endsWith('@my.sliit.lk'), {
-      message: 'Please use your institution email (@sliit.lk or @my.sliit.lk)'
-    }),
-  password: z.string().min(8, 'Password must be at least 8 characters')
-    .regex(/[A-Z]/, 'Must contain at least one uppercase letter')
-    .regex(/[0-9]/, 'Must contain at least one number'),
-  role: z.string().optional(),
-});
+import { registerSchema } from '../schemas/auth';
+import FormInput from '../components/common/FormInput';
+import Alert from '../components/common/Alert';
 
 const RegisterPage = () => {
   const { register: registerUser, loading } = useAuth();
+  const [serverError, setServerError] = useState('');
   const navigate = useNavigate();
-  const { register, handleSubmit, control, formState: { errors } } = useForm({
+  
+  const methods = useForm({
     resolver: zodResolver(registerSchema),
+    mode: 'onBlur',
     defaultValues: {
       role: 'ROLE_USER'
     }
   });
 
-  const passwordValue = useWatch({
-    control,
-    name: "password",
-    defaultValue: ""
-  });
+  const { handleSubmit, formState: { isSubmitting } } = methods;
 
   const onSubmit = async (data) => {
-    const result = await registerUser(data);
-    if (result.success) {
-      navigate('/otp', { state: { email: data.email } });
+    setServerError('');
+    try {
+      const result = await registerUser(data);
+      if (result.success) {
+        navigate('/otp', { state: { email: data.email } });
+      } else {
+        setServerError(result.error || 'Registration failed. Please check your details.');
+      }
+    } catch (err) {
+      setServerError('A connection error occurred. Please try again.');
     }
   };
 
   return (
-    <div className="flex items-center justify-center p-4 py-12">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-lumina-bg-base overflow-y-auto py-12">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[20%] right-[10%] w-[50%] h-[50%] bg-lumina-brand-secondary/5 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[20%] left-[10%] w-[50%] h-[50%] bg-lumina-brand-primary/5 rounded-full blur-[120px]" />
+      </div>
+
       <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="w-full max-w-lg glass p-8 rounded-2xl"
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="w-full max-w-[520px] z-10"
       >
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-3 bg-emerald-600/20 rounded-xl mb-4">
-            <UserPlus className="w-8 h-8 text-emerald-500" />
+        <div className="bg-white rounded-[2.5rem] shadow-lumina-lg border border-slate-100 p-10 relative overflow-hidden">
+          <div className="absolute top-0 left-0 p-8 opacity-10">
+            <Sparkles className="w-12 h-12 text-lumina-brand-secondary" />
           </div>
-          <h1 className="text-3xl font-bold">Create Account</h1>
-          <p className="text-slate-400 mt-2">Join the Smart Campus Operations Hub</p>
-        </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Full Name</label>
-            <div className="relative">
-              <User className="absolute left-3 top-2.5 w-5 h-5 text-slate-500" />
-              <input
-                {...register('fullName')}
-                type="text"
-                placeholder="John Doe"
-                className={`input-field pl-11 ${errors.fullName ? 'border-red-500' : ''}`}
-              />
+          <div className="mb-10 text-center sm:text-left">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-lumina-brand-secondary/10 rounded-2xl mb-6 border border-lumina-brand-secondary/10">
+              <UserPlus className="w-7 h-7 text-lumina-brand-secondary" />
             </div>
-            {errors.fullName && <p className="text-red-400 text-xs mt-1">{errors.fullName.message}</p>}
+            <h1 className="text-3xl font-black text-lumina-text-header tracking-tight mb-2">
+              Join Lumina
+            </h1>
+            <p className="text-lumina-text-body font-medium">
+              Create your Smart Campus profile today
+            </p>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Institutional Email</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-2.5 w-5 h-5 text-slate-500" />
-              <input
-                {...register('email')}
-                type="email"
-                placeholder="it231234@sliit.lk"
-                className={`input-field pl-11 ${errors.email ? 'border-red-500' : ''}`}
+          <Alert 
+            type="error" 
+            message={serverError} 
+            className="mb-8" 
+            onClose={() => setServerError('')}
+          />
+
+          <FormProvider {...methods}>
+            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-6">
+              <FormInput 
+                name="username" 
+                label="Public Username" 
+                placeholder="Unique campus handle"
+                autoFocus
               />
-            </div>
-            {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-2.5 w-5 h-5 text-slate-500" />
-              <input
-                {...register('password')}
-                type="password"
-                placeholder="••••••••"
-                className={`input-field pl-11 ${errors.password ? 'border-red-500' : ''}`}
+              <FormInput 
+                name="email" 
+                label="Institutional Email" 
+                placeholder="id@sliit.lk"
               />
-            </div>
-            <PasswordStrengthIndicator password={passwordValue} />
-            {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Role (For Testing Only)</label>
-            <div className="relative">
-              <ShieldCheck className="absolute left-3 top-2.5 w-5 h-5 text-slate-500" />
-              <select
-                {...register('role')}
-                className="input-field pl-11 appearance-none"
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <FormInput 
+                  name="password" 
+                  type="password" 
+                  label="Password"
+                  placeholder="••••••••"
+                />
+                <FormInput 
+                  name="confirmPassword" 
+                  type="password" 
+                  label="Confirm"
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold text-lumina-text-header ml-1">Account Role</label>
+                <div className="relative group">
+                  <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                    <ShieldCheck className="w-5 h-5 text-slate-400 group-focus-within:text-lumina-brand-primary transition-colors" />
+                  </div>
+                  <select
+                    {...methods.register('role')}
+                    className="w-full pl-12 pr-4 py-3 bg-lumina-bg-surface border border-slate-200 rounded-2xl outline-none transition-all focus:border-lumina-brand-primary focus:ring-4 focus:ring-lumina-brand-primary/10 appearance-none text-lumina-text-body font-medium"
+                  >
+                    <option value="ROLE_USER">Standard Member</option>
+                    <option value="ROLE_TECHNICIAN">Campus Technician</option>
+                    <option value="ROLE_ADMIN">System Administrator</option>
+                  </select>
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || isSubmitting}
+                className="w-full py-4 bg-lumina-brand-secondary hover:bg-lumina-brand-secondary/90 text-white font-bold rounded-2xl transition-all shadow-lumina-md active:scale-[0.98] disabled:opacity-50 mt-4 flex items-center justify-center gap-2"
               >
-                <option value="ROLE_USER">User (Standard)</option>
-                <option value="ROLE_ADMIN">Administrator</option>
-                <option value="ROLE_TECHNICIAN">Technician</option>
-              </select>
-            </div>
+                {loading || isSubmitting ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : 'Establish Profile'}
+              </button>
+            </form>
+          </FormProvider>
+
+          <div className="mt-10 pt-8 border-t border-slate-50 text-center">
+            <p className="text-sm text-lumina-text-body font-medium">
+              Already have a profile?{' '}
+              <Link to="/login" className="text-lumina-brand-secondary font-bold hover:underline underline-offset-4">
+                Sign In
+              </Link>
+            </p>
           </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary mt-6 !bg-emerald-600 hover:!bg-emerald-500 flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Creating account...
-              </>
-            ) : 'Create Account'}
-          </button>
-        </form>
-
-        <p className="text-center text-slate-400 mt-8 text-sm">
-          Already have an account?{' '}
-          <Link to="/login" className="text-emerald-400 hover:text-emerald-300 font-semibold">Sign in here</Link>
+        </div>
+        
+        <p className="mt-6 text-center text-xs text-slate-400 font-medium">
+          By registering, you agree to our Institutional Code of Conduct.
         </p>
       </motion.div>
     </div>

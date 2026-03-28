@@ -1,83 +1,143 @@
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Shield, Calendar, MapPin, Building, Phone, User } from 'lucide-react';
+import { Mail, Shield, Calendar, MapPin, Building, Settings, User, Info } from 'lucide-react';
 
 const ProfilePage = () => {
   const { user } = useAuth();
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white font-sans">Account Settings</h1>
-        <p className="text-slate-400 text-sm mt-1">Manage your campus profile and preferences.</p>
+    <div className="max-w-5xl mx-auto space-y-10">
+      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+        <div>
+          <h1 className="text-3xl font-black tracking-tight text-lumina-text-header">Identity & Access</h1>
+          <p className="text-lumina-text-body font-medium mt-1">Manage institutional credentials and campus permissions.</p>
+        </div>
+        <div className="flex gap-3">
+          <button className="px-6 py-2.5 bg-white border border-slate-200 text-lumina-text-header font-bold rounded-2xl shadow-lumina-sm hover:bg-slate-50 transition-all active:scale-95 flex items-center gap-2">
+            <Settings className="w-4 h-4 text-slate-400" />
+            <span>Preferences</span>
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <div className="md:col-span-1 space-y-6">
-          <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl text-center shadow-lg">
-            <div className="relative inline-block ml-auto mr-auto">
-              <div className="w-32 h-32 rounded-3xl bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center text-5xl font-bold text-white shadow-2xl shadow-primary-500/20 mb-4 mx-auto">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        {/* Left Column: Avatar & Summary */}
+        <div className="lg:col-span-4 space-y-8">
+          <div className="bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-lumina-lg text-center relative overflow-hidden group">
+            <div className="absolute top-0 left-0 w-full h-2 bg-lumina-brand-primary" />
+            
+            <div className="relative inline-block mb-6">
+              <div className="w-36 h-36 rounded-[2.5rem] bg-lumina-bg-surface border-4 border-white shadow-lumina-md flex items-center justify-center text-5xl font-black text-lumina-brand-primary transition-transform group-hover:scale-105 duration-500">
                 {user?.fullName?.charAt(0)}
               </div>
-              <div className="absolute -bottom-1 -right-1 w-10 h-10 bg-slate-900 border-4 border-slate-950 rounded-full flex items-center justify-center shadow-lg">
-                <div className="w-4 h-4 bg-emerald-500 rounded-full animate-pulse" />
+              <div className="absolute -bottom-1 -right-1 w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lumina-md border border-slate-50">
+                <div className="w-4 h-4 bg-lumina-status-success rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.4)]" />
               </div>
             </div>
-            <h2 className="text-xl font-bold text-white">{user?.fullName}</h2>
-            <p className="text-primary-400 text-sm font-medium tracking-wide mt-1 uppercase">
-              {user?.role?.replace('ROLE_', '')}
-            </p>
-            <div className="mt-6 flex justify-center gap-2">
-              <button className="px-4 py-2 bg-primary-600 text-white text-xs font-bold rounded-lg hover:bg-primary-500 transition-all shadow-md">
-                Change Avatar
+
+            <h2 className="text-2xl font-black text-lumina-text-header leading-tight px-2">{user?.fullName}</h2>
+            <div className="mt-3 inline-flex px-4 py-1.5 bg-lumina-brand-primary/10 rounded-full border border-lumina-brand-primary/5">
+              <span className="text-xs font-black text-lumina-brand-primary uppercase tracking-[0.15em]">
+                {user?.role?.replace('ROLE_', '')}
+              </span>
+            </div>
+
+            <div className="mt-10 grid grid-cols-1 gap-3">
+              <button className="btn-primary w-full flex items-center justify-center gap-2">
+                <Shield className="w-4 h-4" />
+                <span>Security Vault</span>
+              </button>
+              <button className="w-full py-3 bg-lumina-bg-surface border border-slate-100 text-lumina-text-header font-bold rounded-xl hover:bg-slate-50 transition-all">
+                Edit Bio
               </button>
             </div>
           </div>
+
+          <div className="bg-lumina-brand-secondary/5 border border-lumina-brand-secondary/10 p-8 rounded-[2rem] relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-4 opacity-5 translate-x-4 -translate-y-4">
+              <Shield className="w-24 h-24 text-lumina-brand-secondary" />
+            </div>
+            <h3 className="text-sm font-black text-lumina-brand-secondary uppercase tracking-widest mb-3">Campus Integrity</h3>
+            <p className="text-xs text-lumina-text-body font-medium leading-relaxed">
+              Your account is verified by SLIIT Active Directory. All actions are logged for campus security and auditing.
+            </p>
+          </div>
         </div>
 
-        <div className="md:col-span-2 space-y-6">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-            <div className="p-6 border-b border-slate-800">
-              <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-                <User className="w-5 h-5 text-primary-500" />
-                Personal Information
+        {/* Right Column: Details */}
+        <div className="lg:col-span-8 space-y-8">
+          <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-lumina-lg overflow-hidden">
+            <div className="p-8 border-b border-slate-50 bg-lumina-bg-surface/30">
+              <h2 className="text-xl font-black text-lumina-text-header flex items-center gap-3">
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-slate-100 shadow-lumina-sm">
+                  <User className="w-5 h-5 text-lumina-brand-primary" />
+                </div>
+                Institutional Record
               </h2>
             </div>
-            <div className="p-8 space-y-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <div className="space-y-1">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                    <Mail className="w-3.5 h-3.5" /> Full Email
+            
+            <div className="p-10 space-y-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-10">
+                <section className="space-y-2 group">
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2 group-hover:text-lumina-brand-primary transition-colors">
+                    <Mail className="w-3.5 h-3.5" /> Primary Email
                   </p>
-                  <p className="text-slate-200 font-medium">{user?.email}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                    <Shield className="w-3.5 h-3.5" /> Security Role
+                  <p className="text-lumina-text-header font-black text-lg border-b border-transparent group-hover:border-slate-100 transition-all inline-block truncate w-full">
+                    {user?.email}
                   </p>
-                  <p className="text-emerald-400 font-medium font-mono">{user?.role}</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                    <Building className="w-3.5 h-3.5" /> Campus Group
+                </section>
+
+                <section className="space-y-2 group">
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2 group-hover:text-lumina-brand-secondary transition-colors">
+                    <Shield className="w-3.5 h-3.5" /> Authority level
                   </p>
-                  <p className="text-slate-200 font-medium">SLIIT IT Faculty</p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                    <Calendar className="w-3.5 h-3.5" /> Joined On
+                  <p className="text-lumina-text-header font-black text-lg font-mono">
+                    {user?.role}
                   </p>
-                  <p className="text-slate-200 font-medium">March 2026</p>
+                </section>
+
+                <section className="space-y-2 group">
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2 group-hover:text-lumina-brand-primary transition-colors">
+                    <Building className="w-3.5 h-3.5" /> Faculty / Division
+                  </p>
+                  <p className="text-lumina-text-header font-black text-lg">
+                    Computing & IT
+                  </p>
+                </section>
+
+                <section className="space-y-2 group">
+                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2 group-hover:text-lumina-brand-secondary transition-colors">
+                    <Calendar className="w-3.5 h-3.5" /> Enrollment
+                  </p>
+                  <p className="text-lumina-text-header font-black text-lg">
+                    March 2026
+                  </p>
+                </section>
+              </div>
+
+              <div className="space-y-6 pt-10 border-t border-slate-50">
+                <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2">
+                  <MapPin className="w-3.5 h-3.5" /> Active Departments
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  {['Information Technology', 'Smart Campus Hub', 'Operational Tech'].map((tag) => (
+                    <span 
+                      key={tag}
+                      className="bg-lumina-bg-surface text-lumina-text-body px-5 py-2.5 rounded-2xl text-xs border border-slate-200 font-black hover:border-lumina-brand-primary/30 transition-all cursor-default shadow-lumina-sm"
+                    >
+                      {tag}
+                    </span>
+                  ))}
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                  <Building className="w-3.5 h-3.5" /> Department
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <span className="bg-slate-800 text-slate-300 px-3 py-1 rounded-lg text-xs border border-slate-700 font-medium">Information Technology</span>
-                  <span className="bg-slate-800 text-slate-300 px-3 py-1 rounded-lg text-xs border border-slate-700 font-medium">Smart Campus Hub</span>
+              <div className="bg-lumina-status-warning/5 border border-lumina-status-warning/10 p-6 rounded-3xl flex items-start gap-4">
+                <Info className="w-6 h-6 text-lumina-status-warning flex-shrink-0" />
+                <div>
+                  <h4 className="text-sm font-black text-lumina-text-header mb-1">Pending Verification</h4>
+                  <p className="text-xs text-lumina-text-body font-medium leading-relaxed">
+                    Contact information (Phone number) needs to be updated. Please visit the Registrar's office for phone verification.
+                  </p>
                 </div>
               </div>
             </div>

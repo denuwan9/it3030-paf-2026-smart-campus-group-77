@@ -1,160 +1,176 @@
-import React, { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState, useEffect } from 'react';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, Mail, Lock, Chrome, Loader2, AlertCircle } from 'lucide-react';
+import { LogIn, Chrome, Loader2, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
 import toast from 'react-hot-toast';
-
-const loginSchema = z.object({
-  email: z.string().email('Invalid email address'),
-  password: z.string().min(1, 'Password is required'),
-});
+import { loginSchema } from '../schemas/auth';
+import FormInput from '../components/common/FormInput';
+import Alert from '../components/common/Alert';
 
 const LoginPage = () => {
-  const { login, logout, loading } = useAuth();
+  const { login, loading } = useAuth();
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [serverError, setServerError] = useState('');
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  
+  const methods = useForm({
     resolver: zodResolver(loginSchema),
+    mode: 'onBlur',
   });
+
+  const { handleSubmit, formState: { isSubmitting } } = methods;
 
   useEffect(() => {
     const error = searchParams.get('error');
     if (error === 'invalid_domain') {
-      toast.error('Unauthorized: Only SLIIT institutional emails (@sliit.lk or @my.sliit.lk) are permitted.', {
-        duration: 5000,
-        icon: '🚫',
-        style: {
-          borderRadius: '10px',
-          background: '#1e293b',
-          color: '#f87171',
-          border: '1px solid #7f1d1d'
-        },
-      });
-      // Clear the error from URL without refreshing
+      setServerError('Unauthorized: Only SLIIT institutional emails are permitted.');
       navigate('/login', { replace: true });
     } else if (error) {
-      toast.error('Login failed. Please try again or use another method.', {
-        duration: 4000
-      });
+      setServerError('Authentication failed. Please try again.');
       navigate('/login', { replace: true });
     }
   }, [searchParams, navigate]);
 
   const onSubmit = async (data) => {
-    const result = await login(data.email, data.password);
-    if (result.success) {
-      if (result.user.role === 'ROLE_ADMIN') navigate('/admin/bookings');
-      else if (result.user.role === 'ROLE_TECHNICIAN') navigate('/tickets');
-      else navigate('/dashboard');
+    setServerError('');
+    try {
+      const result = await login(data.username, data.password);
+      if (result.success) {
+        if (result.user.role === 'ROLE_ADMIN') navigate('/admin/bookings');
+        else if (result.user.role === 'ROLE_TECHNICIAN') navigate('/tickets');
+        else navigate('/dashboard');
+      } else {
+        setServerError(result.error || 'Invalid credentials provided.');
+      }
+    } catch (err) {
+      setServerError('A network error occurred. Please try again later.');
     }
   };
 
   const handleGoogleLogin = () => {
     setGoogleLoading(true);
-    // Clear any existing session to prevent "Already Logged In" conflicts
     localStorage.clear();
-    
-    toast.loading('Opening Google Account Selection...', {
-      icon: '🔐',
-      duration: 3000
-    });
-
-    // Short delay for UX before redirecting to Spring Boot OAuth endpoint
+    toast.loading('Redirecting to Google...', { id: 'google-login' });
     setTimeout(() => {
       window.location.href = 'http://localhost:8080/oauth2/authorization/google';
-    }, 1000);
+    }, 800);
   };
 
   return (
-    <div className="flex items-center justify-center p-4 min-h-[80vh]">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-lumina-bg-base">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-lumina-brand-primary/5 rounded-full blur-[120px]" />
+        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-lumina-brand-secondary/5 rounded-full blur-[120px]" />
+      </div>
+
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-md glass p-8 rounded-2xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-[440px] z-10"
       >
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center p-3 bg-primary-600/20 rounded-xl mb-4">
-            <LogIn className="w-8 h-8 text-primary-500" />
-          </div>
-          <h1 className="text-3xl font-bold">Welcome Back</h1>
-          <p className="text-slate-400 mt-2">Sign in to Smart Campus Hub</p>
-        </div>
-
-        <button
-          onClick={handleGoogleLogin}
-          type="button"
-          disabled={googleLoading || loading}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white hover:bg-slate-50 text-slate-900 font-bold rounded-xl transition-all mb-6 shadow-lg shadow-white/5 active:scale-95 disabled:opacity-70"
-        >
-          {googleLoading ? (
-            <Loader2 className="w-5 h-5 animate-spin text-primary-600" />
-          ) : (
-            <Chrome className="w-5 h-5 text-red-500" />
-          )}
-          {googleLoading ? 'Connecting...' : 'Continue with Google'}
-        </button>
-
-        <div className="relative mb-8">
-          <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-slate-700"></div></div>
-          <div className="relative flex justify-center text-sm uppercase"><span className="px-2 bg-slate-900 text-slate-500">Or continue with email</span></div>
-        </div>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-2.5 w-5 h-5 text-slate-500" />
-              <input
-                {...register('email')}
-                type="email"
-                placeholder="name@sliit.lk"
-                className={`input-field pl-11 ${errors.email ? 'border-red-500' : ''}`}
-              />
-            </div>
-            {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
+        <div className="bg-white rounded-[2.5rem] shadow-lumina-lg border border-slate-100 p-10 relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-10">
+            <Sparkles className="w-12 h-12 text-lumina-brand-primary" />
           </div>
 
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="block text-sm font-medium text-slate-300">Password</label>
-              <Link to="/forgot-password" size="sm" className="text-xs text-primary-400 hover:text-primary-300">Forgot password?</Link>
+          <div className="mb-10 text-center sm:text-left">
+            <div className="inline-flex items-center justify-center w-14 h-14 bg-lumina-brand-primary/10 rounded-2xl mb-6 border border-lumina-brand-primary/10">
+              <LogIn className="w-7 h-7 text-lumina-brand-primary" />
             </div>
-            <div className="relative">
-              <Lock className="absolute left-3 top-2.5 w-5 h-5 text-slate-500" />
-              <input
-                {...register('password')}
-                type="password"
-                placeholder="••••••••"
-                className={`input-field pl-11 ${errors.password ? 'border-red-500' : ''}`}
-              />
-            </div>
-            {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
+            <h1 className="text-3xl font-black text-lumina-text-header tracking-tight mb-2">
+              Lumina Portal
+            </h1>
+            <p className="text-lumina-text-body font-medium">
+              Access the Smart Campus Operations Hub
+            </p>
           </div>
+
+          <Alert 
+            type="error" 
+            message={serverError} 
+            className="mb-8" 
+            onClose={() => setServerError('')}
+          />
 
           <button
-            type="submit"
-            disabled={loading}
-            className="btn-primary flex items-center justify-center gap-2"
+            onClick={handleGoogleLogin}
+            type="button"
+            disabled={googleLoading || loading}
+            className="w-full flex items-center justify-center gap-3 py-3.5 px-4 bg-lumina-bg-surface hover:bg-white text-lumina-text-header font-bold rounded-2xl border border-slate-200 transition-all mb-8 shadow-lumina-sm hover:shadow-lumina-md active:scale-[0.98] disabled:opacity-70 group"
           >
-            {loading ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Signing in...
-              </>
-            ) : 'Sign In'}
+            {googleLoading ? (
+              <Loader2 className="w-5 h-5 animate-spin text-lumina-brand-primary" />
+            ) : (
+              <div className="bg-white p-1 rounded-lg border border-slate-100 group-hover:border-slate-200 transition-colors">
+                <Chrome className="w-4 h-4 text-[#ea4335]" />
+              </div>
+            )}
+            <span>{googleLoading ? 'Connecting...' : 'Continue with Google'}</span>
           </button>
-        </form>
 
-        <p className="text-center text-slate-400 mt-8 text-sm">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-primary-400 hover:text-primary-300 font-semibold">Sign up now</Link>
+          <div className="relative mb-8 text-center">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-slate-100"></div>
+            </div>
+            <span className="relative px-4 bg-white text-xs font-black uppercase tracking-[0.2em] text-slate-300">
+              Direct Access
+            </span>
+          </div>
+
+          <FormProvider {...methods}>
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <FormInput 
+                name="username" 
+                label="Username / ID" 
+                placeholder="Enter your campus ID"
+                autoFocus
+              />
+
+              <div className="space-y-1">
+                <div className="flex justify-between px-1">
+                  <label className="text-sm font-bold text-lumina-text-header">Password</label>
+                  <Link 
+                    to="/forgot-password" 
+                    className="text-xs font-bold text-lumina-brand-primary hover:underline underline-offset-4"
+                  >
+                    Forgot?
+                  </Link>
+                </div>
+                <FormInput 
+                  name="password" 
+                  type="password" 
+                  placeholder="••••••••"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading || isSubmitting}
+                className="btn-primary flex items-center justify-center gap-2 mt-4"
+              >
+                {loading || isSubmitting ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : 'Sign In to Hub'}
+              </button>
+            </form>
+          </FormProvider>
+
+          <div className="mt-10 pt-8 border-t border-slate-50 text-center">
+            <p className="text-sm text-lumina-text-body font-medium">
+              New to the campus?{' '}
+              <Link to="/register" className="text-lumina-brand-primary font-bold hover:underline underline-offset-4">
+                Create Account
+              </Link>
+            </p>
+          </div>
+        </div>
+        
+        <p className="mt-6 text-center text-xs text-slate-400 font-medium">
+          &copy; 2026 Smart Campus Infrastructure. All rights reserved.
         </p>
       </motion.div>
     </div>
