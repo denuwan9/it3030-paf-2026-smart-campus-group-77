@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { LogIn, Mail, Lock, Chrome, Loader2 } from 'lucide-react';
+import { LogIn, Mail, Lock, Chrome, Loader2, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 const loginSchema = z.object({
@@ -17,9 +18,33 @@ const LoginPage = () => {
   const { login, logout, loading } = useAuth();
   const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { register, handleSubmit, formState: { errors } } = useForm({
     resolver: zodResolver(loginSchema),
   });
+
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error === 'invalid_domain') {
+      toast.error('Unauthorized: Only SLIIT institutional emails (@sliit.lk or @my.sliit.lk) are permitted.', {
+        duration: 5000,
+        icon: '🚫',
+        style: {
+          borderRadius: '10px',
+          background: '#1e293b',
+          color: '#f87171',
+          border: '1px solid #7f1d1d'
+        },
+      });
+      // Clear the error from URL without refreshing
+      navigate('/login', { replace: true });
+    } else if (error) {
+      toast.error('Login failed. Please try again or use another method.', {
+        duration: 4000
+      });
+      navigate('/login', { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   const onSubmit = async (data) => {
     const result = await login(data.email, data.password);

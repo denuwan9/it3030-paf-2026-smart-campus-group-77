@@ -1,11 +1,10 @@
 package com.smartcampus.hub.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.smartcampus.hub.security.CustomOAuth2SuccessHandler;
 import com.smartcampus.hub.security.CustomOidcUserService;
 import com.smartcampus.hub.security.JwtAuthenticationFilter;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -29,10 +28,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.time.Instant;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Configuration
 @EnableWebSecurity
@@ -45,6 +41,9 @@ public class SecurityConfig {
     private final CustomOidcUserService oidcUserService;
     private final CustomOAuth2SuccessHandler oauth2SuccessHandler;
     private final ClientRegistrationRepository clientRegistrationRepository;
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -68,15 +67,14 @@ public class SecurityConfig {
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService))
                         .successHandler(oauth2SuccessHandler)
                         .failureHandler((request, response, exception) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                            response.setContentType("application/json");
-                            Map<String, Object> data = new HashMap<>();
-                            data.put("timestamp", Instant.now().toString());
-                            data.put("status", HttpServletResponse.SC_UNAUTHORIZED);
-                            data.put("error", "OAuth2 Authentication Failed");
-                            data.put("message", exception.getMessage());
-                            data.put("path", request.getRequestURI());
-                            response.getWriter().write(new ObjectMapper().writeValueAsString(data));
+                            String errorMessage = exception.getMessage();
+                            String errorCode = "auth_failed";
+                            
+                            if (errorMessage != null && errorMessage.contains("institutional emails")) {
+                                errorCode = "invalid_domain";
+                            }
+                            
+                            response.sendRedirect(frontendUrl + "/login?error=" + errorCode);
                         })
                 )
                 .sessionManagement(session -> session

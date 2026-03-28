@@ -10,18 +10,15 @@ const OAuthCallbackPage = () => {
 
   useEffect(() => {
     const token = searchParams.get('token');
+    const error = searchParams.get('error');
     
     if (token) {
-      // Logic to manually set token and fetch user info if not in JWT
-      // For this implementation, the JWT contains everything
       localStorage.setItem('token', token);
-      
-      // We force a page reload or a context refresh to pick up the new token
-      // simplest way for this demo:
       window.location.href = '/dashboard';
     } else {
-      toast.error('Google login failed');
-      navigate('/login');
+      console.error('OAuth callback error:', error);
+      // Transfer the error parameter back to login page
+      navigate(`/login${error ? `?error=${error}` : ''}`);
     }
   }, [searchParams, navigate]);
 
