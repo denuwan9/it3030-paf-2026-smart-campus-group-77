@@ -7,9 +7,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0f172a;
+  color-scheme: light;
+  color: #475569;
+  background-color: #FFFFFF;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -19,8 +19,6 @@
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -31,19 +29,23 @@ body {
 
 @layer base {
   body {
-    @apply bg-slate-950 text-slate-50;
+    @apply bg-lumina-bg-base text-lumina-text-body antialiased;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-lumina-text-header font-bold;
   }
 }
 
-/* Glassmorphism utility */
+/* Glassmorphism utility - Light Version */
 .glass {
-  @apply bg-slate-900/40 backdrop-blur-md border border-slate-700/50 shadow-xl;
+  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-lumina-md;
 }
 
 .input-field {
-  @apply w-full px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all placeholder:text-slate-500;
+  @apply w-full px-4 py-2.5 bg-lumina-bg-surface border border-slate-200 rounded-xl focus:ring-2 focus:ring-lumina-brand-primary/20 focus:border-lumina-brand-primary outline-none transition-all placeholder:text-slate-400 text-lumina-text-body;
 }
 
 .btn-primary {
-  @apply w-full py-2 bg-primary-600 hover:bg-primary-500 text-white font-semibold rounded-lg transition-colors shadow-lg active:scale-95 disabled:opacity-50 disabled:active:scale-100;
+  @apply w-full py-2.5 bg-lumina-brand-primary hover:bg-lumina-brand-primary/90 text-white font-semibold rounded-xl transition-all shadow-lumina-md active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100;
 }

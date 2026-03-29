@@ -22,18 +22,20 @@ const SidebarLink = ({ to, icon: Icon, label, active, onClick }) => (
   <Link
     to={to}
     onClick={onClick}
-    className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+    className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group ${
       active 
-        ? 'bg-primary-600/10 text-primary-400 font-semibold shadow-sm' 
-        : 'text-slate-400 hover:bg-slate-800/50 hover:text-slate-200'
+        ? 'bg-lumina-brand-primary text-white font-bold shadow-lumina-md' 
+        : 'text-lumina-text-body hover:bg-lumina-brand-primary/5 hover:text-lumina-brand-primary'
     }`}
   >
-    <Icon className={`w-5 h-5 ${active ? 'text-primary-400' : 'group-hover:text-slate-200'}`} />
-    <span>{label}</span>
+    <div className={`p-1.5 rounded-lg transition-colors ${active ? 'bg-white/20' : 'bg-lumina-bg-surface group-hover:bg-lumina-brand-primary/10'}`}>
+      <Icon className={`w-4.5 h-4.5 ${active ? 'text-white' : 'text-slate-400 group-hover:text-lumina-brand-primary'}`} />
+    </div>
+    <span className="text-sm tracking-tight">{label}</span>
     {active && (
       <motion.div 
-        layoutId="activeTab"
-        className="ml-auto w-1.5 h-1.5 rounded-full bg-primary-500"
+        layoutId="activeTabIndicator"
+        className="ml-auto w-1.5 h-4 rounded-full bg-white/40"
       />
     )}
   </Link>
@@ -59,18 +61,6 @@ const DashboardLayout = () => {
       roles: ['ROLE_USER', 'ROLE_ADMIN'] 
     },
     { 
-      label: 'My Bookings', 
-      to: '/bookings', 
-      icon: Calendar, 
-      roles: ['ROLE_USER'] 
-    },
-    { 
-      label: 'Manage Bookings', 
-      to: '/admin/bookings', 
-      icon: Calendar, 
-      roles: ['ROLE_ADMIN'] 
-    },
-    { 
       label: 'Incident Tickets', 
       to: '/tickets', 
       icon: Ticket, 
@@ -92,7 +82,7 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 flex font-sans">
+    <div className="min-h-screen bg-lumina-bg-base flex font-sans selection:bg-lumina-brand-primary/10">
       {/* Sidebar Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
@@ -101,31 +91,34 @@ const DashboardLayout = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setSidebarOpen(false)}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
+            className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-40 lg:hidden"
           />
         )}
       </AnimatePresence>
 
       {/* Sidebar */}
       <aside className={`
-        fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 transform transition-transform duration-300 lg:relative lg:translate-x-0
+        fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-100 transform transition-transform duration-300 lg:relative lg:translate-x-0
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
         <div className="flex flex-col h-full">
-          <div className="p-6 flex items-center justify-between">
-            <Link to="/dashboard" className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-primary-500/20">
-                S
+          <div className="p-8 flex items-center justify-between">
+            <Link to="/dashboard" className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-lumina-brand-primary rounded-2xl flex items-center justify-center font-black text-white shadow-lumina-md rotate-3 group-hover:rotate-0 transition-transform">
+                L
               </div>
-              <span className="text-xl font-bold tracking-tight text-slate-100">SmartCampus</span>
+              <div className="flex flex-col">
+                <span className="text-xl font-black tracking-tight text-lumina-text-header leading-none">Lumina</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Smart Campus</span>
+              </div>
             </Link>
-            <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400 p-1">
+            <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400 p-1 hover:bg-slate-50 rounded-lg">
               <X className="w-6 h-6" />
             </button>
           </div>
 
-          <nav className="flex-1 px-4 py-4 space-y-1">
-            <p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Main Menu</p>
+          <nav className="flex-1 px-6 py-4 space-y-2">
+            <p className="px-4 text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Operations</p>
             {filteredNav.map((item) => (
               <SidebarLink
                 key={item.to}
@@ -136,7 +129,8 @@ const DashboardLayout = () => {
             ))}
           </nav>
 
-          <div className="p-4 border-t border-slate-800">
+          <div className="p-6 border-t border-slate-50 space-y-2">
+            <p className="px-4 text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Identity</p>
             <SidebarLink 
               to="/profile" 
               icon={User} 
@@ -144,19 +138,14 @@ const DashboardLayout = () => {
               active={location.pathname === '/profile'}
               onClick={() => setSidebarOpen(false)}
             />
-            <SidebarLink 
-              to="/settings" 
-              icon={Settings} 
-              label="Settings" 
-              active={location.pathname === '/settings'}
-              onClick={() => setSidebarOpen(false)}
-            />
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-400/10 transition-colors mt-2"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-lumina-status-error font-bold hover:bg-lumina-status-error/5 transition-all mt-2 group"
             >
-              <LogOut className="w-5 h-5" />
-              <span>Logout</span>
+              <div className="p-1.5 bg-lumina-status-error/10 rounded-lg group-hover:bg-lumina-status-error/20 transition-colors">
+                <LogOut className="w-4.5 h-4.5" />
+              </div>
+              <span className="text-sm">Disconnect</span>
             </button>
           </div>
         </div>
@@ -165,45 +154,45 @@ const DashboardLayout = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Navbar */}
-        <header className="h-16 bg-slate-900/50 backdrop-blur-md border-b border-slate-800 flex items-center justify-between px-4 lg:px-8 z-30">
-          <div className="flex items-center gap-4">
-            <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-slate-400 p-1">
+        <header className="h-20 bg-white/80 backdrop-blur-md border-b border-slate-100 flex items-center justify-between px-6 lg:px-10 z-30">
+          <div className="flex items-center gap-6">
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-slate-400 p-2 hover:bg-slate-50 rounded-xl transition-colors">
               <Menu className="w-6 h-6" />
             </button>
-            <div className="hidden md:flex items-center text-sm text-slate-400 border-l border-slate-700 ml-2 pl-4">
-              <span className="hover:text-slate-200 cursor-pointer transition-colors">Campus</span>
-              <ChevronRight className="w-4 h-4 mx-1" />
-              <span className="text-slate-100 font-medium capitalize">
-                {location.pathname.split('/').pop() || 'Dashboard'}
+            <div className="hidden md:flex items-center gap-3 text-sm font-bold bg-lumina-bg-surface px-4 py-2 rounded-2xl border border-slate-100">
+              <span className="text-slate-400">Campus</span>
+              <ChevronRight className="w-4 h-4 text-slate-300" />
+              <span className="text-lumina-text-header capitalize">
+                {location.pathname.split('/').pop()?.replace('-', ' ') || 'Overview'}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
-            <div className="hidden sm:flex items-center gap-2 bg-slate-950/50 border border-slate-800 rounded-lg px-3 py-1.5 focus-within:border-primary-500 transition-all">
-              <Search className="w-4 h-4 text-slate-500" />
+          <div className="flex items-center gap-6">
+            <div className="hidden sm:flex items-center gap-3 bg-lumina-bg-surface border border-slate-200 rounded-2xl px-4 py-2.5 focus-within:border-lumina-brand-primary focus-within:ring-4 focus-within:ring-lumina-brand-primary/5 transition-all group">
+              <Search className="w-4 h-4 text-slate-400 group-focus-within:text-lumina-brand-primary" />
               <input 
                 type="text" 
-                placeholder="Search..." 
-                className="bg-transparent border-none outline-none text-sm text-slate-300 placeholder:text-slate-600 w-48 lg:w-64"
+                placeholder="Search modules..." 
+                className="bg-transparent border-none outline-none text-sm text-lumina-text-body placeholder:text-slate-400 w-48 lg:w-72 font-medium"
               />
             </div>
             
-            <button className="relative p-2 text-slate-400 hover:bg-slate-800 rounded-full transition-colors">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-primary-500 rounded-full border-2 border-slate-900" />
+            <button className="relative p-2.5 text-slate-400 hover:bg-slate-50 hover:text-lumina-brand-primary rounded-2xl transition-all border border-transparent hover:border-slate-100">
+              <Bell className="w-5.5 h-5.5" />
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-lumina-status-error rounded-full border-2 border-white" />
             </button>
 
-            <div className="h-8 w-px bg-slate-800 mx-1" />
+            <div className="h-10 w-px bg-slate-100 mx-2" />
 
-            <div className="flex items-center gap-3 pl-2">
+            <div className="flex items-center gap-4 pl-2 group cursor-pointer">
               <div className="hidden lg:block text-right">
-                <p className="text-xs font-bold text-slate-100 leading-tight">{user?.fullName}</p>
-                <p className="text-[10px] text-slate-500 font-medium leading-tight">
+                <p className="text-sm font-black text-lumina-text-header leading-tight">{user?.fullName}</p>
+                <p className="text-[10px] text-lumina-brand-primary font-black uppercase tracking-widest mt-0.5">
                   {user?.role?.replace('ROLE_', '')}
                 </p>
               </div>
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary-500 to-indigo-600 flex items-center justify-center font-bold text-white text-sm shadow-md">
+              <div className="w-11 h-11 rounded-[1.2rem] bg-lumina-bg-surface border border-slate-200 flex items-center justify-center font-black text-lumina-brand-primary text-base shadow-lumina-sm group-hover:shadow-lumina-md transition-all group-hover:translate-y-[-1px] group-hover:border-lumina-brand-primary/20">
                 {user?.fullName?.charAt(0)}
               </div>
             </div>
@@ -211,8 +200,10 @@ const DashboardLayout = () => {
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto bg-slate-950 p-4 lg:p-8">
-          <Outlet />
+        <main className="flex-1 overflow-y-auto bg-lumina-bg-surface/50 p-6 lg:p-10">
+          <div className="max-w-7xl mx-auto">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
