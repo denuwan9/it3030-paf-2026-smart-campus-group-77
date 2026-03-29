@@ -23,6 +23,8 @@ export default {
           'status-warning': '#F59E0B',
           'status-error': '#F43F5E',
           'status-info': '#3B82F6',
+          'accent-orange': '#FF7A30',
+          'bg-accent': '#F0F4F2',
         },
         primary: {
           50: '#f0f9ff',

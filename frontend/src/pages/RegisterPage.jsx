@@ -3,11 +3,12 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { UserPlus, Sparkles, Loader2, ShieldCheck } from 'lucide-react';
+import { UserPlus, Sparkles, Loader2, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { registerSchema } from '../schemas/auth';
 import FormInput from '../components/common/FormInput';
 import Alert from '../components/common/Alert';
+import loginIllustration from '../assets/login-illustration.png';
 
 const RegisterPage = () => {
   const { register: registerUser, loading } = useAuth();
@@ -39,30 +40,59 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-lumina-bg-base overflow-y-auto py-12">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[20%] right-[10%] w-[50%] h-[50%] bg-lumina-brand-secondary/5 rounded-full blur-[120px]" />
-        <div className="absolute bottom-[20%] left-[10%] w-[50%] h-[50%] bg-lumina-brand-primary/5 rounded-full blur-[120px]" />
-      </div>
-
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 sm:p-6 lg:p-8">
       <motion.div 
-        initial={{ opacity: 0, scale: 0.98 }}
+        initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-[520px] z-10"
+        className="w-full max-w-[1100px] flex flex-col md:flex-row bg-white rounded-[2.5rem] shadow-2xl overflow-hidden min-h-[750px]"
       >
-        <div className="bg-white rounded-[2.5rem] shadow-lumina-lg border border-slate-100 p-10 relative overflow-hidden">
-          <div className="absolute top-0 left-0 p-8 opacity-10">
+        {/* Left Side: Illustration & Branding */}
+        <div className="hidden md:flex md:w-1/2 bg-lumina-bg-accent p-12 flex-col justify-between items-center text-center relative overflow-hidden">
+          <div className="absolute top-10 left-10 opacity-20">
             <Sparkles className="w-12 h-12 text-lumina-brand-secondary" />
           </div>
-
-          <div className="mb-10 text-center sm:text-left">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-lumina-brand-secondary/10 rounded-2xl mb-6 border border-lumina-brand-secondary/10">
-              <UserPlus className="w-7 h-7 text-lumina-brand-secondary" />
+          
+          <div className="flex-1 flex flex-col justify-center items-center gap-10">
+            <motion.img 
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.2 }}
+              src={loginIllustration} 
+              alt="Lumina Hub Illustration" 
+              className="max-h-[350px] object-contain drop-shadow-2xl"
+            />
+            
+            <div className="space-y-4">
+              <h2 className="text-3xl font-black text-slate-800 tracking-tight">
+                Join the Hub
+              </h2>
+              <p className="text-slate-600 max-w-[320px] font-medium leading-relaxed">
+                Connect with the pulse of the campus. Stay notified, manage your journey, and excel together.
+              </p>
+              
+              <div className="flex justify-center gap-2 mt-6">
+                <div className="w-2 h-2 bg-slate-300 rounded-full" />
+                <div className="w-8 h-2 bg-lumina-brand-secondary rounded-full" />
+                <div className="w-2 h-2 bg-slate-300 rounded-full" />
+              </div>
             </div>
-            <h1 className="text-3xl font-black text-lumina-text-header tracking-tight mb-2">
-              Join Lumina
+          </div>
+        </div>
+
+        {/* Right Side: Registration Form */}
+        <div className="w-full md:w-1/2 p-8 sm:p-12 lg:p-14 flex flex-col justify-center relative bg-white overflow-y-auto">
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 bg-lumina-brand-secondary/10 rounded-xl flex items-center justify-center border border-lumina-brand-secondary/10">
+                <UserPlus className="w-5 h-5 text-lumina-brand-secondary" />
+              </div>
+              <span className="font-black text-xl tracking-tight text-slate-800 uppercase">Lumina Hub</span>
+            </div>
+
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">
+              Establish Identity
             </h1>
-            <p className="text-lumina-text-body font-medium">
+            <p className="text-slate-500 font-medium text-lg">
               Create your Smart Campus profile today
             </p>
           </div>
@@ -75,7 +105,7 @@ const RegisterPage = () => {
           />
 
           <FormProvider {...methods}>
-            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 gap-6">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <FormInput 
                 name="username" 
                 label="Public Username" 
@@ -104,48 +134,34 @@ const RegisterPage = () => {
                 />
               </div>
 
-              <div className="space-y-1.5">
-                <label className="text-sm font-bold text-lumina-text-header ml-1">Account Role</label>
-                <div className="relative group">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none">
-                    <ShieldCheck className="w-5 h-5 text-slate-400 group-focus-within:text-lumina-brand-primary transition-colors" />
-                  </div>
-                  <select
-                    {...methods.register('role')}
-                    className="w-full pl-12 pr-4 py-3 bg-lumina-bg-surface border border-slate-200 rounded-2xl outline-none transition-all focus:border-lumina-brand-primary focus:ring-4 focus:ring-lumina-brand-primary/10 appearance-none text-lumina-text-body font-medium"
-                  >
-                    <option value="ROLE_USER">Standard Member</option>
-                    <option value="ROLE_TECHNICIAN">Campus Technician</option>
-                    <option value="ROLE_ADMIN">System Administrator</option>
-                  </select>
-                </div>
+              <div className="space-y-4 pt-2">
+                <button
+                  type="submit"
+                  disabled={loading || isSubmitting}
+                  className="w-full py-4 bg-lumina-brand-secondary hover:bg-teal-700 text-white font-black text-lg rounded-2xl transition-all shadow-xl shadow-teal-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group"
+                >
+                  {loading || isSubmitting ? (
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                  ) : (
+                    <>
+                      Create Profile
+                      <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </>
+                  )}
+                </button>
               </div>
-
-              <button
-                type="submit"
-                disabled={loading || isSubmitting}
-                className="w-full py-4 bg-lumina-brand-secondary hover:bg-lumina-brand-secondary/90 text-white font-bold rounded-2xl transition-all shadow-lumina-md active:scale-[0.98] disabled:opacity-50 mt-4 flex items-center justify-center gap-2"
-              >
-                {loading || isSubmitting ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
-                ) : 'Establish Profile'}
-              </button>
             </form>
           </FormProvider>
 
-          <div className="mt-10 pt-8 border-t border-slate-50 text-center">
-            <p className="text-sm text-lumina-text-body font-medium">
+          <div className="mt-10 text-center">
+            <p className="text-slate-500 font-medium">
               Already have a profile?{' '}
-              <Link to="/login" className="text-lumina-brand-secondary font-bold hover:underline underline-offset-4">
+              <Link to="/login" className="text-lumina-brand-secondary font-black hover:underline underline-offset-4">
                 Sign In
               </Link>
             </p>
           </div>
         </div>
-        
-        <p className="mt-6 text-center text-xs text-slate-400 font-medium">
-          By registering, you agree to our Institutional Code of Conduct.
-        </p>
       </motion.div>
     </div>
   );
