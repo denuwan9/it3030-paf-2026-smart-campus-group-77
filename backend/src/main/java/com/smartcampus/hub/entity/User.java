@@ -67,6 +67,19 @@ public class User implements UserDetails {
     @Builder.Default
     private Boolean isActive = true;
 
+    // ─── Profile Fields ────────────────────────────────────────────────────────
+    @Column(name = "phone_number", length = 20)
+    private String phoneNumber;
+
+    @Column(length = 100)
+    private String department;
+
+    @Column(columnDefinition = "TEXT")
+    private String bio;
+
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
+
     // ─── OTP Fields ───────────────────────────────────────────────────────────
     @Column(name = "otp_code", length = 10)
     private String otpCode;

@@ -1,146 +1,252 @@
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
 import { motion } from 'framer-motion';
+import { 
+  User, 
+  Mail, 
+  Phone, 
+  Building, 
+  FileText, 
+  Shield, 
+  Save, 
+  Loader2,
+  CheckCircle2,
+  MapPin,
+  Calendar,
+  Settings
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Shield, Calendar, MapPin, Building, Settings, User, Info } from 'lucide-react';
+import userService from '../services/userService';
+import ImageUpload from '../components/profile/ImageUpload';
+import toast from 'react-hot-toast';
+
+// Zod Schema for Validation
+const profileSchema = z.object({
+  fullName: z.string().min(3, 'Full name must be at least 3 characters'),
+  phoneNumber: z.string().regex(/^\+?[\d\s-]{10,}$/, 'Invalid phone number format').optional().or(z.literal('')),
+  department: z.string().min(2, 'Department is required').optional().or(z.literal('')),
+  bio: z.string().max(500, 'Bio must be under 500 characters').optional().or(z.literal('')),
+});
 
 const ProfilePage = () => {
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState(user?.profileImageUrl || '');
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isDirty },
+  } = useForm({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      fullName: user?.fullName || '',
+      phoneNumber: user?.phoneNumber || '',
+      department: user?.department || '',
+      bio: user?.bio || '',
+    },
+  });
+
+  // Sync with user context if it changes
+  useEffect(() => {
+    if (user) {
+      setValue('fullName', user.fullName);
+      setValue('phoneNumber', user.phoneNumber || '');
+      setValue('department', user.department || '');
+      setValue('bio', user.bio || '');
+      setProfileImageUrl(user.profileImageUrl || '');
+    }
+  }, [user, setValue]);
+
+  const onSubmit = async (data) => {
+    setIsSubmitting(true);
+    try {
+      const updateData = { ...data, profileImageUrl };
+      const response = await userService.updateProfile(updateData);
+      
+      if (response.data.success) {
+        updateUserProfile(response.data.data);
+        toast.success('Profile updated successfully');
+      }
+    } catch (error) {
+      console.error('Update profile error:', error);
+      toast.error(error.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleImageSuccess = (url) => {
+    setProfileImageUrl(url);
+    // Automatically save profile image update? Or let user click save?
+    // User expects to click "Save Changes" for everything.
+  };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-10">
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
+    <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+      {/* Header Section */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-lumina-text-header">Identity & Access</h1>
-          <p className="text-lumina-text-body text-sm sm:text-base font-medium mt-1">Manage institutional credentials and campus permissions.</p>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Profile Settings</h1>
+          <p className="text-slate-500 font-medium mt-1">Manage your institutional identity and contact details.</p>
         </div>
-        <div className="flex gap-3">
-          <button className="px-6 py-2.5 bg-white border border-slate-200 text-lumina-text-header font-bold rounded-2xl shadow-lumina-sm hover:bg-slate-50 transition-all active:scale-95 flex items-center gap-2">
-            <Settings className="w-4 h-4 text-slate-400" />
-            <span>Preferences</span>
-          </button>
+        <div className="flex items-center gap-3">
+          <div className="px-4 py-2 bg-blue-50 border border-blue-100 rounded-2xl flex items-center gap-2">
+            <Shield className="w-4 h-4 text-blue-600" />
+            <span className="text-xs font-black text-blue-700 uppercase tracking-widest">{user?.role?.replace('ROLE_', '')}</span>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        {/* Left Column: Avatar & Summary */}
-        <div className="lg:col-span-4 space-y-8">
-          <div className="bg-white border border-slate-100 p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] shadow-lumina-lg text-center relative overflow-hidden group">
-            <div className="absolute top-0 left-0 w-full h-2 bg-lumina-brand-primary" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        {/* Left Column: Avatar & Quick Info */}
+        <div className="lg:col-span-1 space-y-8">
+          <div className="bg-white border border-slate-100 p-8 rounded-[2.5rem] shadow-lumina-sm flex flex-col items-center text-center">
+            <ImageUpload 
+              currentImage={profileImageUrl} 
+              onUploadSuccess={handleImageSuccess} 
+            />
             
-            <div className="relative inline-block mb-6">
-              <div className="w-36 h-36 rounded-[2.5rem] bg-lumina-bg-surface border-4 border-white shadow-lumina-md flex items-center justify-center text-5xl font-black text-lumina-brand-primary transition-transform group-hover:scale-105 duration-500">
-                {user?.fullName?.charAt(0)}
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lumina-md border border-slate-50">
-                <div className="w-4 h-4 bg-lumina-status-success rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.4)]" />
-              </div>
+            <div className="mt-6">
+              <h2 className="text-xl font-black text-slate-900">{user?.fullName}</h2>
+              <p className="text-sm text-slate-400 font-medium">{user?.email}</p>
             </div>
 
-            <h2 className="text-2xl font-black text-lumina-text-header leading-tight px-2">{user?.fullName}</h2>
-            <div className="mt-3 inline-flex px-4 py-1.5 bg-lumina-brand-primary/10 rounded-full border border-lumina-brand-primary/5">
-              <span className="text-xs font-black text-lumina-brand-primary uppercase tracking-[0.15em]">
-                {user?.role?.replace('ROLE_', '')}
-              </span>
-            </div>
-
-            <div className="mt-10 grid grid-cols-1 gap-3">
-              <button className="btn-primary w-full flex items-center justify-center gap-2">
-                <Shield className="w-4 h-4" />
-                <span>Security Vault</span>
-              </button>
-              <button className="w-full py-3 bg-lumina-bg-surface border border-slate-100 text-lumina-text-header font-bold rounded-xl hover:bg-slate-50 transition-all">
-                Edit Bio
-              </button>
+            <div className="w-full mt-8 pt-8 border-t border-slate-50 space-y-4">
+              <div className="flex items-center gap-3 text-slate-500 text-sm">
+                <Calendar className="w-4 h-4" />
+                <span className="font-medium">Joined Mar 2026</span>
+              </div>
+              <div className="flex items-center gap-3 text-slate-500 text-sm">
+                <MapPin className="w-4 h-4" />
+                <span className="font-medium">Colombo, Sri Lanka</span>
+              </div>
             </div>
           </div>
 
-          <div className="bg-lumina-brand-secondary/5 border border-lumina-brand-secondary/10 p-8 rounded-[2rem] relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-5 translate-x-4 -translate-y-4">
-              <Shield className="w-24 h-24 text-lumina-brand-secondary" />
-            </div>
-            <h3 className="text-sm font-black text-lumina-brand-secondary uppercase tracking-widest mb-3">Campus Integrity</h3>
-            <p className="text-xs text-lumina-text-body font-medium leading-relaxed">
-              Your account is verified by SLIIT Active Directory. All actions are logged for campus security and auditing.
+          <div className="bg-slate-900 rounded-[2rem] p-6 text-white overflow-hidden relative group">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-110 transition-transform" />
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Verified Identity</h3>
+            <p className="text-xs text-slate-300 leading-relaxed font-medium">
+              Your profile is linked to the SLIIT Academic Registry. Critical changes may require administrative approval.
             </p>
           </div>
         </div>
 
-        {/* Right Column: Details */}
-        <div className="lg:col-span-8 space-y-8">
-          <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-lumina-lg overflow-hidden">
-            <div className="p-8 border-b border-slate-50 bg-lumina-bg-surface/30">
-              <h2 className="text-xl font-black text-lumina-text-header flex items-center gap-3">
-                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center border border-slate-100 shadow-lumina-sm">
-                  <User className="w-5 h-5 text-lumina-brand-primary" />
-                </div>
-                Institutional Record
-              </h2>
+        {/* Right Column: Form */}
+        <div className="lg:col-span-2 space-y-8">
+          <form onSubmit={handleSubmit(onSubmit)} className="bg-white border border-slate-100 rounded-[2.5rem] shadow-lumina-sm overflow-hidden">
+            <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+              <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                <User className="w-5 h-5 text-blue-600" />
+                Personal Information
+              </h3>
+              {isDirty && (
+                <span className="text-[10px] font-black text-amber-500 uppercase tracking-widest bg-amber-50 px-2 py-0.5 rounded-md border border-amber-100">
+                  Unsaved Changes
+                </span>
+              )}
             </div>
-            
-            <div className="p-6 sm:p-10 space-y-12">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-10">
-                <section className="space-y-2 group">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2 group-hover:text-lumina-brand-primary transition-colors">
-                    <Mail className="w-3.5 h-3.5" /> Primary Email
-                  </p>
-                  <p className="text-lumina-text-header font-black text-base sm:text-lg border-b border-transparent group-hover:border-slate-100 transition-all inline-block truncate w-full">
+
+            <div className="p-8 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Full Name */}
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <User className="w-3.5 h-3.5" /> Full Name
+                  </label>
+                  <input 
+                    {...register('fullName')}
+                    className={`w-full px-4 py-3 bg-slate-50 border ${errors.fullName ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-800`}
+                  />
+                  {errors.fullName && <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{errors.fullName.message}</p>}
+                </div>
+
+                {/* Email (Read Only) */}
+                <div className="space-y-2 opacity-60">
+                  <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <Mail className="w-3.5 h-3.5" /> Institutional Email
+                  </label>
+                  <div className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-2xl font-bold text-slate-500 cursor-not-allowed">
                     {user?.email}
-                  </p>
-                </section>
+                  </div>
+                </div>
 
-                <section className="space-y-2 group">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2 group-hover:text-lumina-brand-secondary transition-colors">
-                    <Shield className="w-3.5 h-3.5" /> Authority level
-                  </p>
-                  <p className="text-lumina-text-header font-black text-lg font-mono">
-                    {user?.role}
-                  </p>
-                </section>
+                {/* Phone Number */}
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <Phone className="w-3.5 h-3.5" /> Phone Number
+                  </label>
+                  <input 
+                    {...register('phoneNumber')}
+                    placeholder="+94 7X XXX XXXX"
+                    className={`w-full px-4 py-3 bg-slate-50 border ${errors.phoneNumber ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-800`}
+                  />
+                  {errors.phoneNumber && <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{errors.phoneNumber.message}</p>}
+                </div>
 
-                <section className="space-y-2 group">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2 group-hover:text-lumina-brand-primary transition-colors">
-                    <Building className="w-3.5 h-3.5" /> Faculty / Division
-                  </p>
-                  <p className="text-lumina-text-header font-black text-lg">
-                    Computing & IT
-                  </p>
-                </section>
-
-                <section className="space-y-2 group">
-                  <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2 group-hover:text-lumina-brand-secondary transition-colors">
-                    <Calendar className="w-3.5 h-3.5" /> Enrollment
-                  </p>
-                  <p className="text-lumina-text-header font-black text-lg">
-                    March 2026
-                  </p>
-                </section>
-              </div>
-
-              <div className="space-y-6 pt-10 border-t border-slate-50">
-                <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2">
-                  <MapPin className="w-3.5 h-3.5" /> Active Departments
-                </p>
-                <div className="flex flex-wrap gap-3">
-                  {['Information Technology', 'Smart Campus Hub', 'Operational Tech'].map((tag) => (
-                    <span 
-                      key={tag}
-                      className="bg-lumina-bg-surface text-lumina-text-body px-5 py-2.5 rounded-2xl text-xs border border-slate-200 font-black hover:border-lumina-brand-primary/30 transition-all cursor-default shadow-lumina-sm"
-                    >
-                      {tag}
-                    </span>
-                  ))}
+                {/* Department */}
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <Building className="w-3.5 h-3.5" /> Department / Unit
+                  </label>
+                  <input 
+                    {...register('department')}
+                    placeholder="e.g. Computing Cabinet"
+                    className={`w-full px-4 py-3 bg-slate-50 border ${errors.department ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-800`}
+                  />
+                  {errors.department && <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{errors.department.message}</p>}
                 </div>
               </div>
 
-              <div className="bg-lumina-status-warning/5 border border-lumina-status-warning/10 p-6 rounded-3xl flex items-start gap-4">
-                <Info className="w-6 h-6 text-lumina-status-warning flex-shrink-0" />
-                <div>
-                  <h4 className="text-sm font-black text-lumina-text-header mb-1">Pending Verification</h4>
-                  <p className="text-xs text-lumina-text-body font-medium leading-relaxed">
-                    Contact information (Phone number) needs to be updated. Please visit the Registrar's office for phone verification.
-                  </p>
-                </div>
+              {/* Bio */}
+              <div className="space-y-2">
+                <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                  <FileText className="w-3.5 h-3.5" /> Bio / Brief Description
+                </label>
+                <textarea 
+                  {...register('bio')}
+                  rows={4}
+                  placeholder="Tell us about your campus role..."
+                  className={`w-full px-4 py-3 bg-slate-50 border ${errors.bio ? 'border-rose-500' : 'border-slate-100'} rounded-3xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-800 resize-none`}
+                />
+                {errors.bio && <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{errors.bio.message}</p>}
+              </div>
+
+              <div className="pt-6 border-t border-slate-50">
+                <button 
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-slate-900/10 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                  ) : (
+                    <>
+                      <Save className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                      Save Changes
+                    </>
+                  )}
+                </button>
               </div>
             </div>
+          </form>
+
+          {/* Security Summary Footer */}
+          <div className="flex flex-col sm:flex-row items-center gap-4 bg-blue-50/50 border border-blue-100 p-6 rounded-[2rem]">
+            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center border border-blue-100 shadow-sm">
+              <Shield className="w-6 h-6 text-blue-600" />
+            </div>
+            <div className="flex-1 text-center sm:text-left">
+              <h4 className="text-sm font-black text-slate-800">Campus Trust & Security</h4>
+              <p className="text-[11px] text-slate-500 font-medium">Your data is transmitted securely and stored in our institutional private cloud.</p>
+            </div>
+            <button className="text-xs font-black text-blue-600 hover:underline underline-offset-4">
+              Security Logs
+            </button>
           </div>
         </div>
       </div>

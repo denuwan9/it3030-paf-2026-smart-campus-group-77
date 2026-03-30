@@ -103,13 +103,19 @@ export const AuthProvider = ({ children }) => {
     toast.success('Logged out successfully');
   };
 
+  const updateUserProfile = (newData) => {
+    const updatedUser = { ...user, ...newData };
+    setUser(updatedUser);
+    localStorage.setItem('user', JSON.stringify(updatedUser));
+  };
+
   const hasRole = (roles) => {
     if (!user) return false;
     return roles.includes(user.role);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, verifyOtp, logout, hasRole }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, verifyOtp, logout, hasRole, updateUserProfile }}>
       {children}
     </AuthContext.Provider>
   );
