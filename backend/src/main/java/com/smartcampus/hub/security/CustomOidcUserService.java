@@ -45,6 +45,7 @@ public class CustomOidcUserService extends OidcUserService {
         System.out.println("Domain Approved: " + email);
 
         String name = oidcUser.getFullName();
+        String picture = oidcUser.getPicture();
         
         Optional<User> userOptional = userRepository.findByEmail(email);
         
@@ -56,6 +57,7 @@ public class CustomOidcUserService extends OidcUserService {
                     .isVerified(true) // Google accounts are implicitly verified
                     .isActive(true)
                     .provider("google")
+                    .profileImageUrl(picture)
                     .createdAt(Instant.now())
                     .build();
             userRepository.save(user);
@@ -64,8 +66,11 @@ public class CustomOidcUserService extends OidcUserService {
             User user = userOptional.get();
             if (name != null && !name.equals(user.getFullName())) {
                 user.setFullName(name);
-                userRepository.save(user);
             }
+            if (picture != null && !picture.equals(user.getProfileImageUrl())) {
+                user.setProfileImageUrl(picture);
+            }
+            userRepository.save(user);
         }
         
         return oidcUser;

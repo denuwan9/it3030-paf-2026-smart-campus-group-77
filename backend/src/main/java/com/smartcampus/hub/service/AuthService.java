@@ -77,6 +77,7 @@ public class AuthService {
                 .fullName(user.getFullName())
                 .role(user.getRole())
                 .isVerified(user.getIsVerified())
+                .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
 
@@ -106,6 +107,7 @@ public class AuthService {
                 .fullName(user.getFullName())
                 .role(user.getRole())
                 .isVerified(true)
+                .profileImageUrl(user.getProfileImageUrl())
                 .build();
     }
 

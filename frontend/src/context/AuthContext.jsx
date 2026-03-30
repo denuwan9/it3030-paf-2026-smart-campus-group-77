@@ -27,9 +27,10 @@ export const AuthProvider = ({ children }) => {
     if (storedUser && token) {
       const decoded = jwtDecode(token);
       const userData = JSON.parse(storedUser);
-      // Ensure role from JWT is used, prioritizing it over localStorage
-      if (decoded?.role) {
-        userData.role = decoded.role;
+      // Ensure role and profileImageUrl from JWT are used, prioritizing them over localStorage
+      if (decoded) {
+        userData.role = decoded.role || userData.role;
+        userData.profileImageUrl = decoded.profileImageUrl || userData.profileImageUrl;
       }
       setUser(userData);
     }
