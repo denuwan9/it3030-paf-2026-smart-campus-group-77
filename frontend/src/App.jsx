@@ -20,13 +20,16 @@ import UserDashboard from './pages/dashboard/UserDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 import TechnicianDashboard from './pages/dashboard/TechnicianDashboard';
 
-// Role-based entry point
-const DashboardHome = () => {
-  const { user } = useAuth();
-  
-  if (user?.role === 'ROLE_ADMIN') return <AdminDashboard />;
-  if (user?.role === 'ROLE_TECHNICIAN') return <TechnicianDashboard />;
-  return <UserDashboard />;
+// Role-based entry point / redirector
+const RoleBasedRedirect = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+
+  if (user.role === 'ROLE_ADMIN') return <Navigate to="/admin" replace />;
+  if (user.role === 'ROLE_TECHNICIAN') return <Navigate to="/technician" replace />;
+  return <Navigate to="/dashboard" replace />;
 };
 
 const Unauthorized = () => (
@@ -62,31 +65,40 @@ function App() {
           <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
-          {/* Protected Dashboard Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route element={<DashboardLayout />}>
-              <Route path="/dashboard" element={<DashboardHome />} />
-              <Route path="/profile" element={<ProfilePage />} />
-              
-              {/* Module A: Resource Management */}
-              <Route path="/resources" element={<UserDashboard />} />
-              
-              {/* Admin Exclusive */}
-              <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
-                <Route path="/admin/bookings" element={<AdminDashboard />} />
-                <Route path="/admin/users" element={<AdminDashboard />} />
-              </Route>
+          {/* Role-Specific Protected Dashboard Routes */}
+          <Route element={<DashboardLayout />}>
+            {/* User Access ONLY */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute allowedRoles={['USER']}>
+                <UserDashboard />
+              </ProtectedRoute>
+            } />
+            
+            {/* Admin Access ONLY */}
+            <Route path="/admin" element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } />
 
-              {/* Technician Exclusive */}
-              <Route element={<ProtectedRoute allowedRoles={['ROLE_TECHNICIAN', 'ROLE_ADMIN']} />}>
-                <Route path="/tickets" element={<TechnicianDashboard />} />
-              </Route>
-            </Route>
+            {/* Technician Access ONLY */}
+            <Route path="/technician" element={
+              <ProtectedRoute allowedRoles={['TECHNICIAN']}>
+                <TechnicianDashboard />
+              </ProtectedRoute>
+            } />
+
+            {/* Universal User Profile (Accessed by all logged-in roles) */}
+            <Route path="/profile" element={
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            } />
           </Route>
 
           {/* Global Redirects */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="*" element={<Unauthorized />} />
+          <Route path="/" element={<RoleBasedRedirect />} />
+          <Route path="*" element={<RoleBasedRedirect />} />
         </Routes>
       </div>
     </Router>

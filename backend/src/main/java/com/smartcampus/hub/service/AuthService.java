@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -160,8 +161,18 @@ public class AuthService {
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
 
-        // Cleanup: remove token after successful reset
+    // Cleanup: remove token after successful reset
         tokenRepository.delete(resetToken);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public void deactivateUser(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        user.setIsActive(false);
+        user.setDeactivatedAt(Instant.now());
+        userRepository.save(user);
     }
 
     private void generateAndSendOtp(User user) {

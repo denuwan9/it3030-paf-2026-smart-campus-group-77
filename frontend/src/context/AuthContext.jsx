@@ -9,10 +9,29 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
 
+  const jwtDecode = (token) => {
+    try {
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join(''));
+      return JSON.parse(jsonPayload);
+    } catch (e) {
+      return null;
+    }
+  };
+
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser && token) {
-      setUser(JSON.parse(storedUser));
+      const decoded = jwtDecode(token);
+      const userData = JSON.parse(storedUser);
+      // Ensure role from JWT is used, prioritizing it over localStorage
+      if (decoded?.role) {
+        userData.role = decoded.role;
+      }
+      setUser(userData);
     }
     setLoading(false);
   }, [token]);

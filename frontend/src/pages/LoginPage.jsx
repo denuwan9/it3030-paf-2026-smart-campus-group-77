@@ -42,8 +42,8 @@ const LoginPage = () => {
     try {
       const result = await login(data.username, data.password);
       if (result.success) {
-        if (result.user.role === 'ROLE_ADMIN') navigate('/admin/bookings');
-        else if (result.user.role === 'ROLE_TECHNICIAN') navigate('/tickets');
+        if (result.user.role === 'ROLE_ADMIN') navigate('/admin');
+        else if (result.user.role === 'ROLE_TECHNICIAN') navigate('/technician');
         else navigate('/dashboard');
       } else {
         setServerError(result.error || 'Invalid credentials provided.');
