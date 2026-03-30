@@ -45,17 +45,17 @@ const RegisterPage = () => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-[1100px] flex flex-col md:flex-row bg-white rounded-3xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden md:min-h-[750px]"
+        className="w-full max-w-[1100px] flex flex-col md:flex-row bg-white rounded-3xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden md:min-h-[min(800px,90vh)]"
       >
         {/* Left Side: Illustration & Branding */}
-        <div className="hidden md:flex md:w-1/2 bg-nexar-bg-accent p-12 flex-col justify-between items-center text-center relative overflow-hidden">
+        <div className="hidden md:flex md:w-1/2 bg-lumina-bg-accent p-12 flex-col justify-between items-center text-center relative overflow-hidden">
           <div className="flex-1 flex flex-col justify-center items-center gap-10">
             <motion.img 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
               src={loginIllustration} 
-              alt="Nexar Hub Illustration" 
+              alt="Lumina Hub Illustration" 
               className="max-h-[350px] object-contain drop-shadow-2xl"
             />
             
@@ -69,7 +69,7 @@ const RegisterPage = () => {
               
               <div className="flex justify-center gap-2 mt-6">
                 <div className="w-2 h-2 bg-slate-300 rounded-full" />
-                <div className="w-8 h-2 bg-nexar-brand-secondary rounded-full" />
+                <div className="w-8 h-2 bg-lumina-brand-secondary rounded-full" />
                 <div className="w-2 h-2 bg-slate-300 rounded-full" />
               </div>
             </div>
@@ -77,10 +77,10 @@ const RegisterPage = () => {
         </div>
 
         {/* Right Side: Registration Form */}
-        <div className="w-full md:w-1/2 p-8 sm:p-12 lg:p-14 flex flex-col justify-center relative bg-white overflow-y-auto">
+        <div className="w-full md:w-1/2 p-8 sm:p-12 lg:p-14 flex flex-col relative bg-white overflow-y-auto max-h-[min(800px,90vh)]">
           <div className="mb-8 flex flex-col items-start gap-6">
-            <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-nexar-sm border border-slate-100 p-2 transform rotate-3 hover:rotate-0 transition-transform">
-              <img src={logo} alt="Nexar Hub" className="w-full h-full object-contain" />
+            <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-lumina-sm border border-slate-100 p-2 transform rotate-3 hover:rotate-0 transition-transform">
+              <img src={logo} alt="Lumina Hub" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">
@@ -133,7 +133,7 @@ const RegisterPage = () => {
                 <button
                   type="submit"
                   disabled={loading || isSubmitting}
-                  className="w-full py-3.5 sm:py-4 bg-nexar-brand-secondary hover:bg-teal-700 text-white font-black text-base sm:text-lg rounded-2xl transition-all shadow-xl shadow-teal-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group"
+                  className="w-full py-3.5 sm:py-4 bg-lumina-brand-secondary hover:bg-teal-700 text-white font-black text-base sm:text-lg rounded-2xl transition-all shadow-xl shadow-teal-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group"
                 >
                   {loading || isSubmitting ? (
                     <Loader2 className="w-6 h-6 animate-spin" />
@@ -148,10 +148,10 @@ const RegisterPage = () => {
             </form>
           </FormProvider>
 
-          <div className="mt-10 text-center">
+          <div className="mt-10 mb-4 text-center">
             <p className="text-slate-500 font-medium">
               Already have a profile?{' '}
-              <Link to="/login" className="text-nexar-brand-secondary font-black hover:underline underline-offset-4">
+              <Link to="/login" className="text-lumina-brand-secondary font-black hover:underline underline-offset-4">
                 Sign In
               </Link>
             </p>
