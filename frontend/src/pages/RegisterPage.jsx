@@ -59,11 +59,11 @@ const RegisterPage = () => {
               className="max-h-[350px] object-contain drop-shadow-2xl"
             />
             
-            <div className="space-y-4">
+            <div className="space-y-8">
               <h2 className="text-3xl font-black text-slate-800 tracking-tight">
                 University Resource Management
               </h2>
-              <p className="text-slate-600 max-w-[320px] font-medium leading-relaxed">
+              <p className="text-slate-600 max-w-[620px] font-medium leading-relaxed">
                 Connect with the pulse of the campus. Stay notified, manage your journey, and excel together.
               </p>
               
