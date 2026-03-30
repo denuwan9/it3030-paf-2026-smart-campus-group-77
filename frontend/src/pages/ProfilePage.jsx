@@ -9,8 +9,8 @@ const ProfilePage = () => {
     <div className="max-w-5xl mx-auto space-y-10">
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-6">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-lumina-text-header">Identity & Access</h1>
-          <p className="text-lumina-text-body font-medium mt-1">Manage institutional credentials and campus permissions.</p>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-lumina-text-header">Identity & Access</h1>
+          <p className="text-lumina-text-body text-sm sm:text-base font-medium mt-1">Manage institutional credentials and campus permissions.</p>
         </div>
         <div className="flex gap-3">
           <button className="px-6 py-2.5 bg-white border border-slate-200 text-lumina-text-header font-bold rounded-2xl shadow-lumina-sm hover:bg-slate-50 transition-all active:scale-95 flex items-center gap-2">
@@ -23,7 +23,7 @@ const ProfilePage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Left Column: Avatar & Summary */}
         <div className="lg:col-span-4 space-y-8">
-          <div className="bg-white border border-slate-100 p-10 rounded-[2.5rem] shadow-lumina-lg text-center relative overflow-hidden group">
+          <div className="bg-white border border-slate-100 p-6 sm:p-10 rounded-3xl sm:rounded-[2.5rem] shadow-lumina-lg text-center relative overflow-hidden group">
             <div className="absolute top-0 left-0 w-full h-2 bg-lumina-brand-primary" />
             
             <div className="relative inline-block mb-6">
@@ -76,13 +76,13 @@ const ProfilePage = () => {
               </h2>
             </div>
             
-            <div className="p-10 space-y-12">
+            <div className="p-6 sm:p-10 space-y-12">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-10">
                 <section className="space-y-2 group">
                   <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] flex items-center gap-2 group-hover:text-lumina-brand-primary transition-colors">
                     <Mail className="w-3.5 h-3.5" /> Primary Email
                   </p>
-                  <p className="text-lumina-text-header font-black text-lg border-b border-transparent group-hover:border-slate-100 transition-all inline-block truncate w-full">
+                  <p className="text-lumina-text-header font-black text-base sm:text-lg border-b border-transparent group-hover:border-slate-100 transition-all inline-block truncate w-full">
                     {user?.email}
                   </p>
                 </section>

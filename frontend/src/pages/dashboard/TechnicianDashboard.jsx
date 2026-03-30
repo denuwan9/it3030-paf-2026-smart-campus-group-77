@@ -14,10 +14,10 @@ const TechnicianDashboard = () => {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Assigned Tasks</h1>
-          <p className="text-slate-400 text-sm mt-1">You have 2 tickets requiring immediate attention.</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">Assigned Tasks</h1>
+          <p className="text-slate-400 text-xs sm:text-sm mt-1">You have 2 tickets requiring immediate attention.</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 bg-slate-900/50 p-3 rounded-2xl border border-slate-800/50 md:bg-transparent md:p-0 md:border-none">
           <div className="flex -space-x-2">
             {[1, 2, 3].map(i => (
               <div key={i} className="w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-950 flex items-center justify-center text-[10px] font-bold text-slate-400">
@@ -39,7 +39,7 @@ const TechnicianDashboard = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: i * 0.1 }}
-              className="bg-slate-900 border border-slate-800 rounded-2xl p-5 hover:border-primary-500/50 transition-all group flex items-center justify-between shadow-sm"
+              className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 hover:border-primary-500/50 transition-all group flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
             >
               <div className="flex items-start gap-4">
                 <div className={`p-3 rounded-xl ${
@@ -70,7 +70,7 @@ const TechnicianDashboard = () => {
                 </div>
               </div>
               
-              <div className="flex items-center gap-4">
+              <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-4 sm:pt-0 border-t border-slate-800 sm:border-none">
                 <StatusBadge status={ticket.status} />
                 <button className="p-2 bg-slate-800 rounded-lg text-slate-400 hover:text-white hover:bg-slate-700 transition-all">
                   <ChevronRight className="w-5 h-5" />

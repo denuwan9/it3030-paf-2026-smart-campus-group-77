@@ -27,7 +27,7 @@ const FormInput = ({
       {label && (
         <label 
           htmlFor={name} 
-          className="text-sm font-bold text-lumina-text-header ml-1"
+          className="text-xs sm:text-sm font-bold text-lumina-text-header ml-1"
         >
           {label}
         </label>
@@ -41,8 +41,8 @@ const FormInput = ({
           autoFocus={autoFocus}
           placeholder={placeholder}
           className={`
-            w-full px-4 py-3 bg-lumina-bg-surface border rounded-2xl outline-none transition-all duration-200
-            placeholder:text-slate-400 text-lumina-text-body
+            w-full px-4 py-2.5 sm:py-3 bg-lumina-bg-surface border rounded-2xl outline-none transition-all duration-200
+            placeholder:text-slate-400 text-lumina-text-body text-sm sm:text-base
             group-hover:bg-white group-focus:bg-white
             ${isError 
               ? 'border-lumina-status-error ring-2 ring-lumina-status-error/10' 

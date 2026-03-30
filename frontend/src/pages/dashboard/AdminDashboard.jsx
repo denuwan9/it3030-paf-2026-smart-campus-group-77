@@ -22,8 +22,8 @@ const AdminDashboard = () => {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Operations Overview</h1>
-          <p className="text-slate-400 text-sm mt-1">Real-time metrics and campus-wide management.</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">Operations Overview</h1>
+          <p className="text-slate-400 text-xs sm:text-sm mt-1">Real-time metrics and campus-wide management.</p>
         </div>
         <div className="flex items-center gap-3">
           <button className="px-4 py-2 bg-slate-800 text-slate-200 text-sm font-semibold rounded-lg hover:bg-slate-700 transition-colors">
@@ -60,7 +60,7 @@ const AdminDashboard = () => {
               View All <ArrowUpRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </button>
           </div>
-          <div className="overflow-x-auto">
+          <div className="table-responsive">
             <table className="w-full">
               <thead>
                 <tr className="bg-slate-800/30">

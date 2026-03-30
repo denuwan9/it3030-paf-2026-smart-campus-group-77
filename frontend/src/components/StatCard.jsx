@@ -20,8 +20,8 @@ const StatCard = ({ label, value, icon: Icon, colorClass, trend }) => (
     </div>
     
     <div>
-      <p className="text-sm font-medium text-slate-500">{label}</p>
-      <h3 className="text-3xl font-bold text-slate-100 mt-1">{value}</h3>
+      <p className="text-xs sm:text-sm font-medium text-slate-500">{label}</p>
+      <h3 className="text-2xl sm:text-3xl font-bold text-slate-100 mt-1">{value}</h3>
     </div>
   </motion.div>
 );

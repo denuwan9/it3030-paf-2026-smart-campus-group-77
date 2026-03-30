@@ -66,13 +66,11 @@ const LoginPage = () => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-[1100px] flex flex-col md:flex-row bg-white rounded-[2.5rem] shadow-2xl overflow-hidden min-h-[700px]"
+        className="w-full max-w-[1100px] flex flex-col md:flex-row bg-white rounded-3xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden md:min-h-[700px]"
       >
         {/* Left Side: Illustration & Branding */}
         <div className="hidden md:flex md:w-1/2 bg-lumina-bg-accent p-12 flex-col justify-between items-center text-center relative overflow-hidden">
-          <div className="absolute top-10 left-10 opacity-20">
-            <Sparkles className="w-12 h-12 text-lumina-brand-primary" />
-          </div>
+          
           
           <div className="flex-1 flex flex-col justify-center items-center gap-10">
             <motion.img 
@@ -104,17 +102,10 @@ const LoginPage = () => {
         {/* Right Side: Login Form */}
         <div className="w-full md:w-1/2 p-6 sm:p-8 lg:p-12 flex flex-col justify-center relative bg-white">
           <div className="mb-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-lumina-brand-primary/10 rounded-xl flex items-center justify-center border border-lumina-brand-primary/10">
-                <LogIn className="w-5 h-5 text-lumina-brand-primary" />
-              </div>
-              <span className="font-black text-xl tracking-tight text-slate-800 uppercase">Lumina Hub</span>
-            </div>
-
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-2">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
               Welcome to Lumina
             </h1>
-            <p className="text-slate-500 font-medium">
+            <p className="text-sm sm:text-base text-slate-500 font-medium">
               Please login to your system account
             </p>
           </div>
@@ -130,7 +121,7 @@ const LoginPage = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <FormInput 
                 name="username" 
-                label="Official Email / ID" 
+                label="Official Email " 
                 placeholder="you@sliit.lk"
                 autoFocus
               />
@@ -156,7 +147,7 @@ const LoginPage = () => {
                 <button
                   type="submit"
                   disabled={loading || isSubmitting}
-                  className="w-full py-4 bg-[#FF7A30] hover:bg-[#ff6a1a] text-white font-black text-lg rounded-2xl transition-all shadow-xl shadow-orange-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group"
+                  className="w-full py-3.5 sm:py-4 bg-[#FF7A30] hover:bg-[#ff6a1a] text-white font-black text-base sm:text-lg rounded-2xl transition-all shadow-xl shadow-orange-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group"
                 >
                   {loading || isSubmitting ? (
                     <Loader2 className="w-6 h-6 animate-spin" />
@@ -198,7 +189,7 @@ const LoginPage = () => {
             <p className="text-slate-500 font-medium">
               Are you new?{' '}
               <Link to="/register" className="text-lumina-brand-primary font-black hover:underline underline-offset-4">
-                Establish Identity
+                Create Account
               </Link>
             </p>
           </div>

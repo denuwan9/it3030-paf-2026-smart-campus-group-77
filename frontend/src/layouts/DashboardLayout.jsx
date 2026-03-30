@@ -159,7 +159,7 @@ const DashboardLayout = () => {
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-slate-400 p-2 hover:bg-slate-50 rounded-xl transition-colors">
               <Menu className="w-6 h-6" />
             </button>
-            <div className="hidden md:flex items-center gap-3 text-sm font-bold bg-lumina-bg-surface px-4 py-2 rounded-2xl border border-slate-100">
+            <div className="hidden lg:flex items-center gap-3 text-sm font-bold bg-lumina-bg-surface px-4 py-2 rounded-2xl border border-slate-100">
               <span className="text-slate-400">Campus</span>
               <ChevronRight className="w-4 h-4 text-slate-300" />
               <span className="text-lumina-text-header capitalize">
@@ -169,12 +169,12 @@ const DashboardLayout = () => {
           </div>
 
           <div className="flex items-center gap-6">
-            <div className="hidden sm:flex items-center gap-3 bg-lumina-bg-surface border border-slate-200 rounded-2xl px-4 py-2.5 focus-within:border-lumina-brand-primary focus-within:ring-4 focus-within:ring-lumina-brand-primary/5 transition-all group">
+            <div className="hidden lg:flex items-center gap-3 bg-lumina-bg-surface border border-slate-200 rounded-2xl px-4 py-2.5 focus-within:border-lumina-brand-primary focus-within:ring-4 focus-within:ring-lumina-brand-primary/5 transition-all group">
               <Search className="w-4 h-4 text-slate-400 group-focus-within:text-lumina-brand-primary" />
               <input 
                 type="text" 
                 placeholder="Search modules..." 
-                className="bg-transparent border-none outline-none text-sm text-lumina-text-body placeholder:text-slate-400 w-48 lg:w-72 font-medium"
+                className="bg-transparent border-none outline-none text-sm text-lumina-text-body placeholder:text-slate-400 w-48 xl:w-72 font-medium"
               />
             </div>
             
@@ -192,7 +192,7 @@ const DashboardLayout = () => {
                   {user?.role?.replace('ROLE_', '')}
                 </p>
               </div>
-              <div className="w-11 h-11 rounded-[1.2rem] bg-lumina-bg-surface border border-slate-200 flex items-center justify-center font-black text-lumina-brand-primary text-base shadow-lumina-sm group-hover:shadow-lumina-md transition-all group-hover:translate-y-[-1px] group-hover:border-lumina-brand-primary/20">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[1.2rem] bg-lumina-bg-surface border border-slate-200 flex items-center justify-center font-black text-lumina-brand-primary text-base shadow-lumina-sm group-hover:shadow-lumina-md transition-all group-hover:translate-y-[-1px] group-hover:border-lumina-brand-primary/20">
                 {user?.fullName?.charAt(0)}
               </div>
             </div>
@@ -200,8 +200,8 @@ const DashboardLayout = () => {
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto bg-lumina-bg-surface/50 p-6 lg:p-10">
-          <div className="max-w-7xl mx-auto">
+        <main className="flex-1 overflow-y-auto bg-lumina-bg-surface/50 p-4 sm:p-6 lg:p-10">
+          <div className="max-w-7xl mx-auto w-full">
             <Outlet />
           </div>
         </main>

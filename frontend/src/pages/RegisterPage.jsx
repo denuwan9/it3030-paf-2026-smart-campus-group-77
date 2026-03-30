@@ -44,7 +44,7 @@ const RegisterPage = () => {
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="w-full max-w-[1100px] flex flex-col md:flex-row bg-white rounded-[2.5rem] shadow-2xl overflow-hidden min-h-[750px]"
+        className="w-full max-w-[1100px] flex flex-col md:flex-row bg-white rounded-3xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden md:min-h-[750px]"
       >
         {/* Left Side: Illustration & Branding */}
         <div className="hidden md:flex md:w-1/2 bg-lumina-bg-accent p-12 flex-col justify-between items-center text-center relative overflow-hidden">
@@ -89,10 +89,10 @@ const RegisterPage = () => {
               <span className="font-black text-xl tracking-tight text-slate-800 uppercase">Lumina Hub</span>
             </div>
 
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">
               Establish Identity
             </h1>
-            <p className="text-slate-500 font-medium text-lg">
+            <p className="text-slate-500 font-medium text-base sm:text-lg">
               Create your Smart Campus profile today
             </p>
           </div>
@@ -138,7 +138,7 @@ const RegisterPage = () => {
                 <button
                   type="submit"
                   disabled={loading || isSubmitting}
-                  className="w-full py-4 bg-lumina-brand-secondary hover:bg-teal-700 text-white font-black text-lg rounded-2xl transition-all shadow-xl shadow-teal-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group"
+                  className="w-full py-3.5 sm:py-4 bg-lumina-brand-secondary hover:bg-teal-700 text-white font-black text-base sm:text-lg rounded-2xl transition-all shadow-xl shadow-teal-500/20 active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group"
                 >
                   {loading || isSubmitting ? (
                     <Loader2 className="w-6 h-6 animate-spin" />

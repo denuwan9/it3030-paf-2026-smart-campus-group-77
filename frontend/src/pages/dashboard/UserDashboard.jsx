@@ -60,8 +60,8 @@ const UserDashboard = () => {
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Resource Catalogue</h1>
-          <p className="text-slate-400 text-sm mt-1">Browse and book campus facilities instantly.</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">Resource Catalogue</h1>
+          <p className="text-slate-400 text-xs sm:text-sm mt-1">Browse and book campus facilities instantly.</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative group">
@@ -92,11 +92,11 @@ const UserDashboard = () => {
       </div>
 
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-sm overflow-hidden">
-        <h2 className="text-lg font-bold text-slate-100 mb-6 flex items-center gap-2">
+        <h2 className="text-base sm:text-lg font-bold text-slate-100 mb-6 flex items-center gap-2">
           <Calendar className="w-5 h-5 text-primary-500" />
           My Recent Bookings
         </h2>
-        <div className="overflow-x-auto">
+        <div className="table-responsive">
           <table className="w-full">
             <thead>
               <tr className="border-b border-slate-800">
