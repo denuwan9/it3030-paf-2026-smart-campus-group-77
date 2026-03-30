@@ -9,6 +9,7 @@ import toast from 'react-hot-toast';
 import axiosInstance from '../api/axiosInstance';
 import FormInput from '../components/common/FormInput';
 import { FormProvider } from 'react-hook-form';
+import logo from '../assets/logo.png';
 
 const schema = z.object({
   email: z.string()
@@ -46,10 +47,13 @@ const ForgotPasswordPage = () => {
       >
         <div className="absolute top-0 left-0 w-full h-2 bg-lumina-brand-primary" />
         
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-lumina-brand-primary/10 rounded-3xl mb-6 relative">
-             <RefreshCw className="w-8 h-8 text-lumina-brand-primary animate-spin-slow" />
-             <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-lumina-brand-secondary" />
+        <div className="text-center mb-10 flex flex-col items-center">
+          <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-lumina-sm border border-slate-100 p-3 mb-6 relative group">
+             <img src={logo} alt="Lumina Logo" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+             <div className="absolute -top-2 -right-2 w-8 h-8 bg-lumina-brand-primary/10 rounded-2xl flex items-center justify-center border border-white">
+                <RefreshCw className="w-4 h-4 text-lumina-brand-primary animate-spin-slow" />
+             </div>
+             <Sparkles className="absolute -bottom-1 -left-1 w-5 h-5 text-lumina-brand-secondary" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Identity Recovery</h1>
           <p className="text-slate-500 font-medium mt-3 px-4">

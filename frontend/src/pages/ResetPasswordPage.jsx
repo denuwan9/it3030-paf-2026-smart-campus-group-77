@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import axiosInstance from '../api/axiosInstance';
 import FormInput from '../components/common/FormInput';
+import logo from '../assets/logo.png';
 
 const schema = z.object({
   newPassword: z.string()
@@ -80,9 +81,12 @@ const ResetPasswordPage = () => {
       >
         <div className="absolute top-0 left-0 w-full h-2 bg-lumina-brand-secondary" />
         
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-lumina-brand-secondary/10 rounded-3xl mb-6">
-             <ShieldCheck className="w-8 h-8 text-lumina-brand-secondary" />
+        <div className="text-center mb-10 flex flex-col items-center">
+          <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-lumina-sm border border-slate-100 p-3 mb-6 relative group">
+             <img src={logo} alt="Lumina Hub" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+             <div className="absolute -top-2 -right-2 w-8 h-8 bg-lumina-brand-secondary/10 rounded-2xl flex items-center justify-center border border-white">
+                <ShieldCheck className="w-5 h-5 text-lumina-brand-secondary" />
+             </div>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Set New Password</h1>
           <p className="text-slate-500 font-medium mt-3">

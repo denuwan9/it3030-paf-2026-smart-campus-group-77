@@ -10,6 +10,7 @@ import { loginSchema } from '../schemas/auth';
 import FormInput from '../components/common/FormInput';
 import Alert from '../components/common/Alert';
 import loginIllustration from '../assets/login-illustration.png';
+import logo from '../assets/logo.png';
 
 const LoginPage = () => {
   const { login, loading } = useAuth();
@@ -82,11 +83,11 @@ const LoginPage = () => {
               className="max-h-[350px] object-contain drop-shadow-2xl"
             />
             
-            <div className="space-y-4">
+            <div className="space-y-8">
               <h2 className="text-3xl font-black text-slate-800 tracking-tight">
-                AI Powered Hub
+                University Resource Management
               </h2>
-              <p className="text-slate-600 max-w-[320px] font-medium leading-relaxed">
+              <p className="text-slate-600 max-w-[620px] font-medium leading-relaxed">
                 The centralized operations hub for students to explore, manage, and succeed in the smart campus.
               </p>
               
@@ -101,13 +102,18 @@ const LoginPage = () => {
 
         {/* Right Side: Login Form */}
         <div className="w-full md:w-1/2 p-6 sm:p-8 lg:p-12 flex flex-col justify-center relative bg-white">
-          <div className="mb-6">
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
-              Welcome to Lumina
-            </h1>
-            <p className="text-sm sm:text-base text-slate-500 font-medium">
-              Please login to your system account
-            </p>
+          <div className="mb-8 flex flex-col items-start gap-6">
+            <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-lumina-sm border border-slate-100 p-2 transform -rotate-3 hover:rotate-0 transition-transform">
+              <img src={logo} alt="Lumina Hub" className="w-full h-full object-contain" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
+                Welcome to Nexar
+              </h1>
+              <p className="text-sm sm:text-base text-slate-500 font-medium">
+                Please login to your system account
+              </p>
+            </div>
           </div>
 
           <Alert 
@@ -153,7 +159,7 @@ const LoginPage = () => {
                     <Loader2 className="w-6 h-6 animate-spin" />
                   ) : (
                     <>
-                      Login to Hub
+                      Login to Nexer
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}

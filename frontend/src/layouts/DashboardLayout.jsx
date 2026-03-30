@@ -17,6 +17,7 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import logo from '../assets/logo.png';
 
 const SidebarLink = ({ to, icon: Icon, label, active, onClick }) => (
   <Link
@@ -103,12 +104,12 @@ const DashboardLayout = () => {
       `}>
         <div className="flex flex-col h-full">
           <div className="p-8 flex items-center justify-between">
-            <Link to="/dashboard" className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-lumina-brand-primary rounded-2xl flex items-center justify-center font-black text-white shadow-lumina-md rotate-3 group-hover:rotate-0 transition-transform">
-                L
+            <Link to="/dashboard" className="flex items-center gap-3 group">
+              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lumina-sm border border-slate-100 group-hover:shadow-lumina-md transition-all group-hover:scale-105 active:scale-95 overflow-hidden p-1.5">
+                <img src={logo} alt="Lumina Logo" className="w-full h-full object-contain" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tight text-lumina-text-header leading-none">Lumina</span>
+                <span className="text-xl font-black tracking-tight text-lumina-text-header leading-none group-hover:text-lumina-brand-primary transition-colors">Lumina</span>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Smart Campus</span>
               </div>
             </Link>

@@ -9,6 +9,7 @@ import { registerSchema } from '../schemas/auth';
 import FormInput from '../components/common/FormInput';
 import Alert from '../components/common/Alert';
 import loginIllustration from '../assets/login-illustration.png';
+import logo from '../assets/logo.png';
 
 const RegisterPage = () => {
   const { register: registerUser, loading } = useAuth();
@@ -64,7 +65,7 @@ const RegisterPage = () => {
             
             <div className="space-y-4">
               <h2 className="text-3xl font-black text-slate-800 tracking-tight">
-                Join the Hub
+                University Resource Management
               </h2>
               <p className="text-slate-600 max-w-[320px] font-medium leading-relaxed">
                 Connect with the pulse of the campus. Stay notified, manage your journey, and excel together.
@@ -81,20 +82,18 @@ const RegisterPage = () => {
 
         {/* Right Side: Registration Form */}
         <div className="w-full md:w-1/2 p-8 sm:p-12 lg:p-14 flex flex-col justify-center relative bg-white overflow-y-auto">
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-lumina-brand-secondary/10 rounded-xl flex items-center justify-center border border-lumina-brand-secondary/10">
-                <UserPlus className="w-5 h-5 text-lumina-brand-secondary" />
-              </div>
-              <span className="font-black text-xl tracking-tight text-slate-800 uppercase">Lumina Hub</span>
+          <div className="mb-8 flex flex-col items-start gap-6">
+            <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-lumina-sm border border-slate-100 p-2 transform rotate-3 hover:rotate-0 transition-transform">
+              <img src={logo} alt="Lumina Hub" className="w-full h-full object-contain" />
             </div>
-
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">
-              Establish Identity
-            </h1>
-            <p className="text-slate-500 font-medium text-base sm:text-lg">
-              Create your Smart Campus profile today
-            </p>
+            <div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">
+                Establish Identity
+              </h1>
+              <p className="text-slate-500 font-medium text-base sm:text-lg">
+                Create your Smart Campus profile today
+              </p>
+            </div>
           </div>
 
           <Alert 
