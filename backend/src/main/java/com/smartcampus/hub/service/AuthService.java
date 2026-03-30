@@ -1,8 +1,10 @@
 package com.smartcampus.hub.service;
 
 import com.smartcampus.hub.dto.*;
+import com.smartcampus.hub.entity.PasswordResetToken;
 import com.smartcampus.hub.entity.Role;
 import com.smartcampus.hub.entity.User;
+import com.smartcampus.hub.repository.PasswordResetTokenRepository;
 import com.smartcampus.hub.repository.UserRepository;
 import com.smartcampus.hub.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
@@ -15,12 +17,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Random;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final PasswordResetTokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
@@ -56,7 +60,7 @@ public class AuthService {
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        User user = userRepository.findByEmail(request.getEmail())
+        User user = userRepository.findByEmail(request.getEmail().toLowerCase())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (!user.getIsVerified()) {
@@ -77,7 +81,7 @@ public class AuthService {
 
     @Transactional
     public AuthResponse verifyOtp(String email, String otp) {
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email.toLowerCase())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (user.getOtpCode() == null || !user.getOtpCode().equals(otp)) {
@@ -106,7 +110,7 @@ public class AuthService {
 
     @Transactional
     public void resendOtp(String email) {
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findByEmail(email.toLowerCase())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
         if (user.getIsVerified()) {
@@ -115,6 +119,49 @@ public class AuthService {
 
         generateAndSendOtp(user);
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void forgotPassword(ForgotPasswordRequest request) {
+        User user = userRepository.findByEmail(request.getEmail().toLowerCase())
+                .orElseThrow(() -> new RuntimeException("No account found with this email"));
+
+        // Delete existing token if any
+        tokenRepository.deleteByUser(user);
+
+        // Generate new token (UUID)
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken resetToken = PasswordResetToken.builder()
+                .token(token)
+                .user(user)
+                .expiryDate(Instant.now().plus(15, ChronoUnit.MINUTES))
+                .build();
+
+        tokenRepository.save(resetToken);
+
+        try {
+            emailService.sendPasswordResetEmail(user.getEmail(), token);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to send reset email. Please try again later.");
+        }
+    }
+
+    @Transactional
+    public void resetPassword(ResetPasswordRequest request) {
+        PasswordResetToken resetToken = tokenRepository.findByToken(request.getToken())
+                .orElseThrow(() -> new RuntimeException("Invalid or expired reset link"));
+
+        if (resetToken.isExpired()) {
+            tokenRepository.delete(resetToken);
+            throw new RuntimeException("Reset link has expired (15-minute limit)");
+        }
+
+        User user = resetToken.getUser();
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        // Cleanup: remove token after successful reset
+        tokenRepository.delete(resetToken);
     }
 
     private void generateAndSendOtp(User user) {

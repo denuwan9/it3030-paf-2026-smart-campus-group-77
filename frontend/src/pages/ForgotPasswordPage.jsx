@@ -3,75 +3,98 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft, RefreshCw } from 'lucide-react';
+import { Mail, ArrowLeft, RefreshCw, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
+import axiosInstance from '../api/axiosInstance';
+import FormInput from '../components/common/FormInput';
+import { FormProvider } from 'react-hook-form';
 
 const schema = z.object({
-  email: z.string().email('Invalid email address'),
+  email: z.string()
+    .email('Invalid email address')
+    .refine(email => email.endsWith('@sliit.lk') || email.endsWith('@my.sliit.lk'), {
+      message: "Only SLIIT institutional emails are allowed",
+    }),
 });
 
 const ForgotPasswordPage = () => {
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm({
+  const methods = useForm({
     resolver: zodResolver(schema),
+    mode: 'onChange'
   });
 
+  const { handleSubmit, formState: { isSubmitting } } = methods;
+
   const onSubmit = async (data) => {
-    // Placeholder for actual API call
-    console.log('Forgot password for:', data.email);
-    await new Promise(r => setTimeout(r, 1000));
-    toast.success('Reset link sent to your email');
+    try {
+      const response = await axiosInstance.post('/auth/forgot-password', data);
+      toast.success(response.data.message || 'Reset link sent if account exists');
+    } catch (error) {
+      // toast.error is handled by axiosInstance interceptor generally, 
+      // but we can add specific handling if needed
+    }
   };
 
   return (
     <div className="flex items-center justify-center p-4 min-h-[80vh]">
       <motion.div 
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-md glass p-8 rounded-2xl"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md bg-white border border-slate-100 p-8 sm:p-10 rounded-[2.5rem] shadow-lumina-lg relative overflow-hidden"
       >
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center p-3 bg-primary-600/20 rounded-xl mb-4">
-            <RefreshCw className="w-8 h-8 text-primary-500" />
+        <div className="absolute top-0 left-0 w-full h-2 bg-lumina-brand-primary" />
+        
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-lumina-brand-primary/10 rounded-3xl mb-6 relative">
+             <RefreshCw className="w-8 h-8 text-lumina-brand-primary animate-spin-slow" />
+             <Sparkles className="absolute -top-1 -right-1 w-5 h-5 text-lumina-brand-secondary" />
           </div>
-          <h1 className="text-3xl font-bold">Reset Password</h1>
-          <p className="text-slate-400 mt-2">Enter your email and we'll send you a link</p>
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Identity Recovery</h1>
+          <p className="text-slate-500 font-medium mt-3 px-4">
+            Enter your institutional email to receive a secure recovery link.
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1.5">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-2.5 w-5 h-5 text-slate-500" />
-              <input
-                {...register('email')}
-                type="email"
-                placeholder="name@sliit.lk"
-                className={`input-field pl-11 ${errors.email ? 'border-red-500' : ''}`}
-              />
-            </div>
-            {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
-          </div>
+        <FormProvider {...methods}>
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+            <FormInput 
+              name="email" 
+              label="Official Email" 
+              placeholder="you@sliit.lk"
+              autoFocus
+            />
 
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className="btn-primary flex items-center justify-center gap-2"
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="btn-primary w-full flex items-center justify-center gap-2 group h-12"
+            >
+              {isSubmitting ? (
+                <>
+                  <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span>Initiating...</span>
+                </>
+              ) : (
+                <>
+                  <span>Send Recovery Link</span>
+                  <ArrowLeft className="w-4 h-4 rotate-180 group-hover:translate-x-1 transition-transform" />
+                </>
+              )}
+            </button>
+          </form>
+        </FormProvider>
+
+        <div className="mt-10 pt-8 border-t border-slate-50 text-center">
+          <Link 
+            to="/login" 
+            className="inline-flex items-center gap-2 text-sm font-black text-slate-400 hover:text-lumina-brand-primary transition-colors group"
           >
-            {isSubmitting ? (
-              <>
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                Sending...
-              </>
-            ) : 'Send Reset Link'}
-          </button>
-        </form>
-
-        <Link to="/login" className="flex items-center justify-center gap-2 mt-8 text-sm text-slate-400 hover:text-white transition-colors">
-          <ArrowLeft className="w-4 h-4" />
-          Back to Login
-        </Link>
+            <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+            Back to Authentication
+          </Link>
+        </div>
       </motion.div>
     </div>
   );
