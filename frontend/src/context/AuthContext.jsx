@@ -22,19 +22,52 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  useEffect(() => {
-    const storedUser = localStorage.getItem('user');
-    if (storedUser && token) {
-      const decoded = jwtDecode(token);
-      const userData = JSON.parse(storedUser);
-      // Ensure role and profileImageUrl from JWT are used, prioritizing them over localStorage
-      if (decoded) {
-        userData.role = decoded.role || userData.role;
-        userData.profileImageUrl = decoded.profileImageUrl || userData.profileImageUrl;
+  const fetchUserProfile = async (authToken) => {
+    try {
+      const response = await axiosInstance.get('/user/me');
+      if (response.data.success) {
+        const userData = response.data.data;
+        // Normalize id to userId
+        const normalizedUser = {
+          ...userData,
+          userId: userData.id || userData.userId
+        };
+        setUser(normalizedUser);
+        localStorage.setItem('user', JSON.stringify(normalizedUser));
+        return normalizedUser;
       }
-      setUser(userData);
+    } catch (error) {
+      console.error('Failed to fetch user profile:', error);
+      if (error.response?.status === 401) {
+        logout();
+      }
     }
-    setLoading(false);
+    return null;
+  };
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      const storedUser = localStorage.getItem('user');
+      const currentToken = localStorage.getItem('token');
+      
+      if (currentToken) {
+        // 1. Immediate sync from local storage for UI responsiveness
+        if (storedUser) {
+          try {
+            const userData = JSON.parse(storedUser);
+            setUser(userData);
+          } catch (e) {
+            console.error("Error parsing stored user", e);
+          }
+        }
+
+        // 2. Background fetch to ensure data is fresh with backend
+        await fetchUserProfile(currentToken);
+      }
+      setLoading(false);
+    };
+
+    initializeAuth();
   }, [token]);
 
   const login = async (email, password) => {
@@ -105,7 +138,13 @@ export const AuthProvider = ({ children }) => {
   };
 
   const updateUserProfile = (newData) => {
-    const updatedUser = { ...user, ...newData };
+    // Normalize if backend sends 'id' instead of 'userId'
+    const normalizedData = {
+      ...newData,
+      userId: newData.id || newData.userId || user?.userId
+    };
+    
+    const updatedUser = { ...user, ...normalizedData };
     setUser(updatedUser);
     localStorage.setItem('user', JSON.stringify(updatedUser));
   };

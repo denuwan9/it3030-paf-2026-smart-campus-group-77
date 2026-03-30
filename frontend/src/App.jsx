@@ -33,18 +33,18 @@ const RoleBasedRedirect = () => {
 };
 
 const Unauthorized = () => (
-  <div className="h-screen flex flex-col items-center justify-center p-4 text-center bg-lumina-bg-base">
-    <div className="w-20 h-20 bg-lumina-status-error/10 rounded-3xl flex items-center justify-center mb-6 border border-lumina-status-error/20">
-      <span className="text-4xl text-lumina-status-error font-black">403</span>
+  <div className="h-screen flex flex-col items-center justify-center p-4 text-center bg-nexer-bg-base">
+    <div className="w-20 h-20 bg-nexer-status-error/10 rounded-3xl flex items-center justify-center mb-6 border border-nexer-status-error/20">
+      <span className="text-4xl text-nexer-status-error font-black">403</span>
     </div>
-    <h1 className="text-3xl font-bold mb-2 text-lumina-text-header">Access Denied</h1>
-    <p className="text-lumina-text-body mb-8 max-w-sm">
+    <h1 className="text-3xl font-bold mb-2 text-nexer-text-header">Access Denied</h1>
+    <p className="text-nexer-text-body mb-8 max-w-sm">
       You don't have the required permissions to access this campus module. 
       Please contact the system administrator if you believe this is an error.
     </p>
     <button 
       onClick={() => window.history.back()} 
-      className="px-8 py-2.5 bg-lumina-bg-surface border border-slate-200 hover:bg-slate-50 text-lumina-text-header font-semibold rounded-xl transition-all active:scale-95 shadow-lumina-sm"
+      className="px-8 py-2.5 bg-nexer-bg-surface border border-slate-200 hover:bg-slate-50 text-nexer-text-header font-semibold rounded-xl transition-all active:scale-95 shadow-nexer-sm"
     >
       Return to Safety
     </button>
@@ -54,7 +54,7 @@ const Unauthorized = () => (
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-lumina-bg-base text-lumina-text-body font-sans selection:bg-lumina-brand-primary/10">
+      <div className="min-h-screen bg-nexer-bg-base text-nexer-text-body font-sans selection:bg-nexer-brand-primary/10">
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />

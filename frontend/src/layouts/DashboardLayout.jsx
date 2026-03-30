@@ -25,12 +25,12 @@ const SidebarLink = ({ to, icon: Icon, label, active, onClick }) => (
     onClick={onClick}
     className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-200 group ${
       active 
-        ? 'bg-lumina-brand-primary text-white font-bold shadow-lumina-md' 
-        : 'text-lumina-text-body hover:bg-lumina-brand-primary/5 hover:text-lumina-brand-primary'
+        ? 'bg-nexer-brand-primary text-white font-bold shadow-nexer-md' 
+        : 'text-nexer-text-body hover:bg-nexer-brand-primary/5 hover:text-nexer-brand-primary'
     }`}
   >
-    <div className={`p-1.5 rounded-lg transition-colors ${active ? 'bg-white/20' : 'bg-lumina-bg-surface group-hover:bg-lumina-brand-primary/10'}`}>
-      <Icon className={`w-4.5 h-4.5 ${active ? 'text-white' : 'text-slate-400 group-hover:text-lumina-brand-primary'}`} />
+    <div className={`p-1.5 rounded-lg transition-colors ${active ? 'bg-white/20' : 'bg-nexer-bg-surface group-hover:bg-nexer-brand-primary/10'}`}>
+      <Icon className={`w-4.5 h-4.5 ${active ? 'text-white' : 'text-slate-400 group-hover:text-nexer-brand-primary'}`} />
     </div>
     <span className="text-sm tracking-tight">{label}</span>
     {active && (
@@ -83,7 +83,7 @@ const DashboardLayout = () => {
   };
 
   return (
-    <div className="min-h-screen bg-lumina-bg-base flex font-sans selection:bg-lumina-brand-primary/10">
+    <div className="min-h-screen bg-nexer-bg-base flex font-sans selection:bg-nexer-brand-primary/10">
       {/* Sidebar Overlay */}
       <AnimatePresence>
         {isSidebarOpen && (
@@ -105,11 +105,11 @@ const DashboardLayout = () => {
         <div className="flex flex-col h-full">
           <div className="p-8 flex items-center justify-between">
             <Link to="/dashboard" className="flex items-center gap-3 group">
-              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lumina-sm border border-slate-100 group-hover:shadow-lumina-md transition-all group-hover:scale-105 active:scale-95 overflow-hidden p-1.5">
-                <img src={logo} alt="Lumina Logo" className="w-full h-full object-contain" />
+              <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-nexer-sm border border-slate-100 group-hover:shadow-nexer-md transition-all group-hover:scale-105 active:scale-95 overflow-hidden p-1.5">
+                <img src={logo} alt="SLIIT Nexer Logo" className="w-full h-full object-contain" />
               </div>
               <div className="flex flex-col">
-                <span className="text-xl font-black tracking-tight text-lumina-text-header leading-none group-hover:text-lumina-brand-primary transition-colors">Lumina</span>
+                <span className="text-xl font-black tracking-tight text-nexer-text-header leading-none group-hover:text-nexer-brand-primary transition-colors">Nexer</span>
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Smart Campus</span>
               </div>
             </Link>
@@ -141,9 +141,9 @@ const DashboardLayout = () => {
             />
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-lumina-status-error font-bold hover:bg-lumina-status-error/5 transition-all mt-2 group"
+              className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-nexer-status-error font-bold hover:bg-nexer-status-error/5 transition-all mt-2 group"
             >
-              <div className="p-1.5 bg-lumina-status-error/10 rounded-lg group-hover:bg-lumina-status-error/20 transition-colors">
+              <div className="p-1.5 bg-nexer-status-error/10 rounded-lg group-hover:bg-nexer-status-error/20 transition-colors">
                 <LogOut className="w-4.5 h-4.5" />
               </div>
               <span className="text-sm">Disconnect</span>
@@ -160,48 +160,52 @@ const DashboardLayout = () => {
             <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-slate-400 p-2 hover:bg-slate-50 rounded-xl transition-colors">
               <Menu className="w-6 h-6" />
             </button>
-            <div className="hidden lg:flex items-center gap-3 text-sm font-bold bg-lumina-bg-surface px-4 py-2 rounded-2xl border border-slate-100">
+            <div className="hidden lg:flex items-center gap-3 text-sm font-bold bg-nexer-bg-surface px-4 py-2 rounded-2xl border border-slate-100">
               <span className="text-slate-400">Campus</span>
               <ChevronRight className="w-4 h-4 text-slate-300" />
-              <span className="text-lumina-text-header capitalize">
+              <span className="text-nexer-text-header capitalize">
                 {location.pathname.split('/').pop()?.replace('-', ' ') || 'Overview'}
               </span>
             </div>
           </div>
 
           <div className="flex items-center gap-6">
-            <div className="hidden lg:flex items-center gap-3 bg-lumina-bg-surface border border-slate-200 rounded-2xl px-4 py-2.5 focus-within:border-lumina-brand-primary focus-within:ring-4 focus-within:ring-lumina-brand-primary/5 transition-all group">
-              <Search className="w-4 h-4 text-slate-400 group-focus-within:text-lumina-brand-primary" />
+            <div className="hidden lg:flex items-center gap-3 bg-nexer-bg-surface border border-slate-200 rounded-2xl px-4 py-2.5 focus-within:border-nexer-brand-primary focus-within:ring-4 focus-within:ring-nexer-brand-primary/5 transition-all group">
+              <Search className="w-4 h-4 text-slate-400 group-focus-within:text-nexer-brand-primary" />
               <input 
                 type="text" 
                 placeholder="Search modules..." 
-                className="bg-transparent border-none outline-none text-sm text-lumina-text-body placeholder:text-slate-400 w-48 xl:w-72 font-medium"
+                className="bg-transparent border-none outline-none text-sm text-nexer-text-body placeholder:text-slate-400 w-48 xl:w-72 font-medium"
               />
             </div>
             
-            <button className="relative p-2.5 text-slate-400 hover:bg-slate-50 hover:text-lumina-brand-primary rounded-2xl transition-all border border-transparent hover:border-slate-100">
+            <button className="relative p-2.5 text-slate-400 hover:bg-slate-50 hover:text-nexer-brand-primary rounded-2xl transition-all border border-transparent hover:border-slate-100">
               <Bell className="w-5.5 h-5.5" />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-lumina-status-error rounded-full border-2 border-white" />
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-nexer-status-error rounded-full border-2 border-white" />
             </button>
 
             <div className="h-10 w-px bg-slate-100 mx-2" />
 
             <div className="flex items-center gap-4 pl-2 group cursor-pointer">
               <div className="hidden lg:block text-right">
-                <p className="text-sm font-black text-lumina-text-header leading-tight">{user?.fullName}</p>
-                <p className="text-[10px] text-lumina-brand-primary font-black uppercase tracking-widest mt-0.5">
+                <p className="text-sm font-black text-nexer-text-header leading-tight">{user?.fullName}</p>
+                <p className="text-[10px] text-nexer-brand-primary font-black uppercase tracking-widest mt-0.5">
                   {user?.role?.replace('ROLE_', '')}
                 </p>
               </div>
-              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[1.2rem] bg-lumina-bg-surface border border-slate-200 flex items-center justify-center font-black text-lumina-brand-primary text-base shadow-lumina-sm group-hover:shadow-lumina-md transition-all group-hover:translate-y-[-1px] group-hover:border-lumina-brand-primary/20">
-                {user?.fullName?.charAt(0)}
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-[1.2rem] bg-nexer-bg-surface border border-slate-200 flex items-center justify-center font-black text-nexer-brand-primary text-base shadow-nexer-sm group-hover:shadow-nexer-md transition-all group-hover:translate-y-[-1px] group-hover:border-nexer-brand-primary/20 overflow-hidden">
+                {user?.profileImageUrl ? (
+                  <img src={user.profileImageUrl} alt={user.fullName} className="w-full h-full object-cover" />
+                ) : (
+                  user?.fullName?.charAt(0)
+                )}
               </div>
             </div>
           </div>
         </header>
 
         {/* Content Area */}
-        <main className="flex-1 overflow-y-auto bg-lumina-bg-surface/50 p-4 sm:p-6 lg:p-10">
+        <main className="flex-1 overflow-y-auto bg-nexer-bg-surface/50 p-4 sm:p-6 lg:p-10">
           <div className="max-w-7xl mx-auto w-full">
             <Outlet />
           </div>

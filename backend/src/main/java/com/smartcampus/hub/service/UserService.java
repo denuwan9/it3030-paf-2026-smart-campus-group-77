@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@lombok.extern.slf4j.Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -19,6 +20,7 @@ public class UserService {
     @Transactional
     public User updateProfile(ProfileUpdateRequest request) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.info("Attempting profile update for user: {}", email);
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -38,7 +40,9 @@ public class UserService {
             user.setProfileImageUrl(request.getProfileImageUrl());
         }
 
-        return userRepository.save(user);
+        User savedUser = userRepository.save(user);
+        log.info("Profile updated successfully for user: {}. Current Image: {}", email, savedUser.getProfileImageUrl());
+        return savedUser;
     }
 
     public User getCurrentUser() {

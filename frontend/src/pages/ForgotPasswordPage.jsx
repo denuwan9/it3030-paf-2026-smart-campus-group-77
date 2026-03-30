@@ -43,17 +43,17 @@ const ForgotPasswordPage = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md bg-white border border-slate-100 p-8 sm:p-10 rounded-[2.5rem] shadow-lumina-lg relative overflow-hidden"
+        className="w-full max-w-md bg-white border border-slate-100 p-8 sm:p-10 rounded-[2.5rem] shadow-nexer-lg relative overflow-hidden"
       >
-        <div className="absolute top-0 left-0 w-full h-2 bg-lumina-brand-primary" />
+        <div className="absolute top-0 left-0 w-full h-2 bg-nexer-brand-primary" />
         
         <div className="text-center mb-10 flex flex-col items-center">
-          <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-lumina-sm border border-slate-100 p-3 mb-6 relative group">
-             <img src={logo} alt="Lumina Logo" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
-             <div className="absolute -top-2 -right-2 w-8 h-8 bg-lumina-brand-primary/10 rounded-2xl flex items-center justify-center border border-white">
-                <RefreshCw className="w-4 h-4 text-lumina-brand-primary animate-spin-slow" />
+          <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-nexer-sm border border-slate-100 p-3 mb-6 relative group">
+             <img src={logo} alt="SLIIT Nexer Logo" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
+             <div className="absolute -top-2 -right-2 w-8 h-8 bg-nexer-brand-primary/10 rounded-2xl flex items-center justify-center border border-white">
+                <RefreshCw className="w-4 h-4 text-nexer-brand-primary animate-spin-slow" />
              </div>
-             <Sparkles className="absolute -bottom-1 -left-1 w-5 h-5 text-lumina-brand-secondary" />
+             <Sparkles className="absolute -bottom-1 -left-1 w-5 h-5 text-nexer-brand-secondary" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Identity Recovery</h1>
           <p className="text-slate-500 font-medium mt-3 px-4">
@@ -93,7 +93,7 @@ const ForgotPasswordPage = () => {
         <div className="mt-10 pt-8 border-t border-slate-50 text-center">
           <Link 
             to="/login" 
-            className="inline-flex items-center gap-2 text-sm font-black text-slate-400 hover:text-lumina-brand-primary transition-colors group"
+            className="inline-flex items-center gap-2 text-sm font-black text-slate-400 hover:text-nexer-brand-primary transition-colors group"
           >
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             Back to Authentication

@@ -104,7 +104,7 @@ const ProfilePage = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Left Column: Avatar & Quick Info */}
         <div className="lg:col-span-1 space-y-8">
-          <div className="bg-white border border-slate-100 p-8 rounded-[2.5rem] shadow-lumina-sm flex flex-col items-center text-center">
+          <div className="bg-white border border-slate-100 p-8 rounded-[2.5rem] shadow-nexer-sm flex flex-col items-center text-center">
             <ImageUpload 
               currentImage={profileImageUrl} 
               onUploadSuccess={handleImageSuccess} 
@@ -138,7 +138,7 @@ const ProfilePage = () => {
 
         {/* Right Column: Form */}
         <div className="lg:col-span-2 space-y-8">
-          <form onSubmit={handleSubmit(onSubmit)} className="bg-white border border-slate-100 rounded-[2.5rem] shadow-lumina-sm overflow-hidden">
+          <form onSubmit={handleSubmit(onSubmit)} className="bg-white border border-slate-100 rounded-[2.5rem] shadow-nexer-sm overflow-hidden">
             <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
               <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
                 <User className="w-5 h-5 text-blue-600" />

@@ -45,7 +45,7 @@ const ImageUpload = ({ currentImage, onUploadSuccess }) => {
 
   return (
     <div className="relative group">
-      <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-[2.5rem] bg-slate-100 overflow-hidden border-4 border-white shadow-lumina-md relative">
+      <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-[2.5rem] bg-slate-100 overflow-hidden border-4 border-white shadow-nexer-md relative">
         {uploading && (
           <div className="absolute inset-0 z-20 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center">
             <Loader2 className="w-8 h-8 text-white animate-spin" />
@@ -74,11 +74,11 @@ const ImageUpload = ({ currentImage, onUploadSuccess }) => {
       </div>
 
       {uploading ? (
-        <div className="absolute -bottom-2 -right-2 bg-white rounded-2xl p-2 shadow-lumina-sm border border-slate-50">
-          <Loader2 className="w-4 h-4 text-lumina-brand-primary animate-spin" />
+        <div className="absolute -bottom-2 -right-2 bg-white rounded-2xl p-2 shadow-nexer-sm border border-slate-50">
+          <Loader2 className="w-4 h-4 text-nexer-brand-primary animate-spin" />
         </div>
       ) : preview ? (
-        <div className="absolute -bottom-2 -right-2 bg-white rounded-2xl p-2 shadow-lumina-sm border border-emerald-100">
+        <div className="absolute -bottom-2 -right-2 bg-white rounded-2xl p-2 shadow-nexer-sm border border-emerald-100">
           <CheckCircle2 className="w-4 h-4 text-emerald-500" />
         </div>
       ) : null}

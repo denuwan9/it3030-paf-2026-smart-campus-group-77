@@ -72,7 +72,7 @@ const UserDashboard = () => {
       <section className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1">
-            <h2 className="text-2xl font-black text-lumina-text-header tracking-tight">Resource Catalogue</h2>
+            <h2 className="text-2xl font-black text-nexer-text-header tracking-tight">Resource Catalogue</h2>
             <p className="text-slate-500 text-sm font-medium">Browse and book premium campus facilities instantly.</p>
           </div>
           
@@ -82,14 +82,14 @@ const UserDashboard = () => {
               <input 
                 type="text" 
                 placeholder="Find a module..." 
-                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-4 focus:ring-lumina-brand-primary/5 focus:border-lumina-brand-primary transition-all shadow-lumina-sm"
+                className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-4 focus:ring-nexer-brand-primary/5 focus:border-nexer-brand-primary transition-all shadow-nexer-sm"
               />
             </div>
-            <button className="p-2.5 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-lumina-brand-primary transition-all shadow-lumina-sm hover:translate-y-[-1px]">
+            <button className="p-2.5 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-nexer-brand-primary transition-all shadow-nexer-sm hover:translate-y-[-1px]">
               <Filter className="w-5 h-5" />
             </button>
             <div className="flex items-center bg-slate-50 p-1 rounded-xl border border-slate-100">
-              <button className="p-1.5 bg-white shadow-sm rounded-lg text-lumina-brand-primary">
+              <button className="p-1.5 bg-white shadow-sm rounded-lg text-nexer-brand-primary">
                 <LayoutGrid className="w-4 h-4" />
               </button>
               <button className="p-1.5 text-slate-400 hover:text-slate-600">
@@ -109,29 +109,29 @@ const UserDashboard = () => {
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.5 }}
-            className="group relative rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center p-8 text-center hover:border-lumina-brand-primary/30 hover:bg-lumina-brand-primary/5 transition-all cursor-pointer"
+            className="group relative rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center p-8 text-center hover:border-nexer-brand-primary/30 hover:bg-nexer-brand-primary/5 transition-all cursor-pointer"
           >
-            <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-lumina-brand-primary group-hover:text-white transition-all duration-500">
-              <Sparkles className="w-6 h-6 text-lumina-brand-primary group-hover:text-white transition-all" />
+            <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-nexer-brand-primary group-hover:text-white transition-all duration-500">
+              <Sparkles className="w-6 h-6 text-nexer-brand-primary group-hover:text-white transition-all" />
             </div>
-            <h3 className="font-black text-lumina-text-header group-hover:text-lumina-brand-primary transition-colors">View All Resources</h3>
+            <h3 className="font-black text-nexer-text-header group-hover:text-nexer-brand-primary transition-colors">View All Resources</h3>
             <p className="text-xs text-slate-400 mt-1 font-medium">Explore over 40+ facilities</p>
-            <ArrowRight className="w-5 h-5 mt-4 text-slate-300 group-hover:text-lumina-brand-primary group-hover:translate-x-1 transition-all" />
+            <ArrowRight className="w-5 h-5 mt-4 text-slate-300 group-hover:text-nexer-brand-primary group-hover:translate-x-1 transition-all" />
           </motion.div>
         </div>
       </section>
 
       {/* 4. Recent Activity Section */}
-      <section className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-lumina-sm relative overflow-hidden">
+      <section className="bg-white border border-slate-100 rounded-[2.5rem] p-8 shadow-nexer-sm relative overflow-hidden">
         {/* Abstract Background Detail */}
         <div className="absolute top-0 right-0 w-64 h-64 bg-slate-50 rounded-full -mr-32 -mt-32 blur-3xl opacity-50" />
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="space-y-1">
-            <h2 className="text-xl font-black text-lumina-text-header tracking-tight">Recent Activity</h2>
+            <h2 className="text-xl font-black text-nexer-text-header tracking-tight">Recent Activity</h2>
             <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">History & Status tracking</p>
           </div>
-          <button className="text-sm font-black text-lumina-brand-primary hover:underline underline-offset-4 decoration-2">
+          <button className="text-sm font-black text-nexer-brand-primary hover:underline underline-offset-4 decoration-2">
             View Statement
           </button>
         </div>
@@ -155,11 +155,11 @@ const UserDashboard = () => {
                 <tr key={i} className="group hover:bg-slate-50/50 transition-colors">
                   <td className="py-5">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-lumina-bg-surface flex items-center justify-center font-black text-lumina-brand-primary text-xs border border-slate-100 group-hover:bg-white transition-all">
+                      <div className="w-10 h-10 rounded-xl bg-nexer-bg-surface flex items-center justify-center font-black text-nexer-brand-primary text-xs border border-slate-100 group-hover:bg-white transition-all">
                         {row.name.charAt(0)}
                       </div>
                       <div>
-                        <p className="font-bold text-lumina-text-header text-sm">{row.name}</p>
+                        <p className="font-bold text-nexer-text-header text-sm">{row.name}</p>
                         <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">{row.type}</p>
                       </div>
                     </div>
@@ -181,7 +181,7 @@ const UserDashboard = () => {
                     </div>
                   </td>
                   <td className="py-5 text-right">
-                    <button className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-lumina-brand-primary hover:text-white transition-all group-hover:shadow-sm">
+                    <button className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-nexer-brand-primary hover:text-white transition-all group-hover:shadow-sm">
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </td>

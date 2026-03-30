@@ -70,7 +70,7 @@ const LoginPage = () => {
         className="w-full max-w-[1100px] flex flex-col md:flex-row bg-white rounded-3xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden md:min-h-[700px]"
       >
         {/* Left Side: Illustration & Branding */}
-        <div className="hidden md:flex md:w-1/2 bg-lumina-bg-accent p-12 flex-col justify-between items-center text-center relative overflow-hidden">
+        <div className="hidden md:flex md:w-1/2 bg-nexer-bg-accent p-12 flex-col justify-between items-center text-center relative overflow-hidden">
           
           
           <div className="flex-1 flex flex-col justify-center items-center gap-10">
@@ -79,7 +79,7 @@ const LoginPage = () => {
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
               src={loginIllustration} 
-              alt="Lumina Hub Illustration" 
+              alt="SLIIT Nexer Illustration" 
               className="max-h-[350px] object-contain drop-shadow-2xl"
             />
             
@@ -92,7 +92,7 @@ const LoginPage = () => {
               </p>
               
               <div className="flex justify-center gap-2 mt-6">
-                <div className="w-8 h-2 bg-lumina-brand-primary rounded-full" />
+                <div className="w-8 h-2 bg-nexer-brand-primary rounded-full" />
                 <div className="w-2 h-2 bg-slate-300 rounded-full" />
                 <div className="w-2 h-2 bg-slate-300 rounded-full" />
               </div>
@@ -103,12 +103,12 @@ const LoginPage = () => {
         {/* Right Side: Login Form */}
         <div className="w-full md:w-1/2 p-6 sm:p-8 lg:p-12 flex flex-col justify-center relative bg-white">
           <div className="mb-8 flex flex-col items-start gap-6">
-            <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-lumina-sm border border-slate-100 p-2 transform -rotate-3 hover:rotate-0 transition-transform">
-              <img src={logo} alt="Lumina Hub" className="w-full h-full object-contain" />
+            <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-nexer-sm border border-slate-100 p-2 transform -rotate-3 hover:rotate-0 transition-transform">
+              <img src={logo} alt="SLIIT Nexer" className="w-full h-full object-contain" />
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
-                Welcome to Lumina
+                Welcome to SLIIT Nexer
               </h1>
               <p className="text-sm sm:text-base text-slate-500 font-medium">
                 Please login to your system account
@@ -137,7 +137,7 @@ const LoginPage = () => {
                   <label className="text-sm font-bold text-slate-700">Access Password</label>
                   <Link 
                     to="/forgot-password" 
-                    className="text-sm font-bold text-slate-400 hover:text-lumina-brand-primary transition-colors"
+                    className="text-sm font-bold text-slate-400 hover:text-nexer-brand-primary transition-colors"
                   >
                     Forgot?
                   </Link>
@@ -181,7 +181,7 @@ const LoginPage = () => {
                   className="w-full flex items-center justify-center gap-3 py-4 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold rounded-2xl border border-slate-200 transition-all shadow-sm active:scale-[0.98] disabled:opacity-70 group"
                 >
                   {googleLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin text-lumina-brand-primary" />
+                    <Loader2 className="w-5 h-5 animate-spin text-nexer-brand-primary" />
                   ) : (
                     <Chrome className="w-5 h-5 text-[#ea4335]" />
                   )}
@@ -194,7 +194,7 @@ const LoginPage = () => {
           <div className="mt-12 text-center">
             <p className="text-slate-500 font-medium">
               Are you new?{' '}
-              <Link to="/register" className="text-lumina-brand-primary font-black hover:underline underline-offset-4">
+              <Link to="/register" className="text-nexer-brand-primary font-black hover:underline underline-offset-4">
                 Create Account
               </Link>
             </p>

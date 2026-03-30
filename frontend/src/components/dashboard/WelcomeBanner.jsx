@@ -17,7 +17,7 @@ const WelcomeBanner = () => {
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-lumina-brand-primary/95 to-emerald-600 p-8 sm:p-10 text-white shadow-lumina-lg border border-white/10 group"
+      className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-nexer-brand-primary/95 to-emerald-600 p-8 sm:p-10 text-white shadow-nexer-lg border border-white/10 group"
     >
       {/* Decorative Elements */}
       <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-white/10 rounded-full blur-3xl transition-transform duration-700 group-hover:scale-110" />
@@ -27,7 +27,7 @@ const WelcomeBanner = () => {
         <div className="max-w-2xl space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-black uppercase tracking-widest border border-white/20">
             <Sparkles className="w-3.5 h-3.5" />
-            Lumina Smart Campus
+            Nexer Smart Campus
           </div>
           
           <div className="space-y-2">
@@ -40,7 +40,7 @@ const WelcomeBanner = () => {
           </div>
           
           <div className="flex flex-wrap gap-3 pt-2">
-            <button className="px-6 py-2.5 bg-white text-lumina-brand-primary font-black text-sm rounded-xl hover:bg-emerald-50 transition-all active:scale-95 shadow-xl shadow-emerald-900/10 flex items-center gap-2 group/btn">
+            <button className="px-6 py-2.5 bg-white text-nexer-brand-primary font-black text-sm rounded-xl hover:bg-emerald-50 transition-all active:scale-95 shadow-xl shadow-emerald-900/10 flex items-center gap-2 group/btn">
               Explore Resources
               <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
             </button>

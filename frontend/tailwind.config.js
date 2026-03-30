@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        lumina: {
+        nexer: {
           'bg-base': '#FFFFFF',
           'bg-surface': '#F8FAFC',
           'bg-overlay': '#F1F5F9',
@@ -41,9 +41,9 @@ export default {
         },
       },
       boxShadow: {
-        'lumina-sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-        'lumina-md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
-        'lumina-lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
+        'nexer-sm': '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+        'nexer-md': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+        'nexer-lg': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
       },
     },
   },
