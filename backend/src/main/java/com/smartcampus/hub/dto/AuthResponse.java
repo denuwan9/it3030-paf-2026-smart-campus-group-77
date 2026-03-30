@@ -19,4 +19,5 @@ public class AuthResponse {
     private String fullName;
     private Role role;
     private boolean isVerified;
+    private String profileImageUrl;
 }

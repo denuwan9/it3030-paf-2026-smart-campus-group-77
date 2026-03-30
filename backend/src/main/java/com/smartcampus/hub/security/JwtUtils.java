@@ -37,6 +37,7 @@ public class JwtUtils {
         claims.put("isVerified", user.getIsVerified());
         claims.put("fullName", user.getFullName());
         claims.put("userId", user.getId().toString());
+        claims.put("profileImageUrl", user.getProfileImageUrl());
 
         return createToken(claims, user.getEmail());
     }

@@ -13,7 +13,29 @@ const OAuthCallbackPage = () => {
     const error = searchParams.get('error');
     
     if (token) {
-      localStorage.setItem('token', token);
+      // Simple JWT decode to extract user info
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map(c => {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+        const decoded = JSON.parse(jsonPayload);
+        
+        const userObj = {
+          userId: decoded.userId,
+          email: decoded.sub,
+          fullName: decoded.fullName,
+          role: decoded.role,
+          profileImageUrl: decoded.profileImageUrl,
+        };
+
+        localStorage.setItem('token', token);
+        localStorage.setItem('user', JSON.stringify(userObj));
+      } catch (e) {
+        console.error('Error decoding OAuth token:', e);
+      }
+      
       window.location.href = '/dashboard';
     } else {
       console.error('OAuth callback error:', error);

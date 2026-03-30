@@ -30,7 +30,7 @@
   }
   
   body {
-    @apply bg-lumina-bg-base text-lumina-text-body antialiased;
+    @apply bg-nexer-bg-base text-nexer-text-body antialiased;
     margin: 0;
     min-width: 320px;
     min-height: 100vh;
@@ -39,7 +39,7 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply text-lumina-text-header font-bold tracking-tight;
+    @apply text-nexer-text-header font-bold tracking-tight;
   }
 }
 
@@ -51,15 +51,15 @@
 
 /* Glassmorphism utility - Light Version */
 .glass {
-  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-lumina-md;
+  @apply bg-white/70 backdrop-blur-md border border-white/20 shadow-nexer-md;
 }
 
 .input-field {
-  @apply w-full px-4 py-2.5 bg-lumina-bg-surface border border-slate-200 rounded-xl focus:ring-2 focus:ring-lumina-brand-primary/20 focus:border-lumina-brand-primary outline-none transition-all placeholder:text-slate-400 text-lumina-text-body text-sm sm:text-base;
+  @apply w-full px-4 py-2.5 bg-nexer-bg-surface border border-slate-200 rounded-xl focus:ring-2 focus:ring-nexer-brand-primary/20 focus:border-nexer-brand-primary outline-none transition-all placeholder:text-slate-400 text-nexer-text-body text-sm sm:text-base;
 }
 
 .btn-primary {
-  @apply w-full py-2.5 bg-lumina-brand-primary hover:bg-lumina-brand-primary/90 text-white font-semibold rounded-xl transition-all shadow-lumina-md active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 text-sm sm:text-base;
+  @apply w-full py-2.5 bg-nexer-brand-primary hover:bg-nexer-brand-primary/90 text-white font-semibold rounded-xl transition-all shadow-nexer-md active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 text-sm sm:text-base;
 }
 
 /* Responsive Table Wrapper */

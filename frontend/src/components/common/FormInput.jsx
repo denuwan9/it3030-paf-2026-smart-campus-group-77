@@ -31,7 +31,7 @@ const FormInput = ({
       {label && (
         <label 
           htmlFor={name} 
-          className="text-xs sm:text-sm font-bold text-lumina-text-header ml-1"
+          className="text-xs sm:text-sm font-bold text-nexer-text-header ml-1"
         >
           {label}
         </label>
@@ -45,14 +45,14 @@ const FormInput = ({
           autoFocus={autoFocus}
           placeholder={placeholder}
           className={`
-            w-full px-4 py-2.5 sm:py-3 bg-lumina-bg-surface border rounded-2xl outline-none transition-all duration-200
-            placeholder:text-slate-400 text-lumina-text-body text-sm sm:text-base pr-12
+            w-full px-4 py-2.5 sm:py-3 bg-nexer-bg-surface border rounded-2xl outline-none transition-all duration-200
+            placeholder:text-slate-400 text-nexer-text-body text-sm sm:text-base pr-12
             group-hover:bg-white group-focus:bg-white
             ${isError 
-              ? 'border-lumina-status-error ring-2 ring-lumina-status-error/10' 
+              ? 'border-nexer-status-error ring-2 ring-nexer-status-error/10' 
               : isValid
-                ? 'border-lumina-status-success ring-2 ring-lumina-status-success/5'
-                : 'border-slate-200 focus:border-lumina-brand-primary focus:ring-4 focus:ring-lumina-brand-primary/10'
+                ? 'border-nexer-status-success ring-2 ring-nexer-status-success/5'
+                : 'border-slate-200 focus:border-nexer-brand-primary focus:ring-4 focus:ring-nexer-brand-primary/10'
             }
           `}
         />
@@ -62,7 +62,7 @@ const FormInput = ({
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="p-1 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-lumina-brand-primary pointer-events-auto cursor-pointer"
+              className="p-1 hover:bg-slate-100 rounded-full transition-colors text-slate-400 hover:text-nexer-brand-primary pointer-events-auto cursor-pointer"
               title={showPassword ? "Hide Password" : "Show Password"}
             >
               {showPassword ? (
@@ -80,7 +80,7 @@ const FormInput = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
               >
-                <AlertCircle className="w-5 h-5 text-lumina-status-error" />
+                <AlertCircle className="w-5 h-5 text-nexer-status-error" />
               </motion.div>
             )}
             {isValid && (
@@ -89,7 +89,7 @@ const FormInput = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
               >
-                <CheckCircle2 className="w-5 h-5 text-lumina-status-success" />
+                <CheckCircle2 className="w-5 h-5 text-nexer-status-success" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -102,7 +102,7 @@ const FormInput = ({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="text-xs font-semibold text-lumina-status-error ml-1 flex items-center gap-1"
+            className="text-xs font-semibold text-nexer-status-error ml-1 flex items-center gap-1"
           >
             {errors[name]?.message}
           </motion.p>
