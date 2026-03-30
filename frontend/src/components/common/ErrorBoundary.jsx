@@ -11,7 +11,7 @@ class ErrorBoundary extends React.Component {
   }
 
   componentDidCatch(error, errorInfo) {
-    console.error('Lumina Error Boundary caught an error:', error, errorInfo);
+    console.error('Nexar Error Boundary caught an error:', error, errorInfo);
   }
 
   handleRestart = () => {
@@ -21,10 +21,10 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-lumina-bg-base text-center">
-          <div className="w-24 h-24 bg-lumina-status-error/10 rounded-[2.5rem] flex items-center justify-center mb-8 border border-lumina-status-error/20 shadow-lumina-sm rotate-3 animate-pulse">
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-nexar-bg-base text-center">
+          <div className="w-24 h-24 bg-nexar-status-error/10 rounded-[2.5rem] flex items-center justify-center mb-8 border border-nexar-status-error/20 shadow-nexar-sm rotate-3 animate-pulse">
             <svg 
-              className="w-10 h-10 text-lumina-status-error" 
+              className="w-10 h-10 text-nexar-status-error" 
               fill="none" 
               viewBox="0 0 24 24" 
               stroke="currentColor"
@@ -33,31 +33,31 @@ class ErrorBoundary extends React.Component {
             </svg>
           </div>
           
-          <h1 className="text-4xl font-black text-lumina-text-header mb-4 tracking-tight">System Interruption</h1>
-          <p className="text-lumina-text-body mb-10 max-w-md leading-relaxed">
-            The Lumina engine encountered an unexpected runtime exception. 
+          <h1 className="text-4xl font-black text-nexar-text-header mb-4 tracking-tight">System Interruption</h1>
+          <p className="text-nexar-text-body mb-10 max-w-md leading-relaxed">
+            The Nexar engine encountered an unexpected runtime exception. 
             Your session is safe, but we need to reset the current module to recover stability.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4">
             <button 
               onClick={() => this.setState({ hasError: false })}
-              className="px-8 py-3 bg-lumina-brand-primary text-white font-bold rounded-2xl shadow-lumina-md hover:translate-y-[-2px] transition-all active:scale-95"
+              className="px-8 py-3 bg-nexar-brand-primary text-white font-bold rounded-2xl shadow-nexar-md hover:translate-y-[-2px] transition-all active:scale-95"
             >
               Attempt Recovery
             </button>
             <button 
               onClick={this.handleRestart}
-              className="px-8 py-3 bg-lumina-bg-surface border border-slate-200 text-lumina-text-header font-bold rounded-2xl shadow-lumina-sm hover:bg-slate-50 transition-all active:scale-95"
+              className="px-8 py-3 bg-nexar-bg-surface border border-slate-200 text-nexar-text-header font-bold rounded-2xl shadow-nexar-sm hover:bg-slate-50 transition-all active:scale-95"
             >
               Back to Dashboard
             </button>
           </div>
 
           {process.env.NODE_ENV === 'development' && (
-            <div className="mt-12 p-6 bg-lumina-bg-overlay rounded-3xl border border-slate-200 max-w-2xl w-full text-left overflow-auto">
-              <p className="text-xs font-mono text-lumina-status-error font-bold mb-2 uppercase tracking-widest">Stack Trace</p>
-              <pre className="text-xs font-mono text-lumina-text-body/70 whitespace-pre-wrap">
+            <div className="mt-12 p-6 bg-nexar-bg-overlay rounded-3xl border border-slate-200 max-w-2xl w-full text-left overflow-auto">
+              <p className="text-xs font-mono text-nexar-status-error font-bold mb-2 uppercase tracking-widest">Stack Trace</p>
+              <pre className="text-xs font-mono text-nexar-text-body/70 whitespace-pre-wrap">
                 {this.state.error?.stack}
               </pre>
             </div>

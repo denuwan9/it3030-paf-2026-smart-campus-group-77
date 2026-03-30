@@ -27,7 +27,7 @@ const FormInput = ({
       {label && (
         <label 
           htmlFor={name} 
-          className="text-xs sm:text-sm font-bold text-lumina-text-header ml-1"
+          className="text-xs sm:text-sm font-bold text-nexar-text-header ml-1"
         >
           {label}
         </label>
@@ -41,14 +41,14 @@ const FormInput = ({
           autoFocus={autoFocus}
           placeholder={placeholder}
           className={`
-            w-full px-4 py-2.5 sm:py-3 bg-lumina-bg-surface border rounded-2xl outline-none transition-all duration-200
-            placeholder:text-slate-400 text-lumina-text-body text-sm sm:text-base
+            w-full px-4 py-2.5 sm:py-3 bg-nexar-bg-surface border rounded-2xl outline-none transition-all duration-200
+            placeholder:text-slate-400 text-nexar-text-body text-sm sm:text-base
             group-hover:bg-white group-focus:bg-white
             ${isError 
-              ? 'border-lumina-status-error ring-2 ring-lumina-status-error/10' 
+              ? 'border-nexar-status-error ring-2 ring-nexar-status-error/10' 
               : isValid
-                ? 'border-lumina-status-success ring-2 ring-lumina-status-success/5'
-                : 'border-slate-200 focus:border-lumina-brand-primary focus:ring-4 focus:ring-lumina-brand-primary/10'
+                ? 'border-nexar-status-success ring-2 ring-nexar-status-success/5'
+                : 'border-slate-200 focus:border-nexar-brand-primary focus:ring-4 focus:ring-nexar-brand-primary/10'
             }
           `}
         />
@@ -61,7 +61,7 @@ const FormInput = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
               >
-                <AlertCircle className="w-5 h-5 text-lumina-status-error" />
+                <AlertCircle className="w-5 h-5 text-nexar-status-error" />
               </motion.div>
             )}
             {isValid && (
@@ -70,7 +70,7 @@ const FormInput = ({
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}
               >
-                <CheckCircle2 className="w-5 h-5 text-lumina-status-success" />
+                <CheckCircle2 className="w-5 h-5 text-nexar-status-success" />
               </motion.div>
             )}
           </AnimatePresence>
@@ -83,7 +83,7 @@ const FormInput = ({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="text-xs font-semibold text-lumina-status-error ml-1 flex items-center gap-1"
+            className="text-xs font-semibold text-nexar-status-error ml-1 flex items-center gap-1"
           >
             {errors[name]?.message}
           </motion.p>
