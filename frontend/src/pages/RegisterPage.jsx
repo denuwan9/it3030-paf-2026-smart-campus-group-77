@@ -1,20 +1,23 @@
 import React, { useState } from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { UserPlus, Sparkles, Loader2, ArrowRight } from 'lucide-react';
+import { UserPlus, Sparkles, Loader2, ArrowRight, Chrome } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { registerSchema } from '../schemas/auth';
 import FormInput from '../components/common/FormInput';
 import Alert from '../components/common/Alert';
+import { useAuth } from '../context/AuthContext';
 import loginIllustration from '../assets/login-illustration.png';
 import logo from '../assets/logo.png';
 
 const RegisterPage = () => {
   const { register: registerUser, loading } = useAuth();
   const [serverError, setServerError] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   
   const methods = useForm({
     resolver: zodResolver(registerSchema),
@@ -25,6 +28,29 @@ const RegisterPage = () => {
   });
 
   const { handleSubmit, formState: { isSubmitting } } = methods;
+
+  React.useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      if (error === 'invalid_domain') {
+        toast.error('Access Denied: Please use your SLIIT student or staff email.', {
+          duration: 5000,
+          id: 'auth-error'
+        });
+        setServerError('Unauthorized: Only @my.sliit.lk or @sliit.lk domains are permitted.');
+      } else if (error === 'user_already_exists') {
+        toast.error('Account already exists. Please login instead.', {
+          duration: 5000,
+          id: 'auth-error'
+        });
+        setServerError('An account already exists with this Google profile.');
+      } else {
+        toast.error('Registration failed. Please try again.', { id: 'auth-error' });
+        setServerError('An unexpected error occurred during Google Signup.');
+      }
+      navigate('/register', { replace: true });
+    }
+  }, [searchParams, navigate]);
 
   const onSubmit = async (data) => {
     setServerError('');
@@ -38,6 +64,20 @@ const RegisterPage = () => {
     } catch (err) {
       setServerError('A connection error occurred. Please try again.');
     }
+  };
+
+  const handleGoogleSignup = () => {
+    setGoogleLoading(true);
+    localStorage.clear();
+    toast.loading('Provisioning SLIIT Account...', { id: 'google-signup' });
+    
+    // Derived from VITE_API_URL (removes /api/v1 suffix)
+    const baseUrl = import.meta.env.VITE_API_URL.split('/api/v1')[0];
+    
+    setTimeout(() => {
+      // Append action=signup to distinguish from login attempts
+      window.location.href = `${baseUrl}/oauth2/authorization/google?action=signup`;
+    }, 800);
   };
 
   return (
@@ -143,6 +183,29 @@ const RegisterPage = () => {
                       <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </>
                   )}
+                </button>
+
+                <div className="relative py-4">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-slate-100"></div>
+                  </div>
+                  <span className="relative px-4 bg-white text-xs font-bold uppercase tracking-widest text-slate-300 mx-auto block w-max">
+                    or express with
+                  </span>
+                </div>
+
+                <button
+                  onClick={handleGoogleSignup}
+                  type="button"
+                  disabled={googleLoading || loading}
+                  className="w-full flex items-center justify-center gap-3 py-4 px-4 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold rounded-2xl border border-slate-200 transition-all shadow-sm active:scale-[0.98] disabled:opacity-70 group"
+                >
+                  {googleLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin text-nexer-brand-secondary" />
+                  ) : (
+                    <Chrome className="w-5 h-5 text-[#ea4335]" />
+                  )}
+                  <span>{googleLoading ? 'Connecting...' : 'Continue with Google'}</span>
                 </button>
               </div>
             </form>

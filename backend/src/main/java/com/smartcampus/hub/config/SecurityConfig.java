@@ -1,5 +1,6 @@
 package com.smartcampus.hub.config;
 
+import com.smartcampus.hub.security.CustomOAuth2FailureHandler;
 import com.smartcampus.hub.security.CustomOAuth2SuccessHandler;
 import com.smartcampus.hub.security.CustomOidcUserService;
 import com.smartcampus.hub.security.JwtAuthenticationFilter;
@@ -40,6 +41,7 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final CustomOidcUserService oidcUserService;
     private final CustomOAuth2SuccessHandler oauth2SuccessHandler;
+    private final CustomOAuth2FailureHandler oauth2FailureHandler;
     private final ClientRegistrationRepository clientRegistrationRepository;
 
     @Value("${app.frontend.url}")
@@ -68,16 +70,7 @@ public class SecurityConfig {
                         )
                         .userInfoEndpoint(userInfo -> userInfo.oidcUserService(oidcUserService))
                         .successHandler(oauth2SuccessHandler)
-                        .failureHandler((request, response, exception) -> {
-                            String errorMessage = exception.getMessage();
-                            String errorCode = "auth_failed";
-                            
-                            if (errorMessage != null && errorMessage.contains("institutional emails")) {
-                                errorCode = "invalid_domain";
-                            }
-                            
-                            response.sendRedirect(frontendUrl + "/login?error=" + errorCode);
-                        })
+                        .failureHandler(oauth2FailureHandler)
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
@@ -92,8 +85,23 @@ public class SecurityConfig {
             ClientRegistrationRepository clientRegistrationRepository) {
         DefaultOAuth2AuthorizationRequestResolver resolver = new DefaultOAuth2AuthorizationRequestResolver(
                 clientRegistrationRepository, "/oauth2/authorization");
-        resolver.setAuthorizationRequestCustomizer(customizer -> customizer
-                .additionalParameters(params -> params.put("prompt", "select_account")));
+        
+        resolver.setAuthorizationRequestCustomizer(customizer -> {
+            // Force Google to show the account selection screen
+            customizer.additionalParameters(params -> {
+                params.put("prompt", "select_account");
+            });
+            
+            // Capture the 'action' parameter (login/signup) from the initial request
+            var attributes = org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+            if (attributes instanceof org.springframework.web.context.request.ServletRequestAttributes) {
+                jakarta.servlet.http.HttpServletRequest request = ((org.springframework.web.context.request.ServletRequestAttributes) attributes).getRequest();
+                String action = request.getParameter("action");
+                if (action != null) {
+                    request.getSession().setAttribute("oauth2_action", action);
+                }
+            }
+        });
         return resolver;
     }
 

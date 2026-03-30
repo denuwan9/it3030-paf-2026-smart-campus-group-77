@@ -28,11 +28,29 @@ const LoginPage = () => {
 
   useEffect(() => {
     const error = searchParams.get('error');
-    if (error === 'invalid_domain') {
-      setServerError('Unauthorized: Only SLIIT institutional emails are permitted.');
-      navigate('/login', { replace: true });
-    } else if (error) {
-      setServerError('Authentication failed. Please try again.');
+    if (error) {
+      if (error === 'invalid_domain') {
+        toast.error('Access Denied: Please use your SLIIT student or staff email.', {
+          duration: 5000,
+          id: 'auth-error'
+        });
+        setServerError('Unauthorized: Only @my.sliit.lk or @sliit.lk domains are permitted.');
+      } else if (error === 'user_not_found') {
+        toast.error('No existing account found. Please create an account first.', {
+          duration: 5000,
+          id: 'auth-error'
+        });
+        setServerError('No Nexer account associated with this Google ID.');
+      } else if (error === 'account_exists') {
+        toast.error('Account already exists. Please login with your password.', {
+          duration: 5000,
+          id: 'auth-error'
+        });
+        setServerError('An account with this email already exists.');
+      } else {
+        toast.error('Authentication failed. Please try again.', { id: 'auth-error' });
+        setServerError('An unexpected error occurred during Google Sign-In.');
+      }
       navigate('/login', { replace: true });
     }
   }, [searchParams, navigate]);
@@ -56,9 +74,14 @@ const LoginPage = () => {
   const handleGoogleLogin = () => {
     setGoogleLoading(true);
     localStorage.clear();
-    toast.loading('Redirecting to Google...', { id: 'google-login' });
+    toast.loading('Verifying SLIIT Credentials...', { id: 'google-login' });
+    
+    // Derived from VITE_API_URL (removes /api/v1 suffix)
+    const baseUrl = import.meta.env.VITE_API_URL.split('/api/v1')[0];
+    
     setTimeout(() => {
-      window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+      // Append action=login to distinguish from signup attempts
+      window.location.href = `${baseUrl}/oauth2/authorization/google?action=login`;
     }, 800);
   };
 
