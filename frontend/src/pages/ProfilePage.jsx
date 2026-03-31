@@ -33,9 +33,8 @@ const profileSchema = z.object({
   phoneNumber: z.string().regex(/^\+?[\d\s-]{10,}$/, 'Invalid phone number format').optional().or(z.literal('')),
   department: z.string().min(2, 'Department is required').optional().or(z.literal('')),
   bio: z.string().max(500, 'Bio must be under 500 characters').optional().or(z.literal('')),
-  isEmailPublic: z.boolean().default(false),
-  isPhonePublic: z.boolean().default(false),
 });
+
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
@@ -67,10 +66,9 @@ const ProfilePage = () => {
       phoneNumber: user?.phoneNumber || '',
       department: user?.department || '',
       bio: user?.bio || '',
-      isEmailPublic: user?.isEmailPublic || false,
-      isPhonePublic: user?.isPhonePublic || false,
     },
   });
+
 
   const passwordForm = useForm({
     resolver: zodResolver(passwordSchema),
@@ -107,9 +105,8 @@ const ProfilePage = () => {
       profileForm.setValue('phoneNumber', user.phoneNumber || '');
       profileForm.setValue('department', user.department || '');
       profileForm.setValue('bio', user.bio || '');
-      profileForm.setValue('isEmailPublic', user.isEmailPublic || false);
-      profileForm.setValue('isPhonePublic', user.isPhonePublic || false);
       setProfileImageUrl(user.profileImageUrl || '');
+
     }
   }, [user, profileForm.setValue]);
 
@@ -121,8 +118,9 @@ const ProfilePage = () => {
       
       if (response.data.success) {
         updateUserProfile(response.data.data);
-        toast.success('Profile and individual privacy updated');
+        toast.success('Profile updated successfully');
       }
+
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to update profile');
     } finally {
@@ -164,7 +162,8 @@ const ProfilePage = () => {
           <p className="text-slate-500 font-medium mt-1">Manage your identity, visibility, and security.</p>
         </div>
         <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-sm">
-          {['profile', 'privacy', 'security'].map((tab) => (
+          {['profile', 'security'].map((tab) => (
+
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -305,57 +304,7 @@ const ProfilePage = () => {
             </motion.form>
           )}
 
-          {activeTab === 'privacy' && (
-            <motion.form 
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              onSubmit={profileForm.handleSubmit(onProfileSubmit)}
-              className="bg-white border border-slate-100 rounded-[2.5rem] shadow-nexer-sm overflow-hidden"
-            >
-              <div className="p-8 border-b border-slate-50 bg-slate-50/30">
-                <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-emerald-600" />
-                  Privacy & Visibility
-                </h3>
-                <p className="text-xs text-slate-400 font-bold mt-1 uppercase tracking-widest">Control what other campus members see</p>
-              </div>
 
-              <div className="p-8 space-y-8">
-                <div className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100 transition-all hover:bg-slate-100/50">
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-black text-slate-800">Public Institutional Email</h4>
-                    <p className="text-xs text-slate-500 font-medium">Allow other verified users to see your email address on your profile.</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" {...profileForm.register('isEmailPublic')} className="sr-only peer" />
-                    <div className="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
-                  </label>
-                </div>
-
-                <div className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl border border-slate-100 transition-all hover:bg-slate-100/50">
-                  <div className="space-y-1">
-                    <h4 className="text-sm font-black text-slate-800">Public Phone Contact</h4>
-                    <p className="text-xs text-slate-500 font-medium">Display your mobile number for collaborative outreach.</p>
-                  </div>
-                  <label className="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" {...profileForm.register('isPhonePublic')} className="sr-only peer" />
-                    <div className="w-14 h-7 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-emerald-500"></div>
-                  </label>
-                </div>
-
-                <div className="pt-6 border-t border-slate-50">
-                  <button 
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="w-full sm:w-auto px-8 py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl shadow-xl shadow-emerald-900/10 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
-                  >
-                    {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-                    Apply Privacy Rules
-                  </button>
-                </div>
-              </div>
-            </motion.form>
-          )}
 
           {activeTab === 'security' && (
             <motion.form 

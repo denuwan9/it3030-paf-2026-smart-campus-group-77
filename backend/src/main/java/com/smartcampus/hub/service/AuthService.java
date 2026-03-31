@@ -78,9 +78,8 @@ public class AuthService {
                 .role(user.getRole())
                 .isVerified(user.getIsVerified())
                 .profileImageUrl(user.getProfileImageUrl())
-                .isEmailPublic(user.getIsEmailPublic())
-                .isPhonePublic(user.getIsPhonePublic())
                 .build();
+
     }
 
     @Transactional
@@ -110,9 +109,8 @@ public class AuthService {
                 .role(user.getRole())
                 .isVerified(true)
                 .profileImageUrl(user.getProfileImageUrl())
-                .isEmailPublic(user.getIsEmailPublic())
-                .isPhonePublic(user.getIsPhonePublic())
                 .build();
+
     }
 
     @Transactional

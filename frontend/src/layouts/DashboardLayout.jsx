@@ -68,7 +68,7 @@ const DashboardLayout = () => {
       roles: ['ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
     },
     { 
-      label: 'User Management', 
+      label: 'Command Center', 
       to: '/admin/users', 
       icon: ShieldCheck, 
       roles: ['ROLE_ADMIN'] 
@@ -119,7 +119,8 @@ const DashboardLayout = () => {
           </div>
 
           <nav className="flex-1 px-6 py-4 space-y-2">
-            <p className="px-4 text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Operations</p>
+            <p className="px-4 text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Menu</p>
+
             {filteredNav.map((item) => (
               <SidebarLink
                 key={item.to}

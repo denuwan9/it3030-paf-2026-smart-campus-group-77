@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import { Toaster } from 'react-hot-toast';
+
 
 // Layouts
 import DashboardLayout from './layouts/DashboardLayout';
@@ -19,6 +21,11 @@ import OAuthCallbackPage from './pages/OAuthCallbackPage';
 import UserDashboard from './pages/dashboard/UserDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 import TechnicianDashboard from './pages/dashboard/TechnicianDashboard';
+import UserManagementPage from './pages/dashboard/UserManagementPage';
+
+
+
+
 
 // Role-based entry point / redirector
 const RoleBasedRedirect = () => {
@@ -54,7 +61,9 @@ const Unauthorized = () => (
 function App() {
   return (
     <Router>
+      <Toaster position="top-right" reverseOrder={false} />
       <div className="min-h-screen bg-nexer-bg-base text-nexer-text-body font-sans selection:bg-nexer-brand-primary/10">
+
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<LoginPage />} />
@@ -78,6 +87,12 @@ function App() {
             <Route path="/admin" element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/users" element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <UserManagementPage />
               </ProtectedRoute>
             } />
 

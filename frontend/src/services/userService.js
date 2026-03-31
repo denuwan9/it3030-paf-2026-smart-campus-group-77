@@ -15,7 +15,16 @@ const userService = {
   
   getAllUsers: async () => {
     return axiosInstance.get('/admin/users');
+  },
+  
+  adminUpdateUser: async (id, data) => {
+    return axiosInstance.put(`/admin/users/${id}`, data);
+  },
+  
+  adminDeleteUser: async (id) => {
+    return axiosInstance.delete(`/admin/users/${id}`);
   }
 };
+
 
 export default userService;
