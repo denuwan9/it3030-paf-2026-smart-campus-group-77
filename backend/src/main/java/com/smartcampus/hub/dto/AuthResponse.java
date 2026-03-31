@@ -20,4 +20,6 @@ public class AuthResponse {
     private Role role;
     private boolean isVerified;
     private String profileImageUrl;
+    private Boolean isEmailPublic;
+    private Boolean isPhonePublic;
 }

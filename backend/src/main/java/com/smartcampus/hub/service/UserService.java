@@ -1,10 +1,12 @@
 package com.smartcampus.hub.service;
 
+import com.smartcampus.hub.dto.PasswordChangeRequest;
 import com.smartcampus.hub.dto.ProfileUpdateRequest;
 import com.smartcampus.hub.entity.User;
 import com.smartcampus.hub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,7 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public User updateProfile(ProfileUpdateRequest request) {
@@ -39,10 +42,30 @@ public class UserService {
         if (request.getProfileImageUrl() != null) {
             user.setProfileImageUrl(request.getProfileImageUrl());
         }
+        if (request.getIsEmailPublic() != null) {
+            user.setIsEmailPublic(request.getIsEmailPublic());
+        }
+        if (request.getIsPhonePublic() != null) {
+            user.setIsPhonePublic(request.getIsPhonePublic());
+        }
 
         User savedUser = userRepository.save(user);
         log.info("Profile updated successfully for user: {}. Current Image: {}", email, savedUser.getProfileImageUrl());
         return savedUser;
+    }
+
+    @Transactional
+    public void changePassword(PasswordChangeRequest request) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPasswordHash())) {
+            throw new RuntimeException("Old password does not match");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
     }
 
     public User getCurrentUser() {

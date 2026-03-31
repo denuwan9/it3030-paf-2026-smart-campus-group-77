@@ -18,4 +18,6 @@ public class ProfileUpdateRequest {
     private String department;
     private String bio;
     private String profileImageUrl;
+    private Boolean isEmailPublic;
+    private Boolean isPhonePublic;
 }

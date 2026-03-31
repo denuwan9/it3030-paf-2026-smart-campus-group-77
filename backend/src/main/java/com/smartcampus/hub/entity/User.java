@@ -71,6 +71,14 @@ public class User implements UserDetails {
     @Column(name = "phone_number", length = 20)
     private String phoneNumber;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isEmailPublic = false;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean isPhonePublic = false;
+
     @Column(length = 100)
     private String department;
 

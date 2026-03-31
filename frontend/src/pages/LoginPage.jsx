@@ -58,7 +58,7 @@ const LoginPage = () => {
   const onSubmit = async (data) => {
     setServerError('');
     try {
-      const result = await login(data.username, data.password);
+      const result = await login(data.email, data.password);
       if (result.success) {
         if (result.user.role === 'ROLE_ADMIN') navigate('/admin');
         else if (result.user.role === 'ROLE_TECHNICIAN') navigate('/technician');
@@ -149,7 +149,7 @@ const LoginPage = () => {
           <FormProvider {...methods}>
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               <FormInput 
-                name="username" 
+                name="email" 
                 label="Official Email " 
                 placeholder="you@sliit.lk"
                 autoFocus

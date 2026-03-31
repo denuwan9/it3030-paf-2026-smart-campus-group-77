@@ -186,7 +186,7 @@ const DashboardLayout = () => {
 
             <div className="h-10 w-px bg-slate-100 mx-2" />
 
-            <div className="flex items-center gap-4 pl-2 group cursor-pointer">
+            <Link to="/profile" className="flex items-center gap-4 pl-2 group cursor-pointer">
               <div className="hidden lg:block text-right">
                 <p className="text-sm font-black text-nexer-text-header leading-tight">{user?.fullName}</p>
                 <p className="text-[10px] text-nexer-brand-primary font-black uppercase tracking-widest mt-0.5">
@@ -200,7 +200,7 @@ const DashboardLayout = () => {
                   user?.fullName?.charAt(0)
                 )}
               </div>
-            </div>
+            </Link>
           </div>
         </header>
 
