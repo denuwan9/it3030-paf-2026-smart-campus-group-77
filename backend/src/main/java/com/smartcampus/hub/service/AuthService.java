@@ -79,6 +79,7 @@ public class AuthService {
                 .isVerified(user.getIsVerified())
                 .profileImageUrl(user.getProfileImageUrl())
                 .build();
+
     }
 
     @Transactional
@@ -109,6 +110,7 @@ public class AuthService {
                 .isVerified(true)
                 .profileImageUrl(user.getProfileImageUrl())
                 .build();
+
     }
 
     @Transactional

@@ -21,3 +21,4 @@ public class AuthResponse {
     private boolean isVerified;
     private String profileImageUrl;
 }
+

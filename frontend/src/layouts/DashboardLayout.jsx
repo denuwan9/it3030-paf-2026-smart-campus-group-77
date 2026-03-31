@@ -68,7 +68,7 @@ const DashboardLayout = () => {
       roles: ['ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
     },
     { 
-      label: 'User Management', 
+      label: 'Command Center', 
       to: '/admin/users', 
       icon: ShieldCheck, 
       roles: ['ROLE_ADMIN'] 
@@ -119,7 +119,8 @@ const DashboardLayout = () => {
           </div>
 
           <nav className="flex-1 px-6 py-4 space-y-2">
-            <p className="px-4 text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Operations</p>
+            <p className="px-4 text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">Menu</p>
+
             {filteredNav.map((item) => (
               <SidebarLink
                 key={item.to}
@@ -186,7 +187,7 @@ const DashboardLayout = () => {
 
             <div className="h-10 w-px bg-slate-100 mx-2" />
 
-            <div className="flex items-center gap-4 pl-2 group cursor-pointer">
+            <Link to="/profile" className="flex items-center gap-4 pl-2 group cursor-pointer">
               <div className="hidden lg:block text-right">
                 <p className="text-sm font-black text-nexer-text-header leading-tight">{user?.fullName}</p>
                 <p className="text-[10px] text-nexer-brand-primary font-black uppercase tracking-widest mt-0.5">
@@ -200,7 +201,7 @@ const DashboardLayout = () => {
                   user?.fullName?.charAt(0)
                 )}
               </div>
-            </div>
+            </Link>
           </div>
         </header>
 

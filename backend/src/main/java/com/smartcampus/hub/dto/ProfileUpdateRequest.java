@@ -19,3 +19,4 @@ public class ProfileUpdateRequest {
     private String bio;
     private String profileImageUrl;
 }
+

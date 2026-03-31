@@ -5,6 +5,8 @@ import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 import java.time.Instant;
 import java.util.Collection;
@@ -40,8 +42,10 @@ public class User implements UserDetails {
     /**
      * BCrypt-hashed password. Null for OAuth2 (Google) users.
      */
+    @JsonIgnore
     @Column(name = "password_hash")
     private String passwordHash;
+
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
@@ -72,7 +76,9 @@ public class User implements UserDetails {
     private String phoneNumber;
 
     @Column(length = 100)
+
     private String department;
+
 
     @Column(columnDefinition = "TEXT")
     private String bio;
@@ -81,11 +87,14 @@ public class User implements UserDetails {
     private String profileImageUrl;
 
     // ─── OTP Fields ───────────────────────────────────────────────────────────
+    @JsonIgnore
     @Column(name = "otp_code", length = 10)
     private String otpCode;
 
+    @JsonIgnore
     @Column(name = "otp_expires_at")
     private Instant otpExpiresAt;
+
 
     // ─── Audit Fields ─────────────────────────────────────────────────────────
     @Column(name = "created_at", updatable = false)
@@ -110,38 +119,46 @@ public class User implements UserDetails {
 
     // ─── UserDetails implementation ───────────────────────────────────────────
 
+    @JsonIgnore
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
+    @JsonIgnore
     @Override
     public String getPassword() {
         return passwordHash;
     }
 
+    @JsonIgnore
     @Override
     public String getUsername() {
         return email;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isAccountNonLocked() {
         return Boolean.TRUE.equals(isActive);
     }
 
+    @JsonIgnore
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
+    @JsonIgnore
     @Override
     public boolean isEnabled() {
         return Boolean.TRUE.equals(isActive);
     }
+
 }
