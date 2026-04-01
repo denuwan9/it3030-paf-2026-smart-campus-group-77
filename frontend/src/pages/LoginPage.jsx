@@ -131,7 +131,7 @@ const LoginPage = () => {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
-                Welcome to SLIIT Nexer
+                Welcome to SLIIT Nexar
               </h1>
               <p className="text-sm sm:text-base text-slate-500 font-medium">
                 Please login to your system account
