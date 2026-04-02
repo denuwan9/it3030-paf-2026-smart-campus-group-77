@@ -65,11 +65,11 @@ const DashboardLayout = () => {
       label: 'Resources', 
       to: '/resources', 
       icon: Package, 
-      roles: ['ROLE_USER', 'ROLE_ADMIN'] 
+      roles: ['ROLE_USER'] 
     },
     {
       label: 'Bookings',
-      to: '/bookings',
+      to: user?.role === 'ROLE_ADMIN' ? '/admin/bookings' : '/bookings',
       icon: Calendar,
       roles: ['ROLE_USER', 'ROLE_ADMIN']
     },

@@ -24,11 +24,7 @@ import TechnicianDashboard from './pages/dashboard/TechnicianDashboard';
 import UserManagementPage from './pages/dashboard/UserManagementPage';
 import ResourcesPage from './pages/dashboard/ResourcesPage';
 import BookingsPage from './pages/dashboard/BookingsPage';
-
-
-
-
-
+import AdminBookingsPage from './pages/dashboard/AdminBookingsPage';
 // Role-based entry point / redirector
 const RoleBasedRedirect = () => {
   const { user, loading } = useAuth();
@@ -98,8 +94,14 @@ function App() {
               </ProtectedRoute>
             } />
 
+            <Route path="/admin/bookings" element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminBookingsPage />
+              </ProtectedRoute>
+            } />
+
             <Route path="/resources" element={
-              <ProtectedRoute allowedRoles={['USER', 'ADMIN']}>
+              <ProtectedRoute allowedRoles={['USER']}>
                 <ResourcesPage />
               </ProtectedRoute>
             } />
