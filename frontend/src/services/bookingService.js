@@ -1,0 +1,29 @@
+import axiosInstance from '../api/axiosInstance';
+
+const bookingService = {
+  getResources: async (params = {}) => {
+    return axiosInstance.get('/resources', { params });
+  },
+
+  createBooking: async (payload) => {
+    return axiosInstance.post('/bookings', payload);
+  },
+
+  cancelBooking: async (bookingId, reason) => {
+    return axiosInstance.patch(`/bookings/${bookingId}/cancel`, reason ? { reason } : {});
+  },
+
+  getMyBookings: async (params = {}) => {
+    return axiosInstance.get('/bookings/my', { params });
+  },
+
+  getAllBookings: async (params = {}) => {
+    return axiosInstance.get('/admin/bookings', { params });
+  },
+
+  reviewBooking: async (bookingId, decision, reason) => {
+    return axiosInstance.patch(`/admin/bookings/${bookingId}/decision`, { decision, reason });
+  },
+};
+
+export default bookingService;

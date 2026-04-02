@@ -1,0 +1,303 @@
+﻿import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
+import { 
+  Building2, 
+  CalendarDays, 
+  Clock, 
+  Users, 
+  CheckCircle2, 
+  Pin, 
+  MinusCircle,
+  Plus
+} from 'lucide-react';
+import bookingService from '../../services/bookingService';
+import { useAuth } from '../../context/AuthContext';
+import { format, parseISO } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+
+const statuses = ['', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
+
+const StatusBadge = ({ status }) => {
+  const getStyles = (s) => {
+    switch (s?.toUpperCase()) {
+      case 'OPEN':
+      case 'AVAILABLE':
+      case 'ACTIVE':
+      case 'APPROVED':
+      case 'RESOLVED':
+      case 'COMPLETED':
+        return 'bg-emerald-50 text-emerald-600 border border-emerald-200';
+      case 'IN_PROGRESS':
+      case 'PENDING':
+      case 'BOOKED':
+        return 'bg-amber-50 text-amber-600 border border-amber-200';
+      case 'REJECTED':
+      case 'CLOSED':
+      case 'CANCELLED':
+      case 'OUT_OF_SERVICE':
+        return 'bg-rose-50 text-rose-600 border border-rose-200';
+      default:
+        return 'bg-slate-50 text-slate-600 border border-slate-200';
+    }
+  };
+
+  return (
+    <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${getStyles(status)} tracking-wider uppercase`}>
+      {status?.replace('_', ' ')}
+    </span>
+  );
+};
+
+const BookingsPage = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'ROLE_ADMIN';
+  const navigate = useNavigate();
+
+  const [bookings, setBookings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [filters, setFilters] = useState({
+    status: '',
+    fromDate: '',
+    toDate: '',
+  });
+
+  const loadBookings = async () => {
+    try {
+      setLoading(true);
+      const params = {};
+      if (filters.status) params.status = filters.status;
+      if (filters.fromDate) params.fromDate = filters.fromDate;
+      if (filters.toDate) params.toDate = filters.toDate;
+
+      const response = isAdmin
+        ? await bookingService.getAllBookings(params)
+        : await bookingService.getMyBookings(params);
+
+      setBookings(response.data?.data || []);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadBookings();
+  }, [isAdmin, filters.status, filters.fromDate, filters.toDate]);
+
+  const handleDecision = async (bookingId, decision) => {
+    try {
+      setActionLoadingId(bookingId);
+      let reason;
+      if (decision === 'REJECTED') {
+        reason = window.prompt('Please provide rejection reason:');
+        if (!reason || !reason.trim()) {
+          toast.error('Rejection reason is required');
+          return;
+        }
+      }
+
+      await bookingService.reviewBooking(bookingId, decision, reason);
+      toast.success(`Booking ${decision.toLowerCase()} successfully`);
+      await loadBookings();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update booking');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleCancel = async (bookingId) => {
+    try {
+      setActionLoadingId(bookingId);
+      const reason = window.prompt('Cancellation reason (optional):') || '';
+      await bookingService.cancelBooking(bookingId, reason);
+      toast.success('Booking cancelled successfully');
+      await loadBookings();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to cancel booking');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const formatDate = (dateStr) => {
+    try {
+      return format(parseISO(dateStr), 'eeee, d MMMM yyyy');
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
+  const formatTime = (timeStr) => {
+    try {
+      if (!timeStr) return '';
+      const [hours, minutes] = timeStr.split(':');
+      const h = parseInt(hours, 10);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const formattedH = h % 12 || 12;
+      return `${formattedH}:${minutes} ${ampm}`;
+    } catch (e) {
+      return timeStr;
+    }
+  };
+
+  return (
+    <div className="space-y-6 max-w-5xl mx-auto">
+      {/* Header Banner */}
+      <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-2xl p-6 sm:p-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white shadow-sm">
+        <div className="flex items-center gap-4">
+          <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm shadow-inner">
+            <CalendarDays className="w-7 h-7 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">Booking Management</h1>
+            <p className="text-indigo-100 text-sm mt-1">Manage your facility and equipment bookings with ease</p>
+          </div>
+        </div>
+        <button 
+          onClick={() => navigate('/dashboard/resources')}
+          className="bg-white text-indigo-600 px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-50 transition-colors shadow-sm"
+        >
+          <Plus className="w-4 h-4" />
+          New Booking
+        </button>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <select
+          value={filters.status}
+          onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
+          className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 w-48 shadow-sm text-slate-700"
+        >
+          <option value="">All Statuses</option>
+          <option value="PENDING">Pending</option>
+          <option value="APPROVED">Approved</option>
+          <option value="REJECTED">Rejected</option>
+          <option value="CANCELLED">Cancelled</option>
+        </select>
+      </div>
+
+      {/* Bookings List */}
+      <div className="space-y-4">
+        {loading ? (
+          <div className="p-10 text-center text-sm text-slate-500 bg-white rounded-2xl border border-indigo-100/50 shadow-sm">Loading bookings...</div>
+        ) : bookings.length === 0 ? (
+          <div className="p-10 text-center text-sm text-slate-500 bg-white rounded-2xl border border-indigo-100/50 shadow-sm">No bookings found.</div>
+        ) : (
+          bookings.map((booking) => {
+            const canApprove = isAdmin && booking.status === 'PENDING';
+            const canCancel = booking.status === 'APPROVED' || booking.status === 'PENDING';
+            const isApproved = booking.status === 'APPROVED';
+            const actionLoading = actionLoadingId === booking.id;
+
+            return (
+              <div key={booking.id} className="bg-white border border-indigo-100/60 rounded-2xl p-5 sm:p-6 shadow-sm hover:shadow-md transition-shadow">
+                
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-slate-100 p-2.5 rounded-lg">
+                      <Building2 className="w-5 h-5 text-slate-600" />
+                    </div>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <h3 className="text-lg font-bold text-slate-900">{booking.resourceName}</h3>
+                      <StatusBadge status={booking.status} />
+                    </div>
+                  </div>
+                  
+                  {/* Actions */}
+                  <div className="flex items-center gap-2">
+                    {canCancel && (
+                      <button
+                        onClick={() => handleCancel(booking.id)}
+                        disabled={actionLoading}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-100 text-rose-500 text-sm font-bold hover:bg-rose-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <MinusCircle className="w-4 h-4 text-rose-500" />
+                        Cancel
+                      </button>
+                    )}
+                    
+                    {canApprove && (
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => handleDecision(booking.id, 'APPROVED')}
+                                disabled={actionLoading}
+                                className="px-4 py-1.5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500 disabled:opacity-50"
+                            >
+                                Approve
+                            </button>
+                            <button
+                                onClick={() => handleDecision(booking.id, 'REJECTED')}
+                                disabled={actionLoading}
+                                className="px-4 py-1.5 rounded-lg bg-rose-600 text-white text-sm font-semibold hover:bg-rose-500 disabled:opacity-50"
+                            >
+                                Reject
+                            </button>
+                        </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-4 pl-0 sm:pl-14 space-y-2.5">
+                  {booking.purpose && (
+                    <p className="text-slate-800 text-sm font-medium mb-3">{booking.purpose}</p>
+                  )}
+
+                  <div className="flex items-center gap-2.5 text-slate-500 text-sm font-medium">
+                    <CalendarDays className="w-4 h-4 text-indigo-400" />
+                    <span>{formatDate(booking.bookingDate)}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2.5 text-slate-500 text-sm font-medium">
+                    <Clock className="w-4 h-4 text-slate-400 font-bold" />
+                    <span>{formatTime(booking.startTime)} – {formatTime(booking.endTime)}</span>
+                  </div>
+
+                  {booking.expectedAttendees > 0 && (
+                    <div className="flex items-center gap-2.5 text-slate-500 text-sm font-medium">
+                      <Users className="w-4 h-4 text-indigo-800" />
+                      <span>{booking.expectedAttendees} attendees</span>
+                    </div>
+                  )}
+
+                  {isAdmin && (
+                    <div className="flex items-center gap-2.5 text-slate-500 text-sm mt-3 pt-3 border-t border-slate-100">
+                       <span className="font-semibold text-slate-700">Requested by:</span> {booking.requestedByName} ({booking.requestedByEmail})
+                    </div>
+                  )}
+
+                  {/* Checked in mockup element for approved bookings */}
+                  {isApproved && (
+                    <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm mt-3">
+                      <CheckCircle2 className="w-[18px] h-[18px]" />
+                      <span>Checked in at {booking.reviewedAt ? new Date(booking.reviewedAt).toLocaleString() : 'N/A'}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Admin Note Section */}
+                {(booking.reviewReason || booking.cancelReason) && (
+                  <div className="mt-5 sm:ml-14 bg-[#fffdf0] border border-amber-200/60 rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Pin className="w-4 h-4 text-amber-700 fill-amber-700" />
+                      <span className="text-sm font-bold text-amber-900">Note from Admin</span>
+                    </div>
+                    <p className="text-sm text-amber-700 ml-6">
+                      {booking.reviewReason || booking.cancelReason}
+                    </p>
+                  </div>
+                )}
+
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default BookingsPage;
