@@ -326,10 +326,17 @@ const AdminBookingsPage = () => {
                   <p className="text-slate-700 mt-1">{selectedBooking.purpose || '-'}</p>
                 </div>
 
-                {(selectedBooking.reviewReason || selectedBooking.cancelReason) && (
+                {selectedBooking.reviewReason && (
                   <div className="sm:col-span-2">
                     <p className="text-xs uppercase tracking-wider text-slate-400 font-bold">Admin Note</p>
-                    <p className="text-slate-700 mt-1">{selectedBooking.reviewReason || selectedBooking.cancelReason}</p>
+                    <p className="text-slate-700 mt-1">{selectedBooking.reviewReason}</p>
+                  </div>
+                )}
+
+                {selectedBooking.cancelReason && (
+                  <div className="sm:col-span-2">
+                    <p className="text-xs uppercase tracking-wider text-slate-400 font-bold">Cancellation Reason by User</p>
+                    <p className="text-slate-700 mt-1">{selectedBooking.cancelReason}</p>
                   </div>
                 )}
               </div>

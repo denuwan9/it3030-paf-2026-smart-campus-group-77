@@ -278,15 +278,17 @@ const BookingsPage = () => {
                   )}
                 </div>
 
-                {/* Admin Note Section */}
+                {/* Reason Section */}
                 {(booking.reviewReason || booking.cancelReason) && (
                   <div className="mt-5 sm:ml-14 bg-[#fffdf0] border border-amber-200/60 rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-1">
                       <Pin className="w-4 h-4 text-amber-700 fill-amber-700" />
-                      <span className="text-sm font-bold text-amber-900">Note from Admin</span>
+                      <span className="text-sm font-bold text-amber-900">
+                        {booking.cancelReason ? 'Cancellation Reason by User' : 'Note from Admin'}
+                      </span>
                     </div>
                     <p className="text-sm text-amber-700 ml-6">
-                      {booking.reviewReason || booking.cancelReason}
+                      {booking.cancelReason || booking.reviewReason}
                     </p>
                   </div>
                 )}
