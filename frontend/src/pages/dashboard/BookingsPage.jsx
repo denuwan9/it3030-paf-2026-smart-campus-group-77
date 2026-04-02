@@ -63,6 +63,11 @@ const BookingsPage = () => {
   const [qrLoading, setQrLoading] = useState(false);
   const [qrData, setQrData] = useState(null);
   const [qrImage, setQrImage] = useState('');
+  
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [bookingToCancel, setBookingToCancel] = useState(null);
+  const [cancelReason, setCancelReason] = useState('');
+
   const [filters, setFilters] = useState({
     status: '',
     fromDate: '',
@@ -146,11 +151,23 @@ const BookingsPage = () => {
     }
   };
 
-  const handleCancel = async (bookingId) => {
+  const openCancelModal = (bookingId) => {
+    setBookingToCancel(bookingId);
+    setCancelReason('');
+    setCancelModalOpen(true);
+  };
+
+  const closeCancelModal = () => {
+    setCancelModalOpen(false);
+    setBookingToCancel(null);
+    setCancelReason('');
+  };
+
+  const confirmCancellation = async () => {
     try {
-      setActionLoadingId(bookingId);
-      const reason = window.prompt('Cancellation reason (optional):') || '';
-      await bookingService.cancelBooking(bookingId, reason);
+      setActionLoadingId(bookingToCancel);
+      closeCancelModal();
+      await bookingService.cancelBooking(bookingToCancel, cancelReason);
       toast.success('Booking cancelled successfully');
       await loadBookings();
     } catch (error) {
@@ -282,7 +299,7 @@ const BookingsPage = () => {
 
                     {canCancel && (
                       <button
-                        onClick={() => handleCancel(booking.id)}
+                        onClick={() => openCancelModal(booking.id)}
                         disabled={actionLoading}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-100 text-rose-500 text-sm font-bold hover:bg-rose-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                       >
@@ -369,6 +386,55 @@ const BookingsPage = () => {
           })
         )}
       </div>
+
+      {/* Cancel Modal */}
+      {cancelModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-rose-100 flex items-center justify-between bg-rose-50/50">
+              <div>
+                <h2 className="text-lg font-bold text-rose-700 tracking-tight">Cancel Booking</h2>
+              </div>
+              <button
+                onClick={closeCancelModal}
+                className="w-8 h-8 rounded-lg border border-transparent text-rose-500 hover:text-rose-700 hover:bg-rose-100 flex items-center justify-center transition-colors font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="p-6">
+              <p className="text-sm font-medium text-slate-600 mb-4 px-1">
+                Please provide a reason for cancelling this booking. This is optional but helps admins understand why the booking is no longer needed.
+              </p>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Cancellation reason (optional)..."
+                rows="4"
+                className="w-full bg-slate-50/50 border border-slate-200 text-sm font-medium rounded-xl px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 placeholder-slate-400 transition-all resize-none shadow-sm"
+                autoFocus
+              />
+            </div>
+
+            <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3 rounded-b-2xl">
+              <button
+                onClick={closeCancelModal}
+                className="px-5 py-2 min-w-[100px] text-center bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-800 border border-slate-200 rounded-xl text-sm font-bold transition-all shadow-sm"
+              >
+                Go Back
+              </button>
+              <button
+                onClick={confirmCancellation}
+                disabled={actionLoadingId === bookingToCancel}
+                className="px-5 py-2 min-w-[100px] text-center bg-rose-600 text-white hover:bg-rose-500 rounded-xl text-sm font-bold transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 disabled:cursor-not-allowed"
+              >
+                {actionLoadingId === bookingToCancel ? 'Cancelling...' : 'Confirm Cancel'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {qrModalOpen && (
         <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
