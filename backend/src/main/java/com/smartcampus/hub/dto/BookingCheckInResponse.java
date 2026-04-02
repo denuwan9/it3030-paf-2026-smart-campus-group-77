@@ -21,7 +21,9 @@ public class BookingCheckInResponse {
     private String checkInToken;
     private String verificationUrl;
 
+    private boolean expired;
     private boolean checkedIn;
     private Instant checkedInAt;
+    private Instant lastScannedAt;
     private String checkedInByName;
 }

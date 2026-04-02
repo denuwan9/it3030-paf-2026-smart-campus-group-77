@@ -40,6 +40,7 @@ public class BookingResponse {
     private UUID checkedInById;
     private String checkedInByName;
     private Instant checkedInAt;
+    private Instant lastScannedAt;
 
     private Instant createdAt;
     private Instant updatedAt;

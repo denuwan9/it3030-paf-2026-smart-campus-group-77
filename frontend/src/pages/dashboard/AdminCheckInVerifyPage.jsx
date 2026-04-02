@@ -4,6 +4,31 @@ import toast from 'react-hot-toast';
 import { CheckCircle2, QrCode, ShieldCheck, XCircle } from 'lucide-react';
 import bookingService from '../../services/bookingService';
 
+const formatDateTime = (value) => {
+  if (!value) return 'N/A';
+  try {
+    return new Date(value).toLocaleString();
+  } catch {
+    return 'N/A';
+  }
+};
+
+const formatBookingEndDateTime = (bookingDate, endTime) => {
+  if (!bookingDate || !endTime) return 'N/A';
+  return `${bookingDate} ${endTime}`;
+};
+
+const buildScanErrorMessage = (message) => {
+  const normalized = (message || '').toLowerCase();
+  if (normalized.includes('expired')) {
+    return `Booking expired: ${message}`;
+  }
+  if (normalized.includes('not open yet')) {
+    return `Scan too early: ${message}`;
+  }
+  return `Scan failed: ${message}`;
+};
+
 const AdminCheckInVerifyPage = () => {
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
@@ -30,7 +55,17 @@ const AdminCheckInVerifyPage = () => {
         const payload = response.data?.data || null;
         setDetails(payload);
 
-        if (payload?.checkedIn) {
+        if (payload?.expired && payload?.checkedIn) {
+          setScanResult({
+            type: 'error',
+            message: `Booking expired. Last checked time: ${formatDateTime(payload?.lastScannedAt || payload?.checkedInAt)}.`
+          });
+        } else if (payload?.expired) {
+          setScanResult({
+            type: 'error',
+            message: `Booking expired. Ended at ${formatBookingEndDateTime(payload?.bookingDate, payload?.endTime)}.`
+          });
+        } else if (payload?.checkedIn) {
           setScanResult({
             type: 'success',
             message: 'Scan success: booking is already checked in.'
@@ -42,7 +77,7 @@ const AdminCheckInVerifyPage = () => {
           : 'Verification service unavailable (network/auth redirect). Please restart backend and try again.';
         setScanResult({
           type: 'error',
-          message: `Scan failed: ${errorMessage}`
+          message: buildScanErrorMessage(errorMessage)
         });
         toast.error(errorMessage);
       } finally {
@@ -75,7 +110,7 @@ const AdminCheckInVerifyPage = () => {
         : 'Verification service unavailable (network/auth redirect). Please restart backend and try again.';
       setScanResult({
         type: 'error',
-        message: `Scan failed: ${errorMessage}`
+        message: buildScanErrorMessage(errorMessage)
       });
 
       if (showToast) {
@@ -91,7 +126,7 @@ const AdminCheckInVerifyPage = () => {
       loading ||
       !token ||
       !details ||
-      details.checkedIn ||
+      details.expired ||
       verifying ||
       autoVerifyTriggeredRef.current
     ) {
@@ -166,14 +201,32 @@ const AdminCheckInVerifyPage = () => {
               </div>
             </div>
 
-            {details.checkedIn ? (
+            {details.expired ? (
+              <div className="bg-rose-50 border border-rose-200 rounded-xl p-4">
+                <div className="flex items-center gap-2 text-rose-700 font-semibold">
+                  <XCircle className="w-5 h-5" />
+                  Booking expired
+                </div>
+                <p className="text-sm text-rose-700 mt-1">
+                  Booking ended at {formatBookingEndDateTime(details.bookingDate, details.endTime)}.
+                </p>
+                {details.checkedInAt && (
+                  <p className="text-sm text-rose-700 mt-1">
+                    Last checked time: {formatDateTime(details.lastScannedAt || details.checkedInAt)}
+                  </p>
+                )}
+              </div>
+            ) : details.checkedIn ? (
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
                 <div className="flex items-center gap-2 text-emerald-700 font-semibold">
                   <CheckCircle2 className="w-5 h-5" />
                   Booking already checked in
                 </div>
                 <p className="text-sm text-emerald-700 mt-1">
-                  Checked in by {details.checkedInByName || 'Admin'} at {details.checkedInAt ? new Date(details.checkedInAt).toLocaleString() : 'N/A'}
+                  Checked in by {details.checkedInByName || 'Admin'}
+                </p>
+                <p className="text-sm text-emerald-700 mt-1">
+                  Last checked time: {formatDateTime(details.lastScannedAt || details.checkedInAt)}
                 </p>
               </div>
             ) : (

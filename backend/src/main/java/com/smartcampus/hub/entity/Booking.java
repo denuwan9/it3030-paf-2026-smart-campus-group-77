@@ -77,6 +77,9 @@ public class Booking {
     @Column(name = "checked_in_at")
     private Instant checkedInAt;
 
+    @Column(name = "last_scanned_at")
+    private Instant lastScannedAt;
+
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 

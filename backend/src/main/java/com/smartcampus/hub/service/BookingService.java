@@ -10,6 +10,7 @@ import com.smartcampus.hub.repository.BookingRepository;
 import com.smartcampus.hub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +19,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -149,7 +151,7 @@ public class BookingService {
         return toCheckInResponse(booking);
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public BookingCheckInResponse previewCheckInByToken(String token) {
         Booking booking = bookingRepository.findByCheckInToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid check-in token"));
@@ -157,6 +159,13 @@ public class BookingService {
         if (booking.getStatus() != BookingStatus.APPROVED) {
             throw new RuntimeException("This booking is not eligible for check-in");
         }
+
+        if (booking.getCheckedInAt() == null) {
+            validateCheckInTimeWindow(booking);
+        }
+
+        booking.setLastScannedAt(Instant.now());
+        booking = bookingRepository.save(booking);
 
         return toCheckInResponse(booking);
     }
@@ -170,11 +179,15 @@ public class BookingService {
             throw new RuntimeException("This booking is not eligible for check-in");
         }
 
-        if (booking.getCheckedInAt() == null) {
-            booking.setCheckedInAt(Instant.now());
-            booking.setCheckedInBy(getCurrentUser());
-            booking = bookingRepository.save(booking);
+        validateCheckInTimeWindow(booking);
+
+        booking.setLastScannedAt(Instant.now());
+        booking.setCheckedInAt(Instant.now());
+        User scanner = getCurrentUserOptional();
+        if (scanner != null) {
+            booking.setCheckedInBy(scanner);
         }
+        booking = bookingRepository.save(booking);
 
         return toCheckInResponse(booking);
     }
@@ -247,6 +260,44 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    private User getCurrentUserOptional() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+
+        String email = authentication.getName();
+        if (email == null || email.isBlank() || "anonymousUser".equals(email)) {
+            return null;
+        }
+
+        return userRepository.findByEmail(email).orElse(null);
+    }
+
+    private void validateCheckInTimeWindow(Booking booking) {
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+
+        boolean expired = today.isAfter(booking.getBookingDate())
+                || (today.isEqual(booking.getBookingDate()) && !now.isBefore(booking.getEndTime()));
+        if (expired) {
+            throw new RuntimeException("Check-in expired: booking time has ended");
+        }
+
+        boolean notStarted = today.isBefore(booking.getBookingDate())
+                || (today.isEqual(booking.getBookingDate()) && now.isBefore(booking.getStartTime()));
+        if (notStarted) {
+            throw new RuntimeException("Check-in not open yet for this booking");
+        }
+    }
+
+    private boolean isCheckInExpired(Booking booking) {
+        LocalDate today = LocalDate.now();
+        LocalTime now = LocalTime.now();
+        return today.isAfter(booking.getBookingDate())
+                || (today.isEqual(booking.getBookingDate()) && !now.isBefore(booking.getEndTime()));
+    }
+
     private BookingResponse toResponse(Booking booking) {
         return BookingResponse.builder()
                 .id(booking.getId())
@@ -271,6 +322,7 @@ public class BookingService {
                 .checkedInById(booking.getCheckedInBy() != null ? booking.getCheckedInBy().getId() : null)
                 .checkedInByName(booking.getCheckedInBy() != null ? booking.getCheckedInBy().getFullName() : null)
                 .checkedInAt(booking.getCheckedInAt())
+                .lastScannedAt(booking.getLastScannedAt())
                 .createdAt(booking.getCreatedAt())
                 .updatedAt(booking.getUpdatedAt())
                 .build();
@@ -289,8 +341,10 @@ public class BookingService {
                 .requestedByName(booking.getRequestedBy().getFullName())
                 .checkInToken(booking.getCheckInToken())
                 .verificationUrl(verificationUrl)
+            .expired(isCheckInExpired(booking))
                 .checkedIn(booking.getCheckedInAt() != null)
                 .checkedInAt(booking.getCheckedInAt())
+                .lastScannedAt(booking.getLastScannedAt())
                 .checkedInByName(booking.getCheckedInBy() != null ? booking.getCheckedInBy().getFullName() : null)
                 .build();
     }

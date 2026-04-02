@@ -252,7 +252,6 @@ const BookingsPage = () => {
             const canApprove = isAdmin && booking.status === 'PENDING';
             const canCancel = booking.status === 'APPROVED' || booking.status === 'PENDING';
             const isApproved = booking.status === 'APPROVED';
-            const isCheckedIn = Boolean(booking.checkedInAt);
             const actionLoading = actionLoadingId === booking.id;
 
             return (
@@ -271,7 +270,7 @@ const BookingsPage = () => {
                   
                   {/* Actions */}
                   <div className="flex items-center gap-2">
-                    {isApproved && !isCheckedIn && (
+                    {isApproved && (
                       <button
                         onClick={() => handleOpenQr(booking.id)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-sm font-bold hover:bg-indigo-50 transition-colors"
@@ -345,7 +344,7 @@ const BookingsPage = () => {
                   {isApproved && (
                     <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm mt-3">
                       <CheckCircle2 className="w-[18px] h-[18px]" />
-                      <span>Checked in at {booking.checkedInAt ? new Date(booking.checkedInAt).toLocaleString() : 'Not checked in yet'}</span>
+                      <span>Last scanned time {(booking.lastScannedAt || booking.checkedInAt) ? new Date(booking.lastScannedAt || booking.checkedInAt).toLocaleString() : 'Not scanned yet'}</span>
                     </div>
                   )}
                 </div>
