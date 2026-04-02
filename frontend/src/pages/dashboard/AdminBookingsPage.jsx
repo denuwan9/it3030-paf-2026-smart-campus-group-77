@@ -43,6 +43,11 @@ const AdminBookingsPage = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState(null);
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [rejectModalOpen, setRejectModalOpen] = useState(false);
+  const [bookingToReject, setBookingToReject] = useState(null);
+  const [rejectionReason, setRejectionReason] = useState('');
+  const [approveModalOpen, setApproveModalOpen] = useState(false);
+  const [bookingToApprove, setBookingToApprove] = useState(null);
   const [filters, setFilters] = useState({
     status: 'All Statuses',
     search: '',
@@ -67,18 +72,9 @@ const AdminBookingsPage = () => {
     loadBookings();
   }, [filters.status]);
 
-  const handleDecision = async (bookingId, decision) => {
+  const handleDecision = async (bookingId, decision, reason = null) => {
     try {
       setActionLoadingId(bookingId);
-      let reason;
-      if (decision === 'REJECTED') {
-        reason = window.prompt('Please provide rejection reason:');
-        if (!reason || !reason.trim()) {
-          toast.error('Rejection reason is required');
-          return;
-        }
-      }
-
       await bookingService.reviewBooking(bookingId, decision, reason);
       toast.success(`Booking ${decision.toLowerCase()} successfully`);
       await loadBookings();
@@ -87,6 +83,43 @@ const AdminBookingsPage = () => {
     } finally {
       setActionLoadingId(null);
     }
+  };
+
+  const openRejectModal = (bookingId) => {
+    setBookingToReject(bookingId);
+    setRejectionReason('');
+    setRejectModalOpen(true);
+  };
+
+  const closeRejectModal = () => {
+    setRejectModalOpen(false);
+    setBookingToReject(null);
+    setRejectionReason('');
+  };
+
+  const confirmRejection = async () => {
+    if (!rejectionReason.trim()) {
+      toast.error('Rejection reason is required');
+      return;
+    }
+    
+    closeRejectModal();
+    await handleDecision(bookingToReject, 'REJECTED', rejectionReason);
+  };
+
+  const openApproveModal = (bookingId) => {
+    setBookingToApprove(bookingId);
+    setApproveModalOpen(true);
+  };
+
+  const closeApproveModal = () => {
+    setApproveModalOpen(false);
+    setBookingToApprove(null);
+  };
+
+  const confirmApproval = async () => {
+    closeApproveModal();
+    await handleDecision(bookingToApprove, 'APPROVED');
   };
 
   const openDetails = (booking) => {
@@ -234,29 +267,30 @@ const AdminBookingsPage = () => {
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className="flex items-center justify-center gap-2 flex-wrap">
-                          <button
-                            onClick={() => openDetails(booking)}
-                            className="px-4 py-1.5 bg-white text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 border border-slate-200 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm"
-                          >
-                            Details
-                          </button>
-                          {booking.status === 'PENDING' && (
+                          {booking.status === 'PENDING' ? (
                             <>
                               <button
-                                onClick={() => handleDecision(booking.id, 'APPROVED')}
+                                onClick={() => openApproveModal(booking.id)}
                                 disabled={actionLoadingId === booking.id}
                                 className="px-4 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-200 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm disabled:opacity-50"
                               >
                                 Approve
                               </button>
                               <button
-                                onClick={() => handleDecision(booking.id, 'REJECTED')}
+                                onClick={() => openRejectModal(booking.id)}
                                 disabled={actionLoadingId === booking.id}
                                 className="px-4 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white border border-rose-200 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm disabled:opacity-50"
                               >
                                 Reject
                               </button>
                             </>
+                          ) : (
+                            <button
+                              onClick={() => openDetails(booking)}
+                              className="px-4 py-1.5 bg-white text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 border border-slate-200 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm"
+                            >
+                              Details
+                            </button>
                           )}
                         </div>
                       </td>
@@ -347,6 +381,91 @@ const AdminBookingsPage = () => {
                   className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-500 transition-colors"
                 >
                   Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rejection Modal */}
+        {rejectModalOpen && (
+          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden animate-in fade-in duration-200 flex flex-col">
+              <div className="px-6 py-4 border-b border-rose-100 flex items-center justify-between bg-rose-50/50">
+                <h2 className="text-lg font-bold text-rose-700 tracking-tight">Reject Booking</h2>
+                <button
+                  onClick={closeRejectModal}
+                  className="w-8 h-8 rounded-lg border border-transparent text-rose-500 hover:text-rose-700 hover:bg-rose-100 flex items-center justify-center transition-colors font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-6">
+                <p className="text-sm font-medium text-slate-600 mb-4 px-1">
+                  Please provide a reason for rejecting this booking. The user will be able to see this reason.
+                </p>
+                <textarea
+                  value={rejectionReason}
+                  onChange={(e) => setRejectionReason(e.target.value)}
+                  placeholder="Enter rejection reason..."
+                  rows="4"
+                  className="w-full bg-slate-50/50 border border-slate-200 text-sm font-medium rounded-xl px-4 py-3 text-slate-800 outline-none focus:bg-white focus:border-rose-400 focus:ring-4 focus:ring-rose-500/10 placeholder-slate-400 transition-all resize-none shadow-sm"
+                  autoFocus
+                />
+              </div>
+
+              <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3 rounded-b-2xl">
+                <button
+                  onClick={closeRejectModal}
+                  className="px-5 py-2 min-w-[100px] text-center bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-800 border border-slate-200 rounded-xl text-sm font-bold transition-all shadow-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmRejection}
+                  disabled={!rejectionReason.trim()}
+                  className="px-5 py-2 min-w-[100px] text-center bg-rose-600 text-white hover:bg-rose-500 rounded-xl text-sm font-bold transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 disabled:cursor-not-allowed"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Approve Modal */}
+        {approveModalOpen && (
+          <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+            <div className="w-full max-w-sm bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden animate-in fade-in duration-200 flex flex-col">
+              <div className="px-6 py-4 border-b border-emerald-100 flex items-center justify-between bg-emerald-50/50">
+                <h2 className="text-lg font-bold text-emerald-700 tracking-tight">Approve Booking</h2>
+                <button
+                  onClick={closeApproveModal}
+                  className="w-8 h-8 rounded-lg border border-transparent text-emerald-500 hover:text-emerald-700 hover:bg-emerald-100 flex items-center justify-center transition-colors font-bold"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="p-6">
+                <p className="text-sm font-medium text-slate-600 px-1 text-center">
+                  Are you sure you want to approve this booking request? The user will be notified of the approval.
+                </p>
+              </div>
+
+              <div className="px-6 py-4 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-3 rounded-b-2xl">
+                <button
+                  onClick={closeApproveModal}
+                  className="px-5 py-2 min-w-[100px] text-center bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-800 border border-slate-200 rounded-xl text-sm font-bold transition-all shadow-sm"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmApproval}
+                  className="px-5 py-2 min-w-[100px] text-center bg-emerald-600 text-white hover:bg-emerald-500 rounded-xl text-sm font-bold transition-all shadow-sm active:scale-[0.98]"
+                >
+                  Approve
                 </button>
               </div>
             </div>
