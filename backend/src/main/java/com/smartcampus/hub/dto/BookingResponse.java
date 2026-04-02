@@ -37,6 +37,10 @@ public class BookingResponse {
     private String reviewedByName;
     private Instant reviewedAt;
 
+    private UUID checkedInById;
+    private String checkedInByName;
+    private Instant checkedInAt;
+
     private Instant createdAt;
     private Instant updatedAt;
 }

@@ -10,10 +10,13 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, UUID> {
+
+  Optional<Booking> findByCheckInToken(String checkInToken);
 
     @Query("""
             SELECT COUNT(b) FROM Booking b

@@ -11,7 +11,8 @@ import java.util.UUID;
 @Entity
 @Table(name = "bookings", indexes = {
         @Index(name = "idx_booking_resource_date", columnList = "resource_id, booking_date"),
-        @Index(name = "idx_booking_requester", columnList = "requested_by")
+    @Index(name = "idx_booking_requester", columnList = "requested_by"),
+    @Index(name = "idx_booking_check_in_token", columnList = "check_in_token")
 })
 @Getter
 @Setter
@@ -59,12 +60,22 @@ public class Booking {
     @Column(name = "cancel_reason", columnDefinition = "TEXT")
     private String cancelReason;
 
+    @Column(name = "check_in_token", length = 120, unique = true)
+    private String checkInToken;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "reviewed_by")
     private User reviewedBy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "checked_in_by")
+    private User checkedInBy;
+
     @Column(name = "reviewed_at")
     private Instant reviewedAt;
+
+    @Column(name = "checked_in_at")
+    private Instant checkedInAt;
 
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;

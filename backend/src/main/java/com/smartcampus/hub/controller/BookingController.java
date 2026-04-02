@@ -2,6 +2,7 @@ package com.smartcampus.hub.controller;
 
 import com.smartcampus.hub.dto.ApiResponse;
 import com.smartcampus.hub.dto.BookingCancelRequest;
+import com.smartcampus.hub.dto.BookingCheckInResponse;
 import com.smartcampus.hub.dto.BookingResponse;
 import com.smartcampus.hub.dto.CreateBookingRequest;
 import com.smartcampus.hub.entity.BookingStatus;
@@ -41,6 +42,14 @@ public class BookingController {
         return ResponseEntity.ok(ApiResponse.success(
                 "Bookings fetched successfully",
                 bookingService.getCurrentUserBookings(status, fromDate, toDate)
+        ));
+    }
+
+    @GetMapping("/{bookingId}/check-in-qr")
+    public ResponseEntity<ApiResponse<BookingCheckInResponse>> getCheckInQr(@PathVariable UUID bookingId) {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Check-in QR generated successfully",
+                bookingService.getCheckInQrData(bookingId)
         ));
     }
 

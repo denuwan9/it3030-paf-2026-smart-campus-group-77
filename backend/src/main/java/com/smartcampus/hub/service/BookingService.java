@@ -1,16 +1,21 @@
 package com.smartcampus.hub.service;
 
 import com.smartcampus.hub.dto.BookingDecisionRequest;
+import com.smartcampus.hub.dto.BookingCheckInResponse;
 import com.smartcampus.hub.dto.BookingResponse;
+import com.smartcampus.hub.dto.CheckInVerifyRequest;
 import com.smartcampus.hub.dto.CreateBookingRequest;
 import com.smartcampus.hub.entity.*;
 import com.smartcampus.hub.repository.BookingRepository;
 import com.smartcampus.hub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -23,6 +28,9 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final ResourceService resourceService;
     private final UserRepository userRepository;
+
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     @Transactional
     public BookingResponse createBooking(CreateBookingRequest request) {
@@ -109,7 +117,66 @@ public class BookingService {
         booking.setReviewedBy(admin);
         booking.setReviewedAt(Instant.now());
 
+        if (request.getDecision() == BookingStatus.APPROVED && (booking.getCheckInToken() == null || booking.getCheckInToken().isBlank())) {
+            booking.setCheckInToken(UUID.randomUUID().toString());
+        }
+
         return toResponse(bookingRepository.save(booking));
+    }
+
+    @Transactional
+    public BookingCheckInResponse getCheckInQrData(UUID bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        User currentUser = getCurrentUser();
+        boolean isOwner = booking.getRequestedBy().getId().equals(currentUser.getId());
+        boolean isAdmin = currentUser.getRole() == Role.ROLE_ADMIN;
+
+        if (!isOwner && !isAdmin) {
+            throw new RuntimeException("You are not allowed to access this booking QR");
+        }
+
+        if (booking.getStatus() != BookingStatus.APPROVED) {
+            throw new RuntimeException("QR check-in is available only for approved bookings");
+        }
+
+        if (booking.getCheckInToken() == null || booking.getCheckInToken().isBlank()) {
+            booking.setCheckInToken(UUID.randomUUID().toString());
+            booking = bookingRepository.save(booking);
+        }
+
+        return toCheckInResponse(booking);
+    }
+
+    @Transactional(readOnly = true)
+    public BookingCheckInResponse previewCheckInByToken(String token) {
+        Booking booking = bookingRepository.findByCheckInToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid check-in token"));
+
+        if (booking.getStatus() != BookingStatus.APPROVED) {
+            throw new RuntimeException("This booking is not eligible for check-in");
+        }
+
+        return toCheckInResponse(booking);
+    }
+
+    @Transactional
+    public BookingCheckInResponse verifyCheckIn(CheckInVerifyRequest request) {
+        Booking booking = bookingRepository.findByCheckInToken(request.getToken())
+                .orElseThrow(() -> new RuntimeException("Invalid check-in token"));
+
+        if (booking.getStatus() != BookingStatus.APPROVED) {
+            throw new RuntimeException("This booking is not eligible for check-in");
+        }
+
+        if (booking.getCheckedInAt() == null) {
+            booking.setCheckedInAt(Instant.now());
+            booking.setCheckedInBy(getCurrentUser());
+            booking = bookingRepository.save(booking);
+        }
+
+        return toCheckInResponse(booking);
     }
 
     @Transactional
@@ -130,6 +197,9 @@ public class BookingService {
 
         booking.setStatus(BookingStatus.CANCELLED);
         booking.setCancelReason(reason == null || reason.isBlank() ? null : reason.trim());
+        booking.setCheckInToken(null);
+        booking.setCheckedInAt(null);
+        booking.setCheckedInBy(null);
 
         return toResponse(bookingRepository.save(booking));
     }
@@ -198,8 +268,30 @@ public class BookingService {
                 .reviewedById(booking.getReviewedBy() != null ? booking.getReviewedBy().getId() : null)
                 .reviewedByName(booking.getReviewedBy() != null ? booking.getReviewedBy().getFullName() : null)
                 .reviewedAt(booking.getReviewedAt())
+                .checkedInById(booking.getCheckedInBy() != null ? booking.getCheckedInBy().getId() : null)
+                .checkedInByName(booking.getCheckedInBy() != null ? booking.getCheckedInBy().getFullName() : null)
+                .checkedInAt(booking.getCheckedInAt())
                 .createdAt(booking.getCreatedAt())
                 .updatedAt(booking.getUpdatedAt())
+                .build();
+    }
+
+    private BookingCheckInResponse toCheckInResponse(Booking booking) {
+        String encodedToken = URLEncoder.encode(booking.getCheckInToken(), StandardCharsets.UTF_8);
+        String verificationUrl = frontendUrl + "/admin/bookings/check-in?token=" + encodedToken;
+
+        return BookingCheckInResponse.builder()
+                .bookingId(booking.getId())
+                .resourceName(booking.getResource().getName())
+                .bookingDate(booking.getBookingDate())
+                .startTime(booking.getStartTime())
+                .endTime(booking.getEndTime())
+                .requestedByName(booking.getRequestedBy().getFullName())
+                .checkInToken(booking.getCheckInToken())
+                .verificationUrl(verificationUrl)
+                .checkedIn(booking.getCheckedInAt() != null)
+                .checkedInAt(booking.getCheckedInAt())
+                .checkedInByName(booking.getCheckedInBy() != null ? booking.getCheckedInBy().getFullName() : null)
                 .build();
     }
 }

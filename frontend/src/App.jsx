@@ -25,6 +25,7 @@ import UserManagementPage from './pages/dashboard/UserManagementPage';
 import ResourcesPage from './pages/dashboard/ResourcesPage';
 import BookingsPage from './pages/dashboard/BookingsPage';
 import AdminBookingsPage from './pages/dashboard/AdminBookingsPage';
+import AdminCheckInVerifyPage from './pages/dashboard/AdminCheckInVerifyPage';
 // Role-based entry point / redirector
 const RoleBasedRedirect = () => {
   const { user, loading } = useAuth();
@@ -71,6 +72,7 @@ function App() {
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/admin/bookings/check-in" element={<AdminCheckInVerifyPage />} />
 
           {/* Role-Specific Protected Dashboard Routes */}
           <Route element={<DashboardLayout />}>

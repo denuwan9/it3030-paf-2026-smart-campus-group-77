@@ -8,12 +8,15 @@ import {
   CheckCircle2, 
   Pin, 
   MinusCircle,
-  Plus
+  Plus,
+  QrCode,
+  X
 } from 'lucide-react';
 import bookingService from '../../services/bookingService';
 import { useAuth } from '../../context/AuthContext';
 import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import QRCode from 'qrcode';
 
 const statuses = ['', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
 
@@ -56,11 +59,46 @@ const BookingsPage = () => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState(null);
+  const [qrModalOpen, setQrModalOpen] = useState(false);
+  const [qrLoading, setQrLoading] = useState(false);
+  const [qrData, setQrData] = useState(null);
+  const [qrImage, setQrImage] = useState('');
   const [filters, setFilters] = useState({
     status: '',
     fromDate: '',
     toDate: '',
   });
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const generateQr = async () => {
+      if (!qrData?.verificationUrl) {
+        setQrImage('');
+        return;
+      }
+
+      try {
+        const image = await QRCode.toDataURL(qrData.verificationUrl, {
+          width: 240,
+          margin: 1,
+        });
+        if (!cancelled) {
+          setQrImage(image);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setQrImage('');
+          toast.error('Failed to generate QR code image');
+        }
+      }
+    };
+
+    generateQr();
+    return () => {
+      cancelled = true;
+    };
+  }, [qrData]);
 
   const loadBookings = async () => {
     try {
@@ -120,6 +158,29 @@ const BookingsPage = () => {
     } finally {
       setActionLoadingId(null);
     }
+  };
+
+  const handleOpenQr = async (bookingId) => {
+    try {
+      setQrModalOpen(true);
+      setQrLoading(true);
+      setQrData(null);
+      setQrImage('');
+
+      const response = await bookingService.getCheckInQrData(bookingId);
+      setQrData(response.data?.data || null);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to load check-in QR');
+      setQrModalOpen(false);
+    } finally {
+      setQrLoading(false);
+    }
+  };
+
+  const closeQrModal = () => {
+    setQrModalOpen(false);
+    setQrData(null);
+    setQrImage('');
   };
 
   const formatDate = (dateStr) => {
@@ -209,6 +270,16 @@ const BookingsPage = () => {
                   
                   {/* Actions */}
                   <div className="flex items-center gap-2">
+                    {isApproved && (
+                      <button
+                        onClick={() => handleOpenQr(booking.id)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-sm font-bold hover:bg-indigo-50 transition-colors"
+                      >
+                        <QrCode className="w-4 h-4" />
+                        Check-In QR
+                      </button>
+                    )}
+
                     {canCancel && (
                       <button
                         onClick={() => handleCancel(booking.id)}
@@ -273,7 +344,7 @@ const BookingsPage = () => {
                   {isApproved && (
                     <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm mt-3">
                       <CheckCircle2 className="w-[18px] h-[18px]" />
-                      <span>Checked in at {booking.reviewedAt ? new Date(booking.reviewedAt).toLocaleString() : 'N/A'}</span>
+                      <span>Checked in at {booking.checkedInAt ? new Date(booking.checkedInAt).toLocaleString() : 'Not checked in yet'}</span>
                     </div>
                   )}
                 </div>
@@ -298,6 +369,52 @@ const BookingsPage = () => {
           })
         )}
       </div>
+
+      {qrModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-xl">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">QR Check-In</h2>
+                <p className="text-xs text-slate-500 mt-0.5">Scan at the verification desk to check in.</p>
+              </div>
+              <button
+                onClick={closeQrModal}
+                className="w-8 h-8 rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+              >
+                <X className="w-4 h-4 mx-auto" />
+              </button>
+            </div>
+
+            <div className="p-5 space-y-4">
+              {qrLoading ? (
+                <div className="text-sm text-slate-500">Loading QR code...</div>
+              ) : qrData ? (
+                <>
+                  <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm">
+                    <p className="font-semibold text-slate-900">{qrData.resourceName}</p>
+                    <p className="text-slate-600 mt-1">{qrData.bookingDate} | {formatTime(qrData.startTime)} - {formatTime(qrData.endTime)}</p>
+                  </div>
+
+                  <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-center">
+                    {qrImage ? (
+                      <img src={qrImage} alt="Booking check-in QR" className="w-56 h-56" />
+                    ) : (
+                      <div className="text-sm text-slate-500">Generating QR image...</div>
+                    )}
+                  </div>
+
+                  <p className="text-xs text-slate-500 break-all">
+                    Verification URL: {qrData.verificationUrl}
+                  </p>
+                </>
+              ) : (
+                <div className="text-sm text-rose-600">Unable to load QR code data.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
