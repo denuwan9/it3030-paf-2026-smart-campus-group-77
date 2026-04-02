@@ -137,21 +137,21 @@ const AdminBookingsPage = () => {
 
         {/* Stats Row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between h-28">
-            <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Pending</h3>
-            <p className="text-4xl font-extrabold text-slate-900">{stats.pending}</p>
+          <div className="rounded-xl p-5 border border-amber-200 bg-gradient-to-br from-amber-50 to-white shadow-sm flex flex-col justify-between h-28">
+            <h3 className="text-[11px] font-bold text-amber-700 uppercase tracking-widest">Pending</h3>
+            <p className="text-4xl font-extrabold text-amber-800">{stats.pending}</p>
           </div>
-          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between h-28">
-            <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Approved</h3>
-            <p className="text-4xl font-extrabold text-slate-900">{stats.approved}</p>
+          <div className="rounded-xl p-5 border border-emerald-200 bg-gradient-to-br from-emerald-50 to-white shadow-sm flex flex-col justify-between h-28">
+            <h3 className="text-[11px] font-bold text-emerald-700 uppercase tracking-widest">Approved</h3>
+            <p className="text-4xl font-extrabold text-emerald-800">{stats.approved}</p>
           </div>
-          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between h-28">
-            <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Rejected</h3>
-            <p className="text-4xl font-extrabold text-slate-900">{stats.rejected}</p>
+          <div className="rounded-xl p-5 border border-rose-200 bg-gradient-to-br from-rose-50 to-white shadow-sm flex flex-col justify-between h-28">
+            <h3 className="text-[11px] font-bold text-rose-700 uppercase tracking-widest">Rejected</h3>
+            <p className="text-4xl font-extrabold text-rose-800">{stats.rejected}</p>
           </div>
-          <div className="bg-white rounded-xl p-5 border border-slate-200 shadow-sm flex flex-col justify-between h-28">
-            <h3 className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Total</h3>
-            <p className="text-4xl font-extrabold text-slate-900">{stats.total}</p>
+          <div className="rounded-xl p-5 border border-indigo-200 bg-gradient-to-br from-indigo-50 to-white shadow-sm flex flex-col justify-between h-28">
+            <h3 className="text-[11px] font-bold text-indigo-700 uppercase tracking-widest">Total</h3>
+            <p className="text-4xl font-extrabold text-indigo-800">{stats.total}</p>
           </div>
         </div>
 
