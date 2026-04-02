@@ -252,6 +252,7 @@ const BookingsPage = () => {
             const canApprove = isAdmin && booking.status === 'PENDING';
             const canCancel = booking.status === 'APPROVED' || booking.status === 'PENDING';
             const isApproved = booking.status === 'APPROVED';
+            const isCheckedIn = Boolean(booking.checkedInAt);
             const actionLoading = actionLoadingId === booking.id;
 
             return (
@@ -270,7 +271,7 @@ const BookingsPage = () => {
                   
                   {/* Actions */}
                   <div className="flex items-center gap-2">
-                    {isApproved && (
+                    {isApproved && !isCheckedIn && (
                       <button
                         onClick={() => handleOpenQr(booking.id)}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-sm font-bold hover:bg-indigo-50 transition-colors"
