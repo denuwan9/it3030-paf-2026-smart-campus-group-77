@@ -179,14 +179,16 @@ public class BookingService {
             throw new RuntimeException("This booking is not eligible for check-in");
         }
 
-        validateCheckInTimeWindow(booking);
+        if (booking.getCheckedInAt() == null) {
+            validateCheckInTimeWindow(booking);
+            booking.setCheckedInAt(Instant.now());
+            User scanner = getCurrentUserOptional();
+            if (scanner != null) {
+                booking.setCheckedInBy(scanner);
+            }
+        }
 
         booking.setLastScannedAt(Instant.now());
-        booking.setCheckedInAt(Instant.now());
-        User scanner = getCurrentUserOptional();
-        if (scanner != null) {
-            booking.setCheckedInBy(scanner);
-        }
         booking = bookingRepository.save(booking);
 
         return toCheckInResponse(booking);
@@ -233,7 +235,8 @@ public class BookingService {
                                             java.time.LocalTime bookingStart,
                                             java.time.LocalTime bookingEnd) {
         if (bookingStart.isBefore(resource.getAvailabilityStart()) || bookingEnd.isAfter(resource.getAvailabilityEnd())) {
-            throw new RuntimeException("Booking is outside the resource availability window");
+            throw new RuntimeException("Booking is outside the resource availability window (" 
+                + resource.getAvailabilityStart() + " to " + resource.getAvailabilityEnd() + ")");
         }
     }
 
