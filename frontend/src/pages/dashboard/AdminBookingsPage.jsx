@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
 import bookingService from '../../services/bookingService';
@@ -38,6 +38,7 @@ const StatusBadge = ({ status }) => {
 const AdminBookingsPage = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'ROLE_ADMIN' || user?.role === 'ADMIN';
+  const statusDropdownRef = useRef(null);
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,10 +49,22 @@ const AdminBookingsPage = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [approveModalOpen, setApproveModalOpen] = useState(false);
   const [bookingToApprove, setBookingToApprove] = useState(null);
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
   const [filters, setFilters] = useState({
     status: 'All Statuses',
     search: '',
   });
+
+  const statusOptions = [
+    { value: 'All Statuses', label: 'All Statuses', dotClass: 'bg-slate-400' },
+    { value: 'PENDING', label: 'Pending', dotClass: 'bg-amber-500' },
+    { value: 'APPROVED', label: 'Approved', dotClass: 'bg-emerald-500' },
+    { value: 'REJECTED', label: 'Rejected', dotClass: 'bg-rose-500' },
+    { value: 'CANCELLED', label: 'Cancelled', dotClass: 'bg-slate-500' },
+  ];
+
+  const selectedStatusOption =
+    statusOptions.find((option) => option.value === filters.status) || statusOptions[0];
 
   const loadBookings = async () => {
     try {
@@ -71,6 +84,28 @@ const AdminBookingsPage = () => {
   useEffect(() => {
     loadBookings();
   }, [filters.status]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target)) {
+        setStatusDropdownOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setStatusDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
 
   const handleDecision = async (bookingId, decision, reason = null) => {
     try {
@@ -199,17 +234,52 @@ const AdminBookingsPage = () => {
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
               className="bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-2.5 w-full sm:w-96 text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 placeholder-slate-400 transition-all font-medium"
             />
-            <select
-              value={filters.status}
-              onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
-              className="bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-2.5 w-full sm:w-48 text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all"
-            >
-              <option value="All Statuses">All Statuses</option>
-              <option value="PENDING">Pending</option>
-              <option value="APPROVED">Approved</option>
-              <option value="REJECTED">Rejected</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
+            <div className="relative w-full sm:w-52" ref={statusDropdownRef}>
+              <button
+                type="button"
+                onClick={() => setStatusDropdownOpen((prev) => !prev)}
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all flex items-center justify-between"
+              >
+                <span className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${selectedStatusOption.dotClass}`} />
+                  <span>{selectedStatusOption.label}</span>
+                </span>
+                <svg
+                  className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${statusDropdownOpen ? 'rotate-180' : ''}`}
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+
+              {statusDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-20 animate-in fade-in slide-in-from-top-1 duration-150">
+                  {statusOptions.map((option) => {
+                    const isSelected = option.value === filters.status;
+                    return (
+                      <button
+                        key={option.value}
+                        type="button"
+                        onClick={() => {
+                          setFilters((prev) => ({ ...prev, status: option.value }));
+                          setStatusDropdownOpen(false);
+                        }}
+                        className={`w-full px-4 py-2.5 text-sm text-left flex items-center gap-2 transition-colors ${
+                          isSelected
+                            ? 'bg-indigo-50 text-indigo-700 font-semibold'
+                            : 'text-slate-700 hover:bg-slate-50 font-medium'
+                        }`}
+                      >
+                        <span className={`w-2 h-2 rounded-full ${option.dotClass}`} />
+                        <span>{option.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Table */}

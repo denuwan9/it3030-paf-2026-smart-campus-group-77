@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import { 
   Building2, 
@@ -18,7 +18,13 @@ import { format, parseISO } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import QRCode from 'qrcode';
 
-const statuses = ['', 'PENDING', 'APPROVED', 'REJECTED', 'CANCELLED'];
+const statusOptions = [
+  { value: '', label: 'All Statuses', dotClass: 'bg-slate-400' },
+  { value: 'PENDING', label: 'Pending', dotClass: 'bg-amber-500' },
+  { value: 'APPROVED', label: 'Approved', dotClass: 'bg-emerald-500' },
+  { value: 'REJECTED', label: 'Rejected', dotClass: 'bg-rose-500' },
+  { value: 'CANCELLED', label: 'Cancelled', dotClass: 'bg-slate-500' },
+];
 
 const StatusBadge = ({ status }) => {
   const getStyles = (s) => {
@@ -55,6 +61,7 @@ const BookingsPage = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === 'ROLE_ADMIN';
   const navigate = useNavigate();
+  const statusDropdownRef = useRef(null);
 
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,12 +74,16 @@ const BookingsPage = () => {
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState(null);
   const [cancelReason, setCancelReason] = useState('');
+  const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
 
   const [filters, setFilters] = useState({
     status: '',
     fromDate: '',
     toDate: '',
   });
+
+  const selectedStatusOption =
+    statusOptions.find((option) => option.value === filters.status) || statusOptions[0];
 
   useEffect(() => {
     let cancelled = false;
@@ -128,6 +139,28 @@ const BookingsPage = () => {
   useEffect(() => {
     loadBookings();
   }, [isAdmin, filters.status, filters.fromDate, filters.toDate]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (statusDropdownRef.current && !statusDropdownRef.current.contains(event.target)) {
+        setStatusDropdownOpen(false);
+      }
+    };
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setStatusDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, []);
 
   const handleDecision = async (bookingId, decision) => {
     try {
@@ -245,17 +278,56 @@ const BookingsPage = () => {
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <select
-          value={filters.status}
-          onChange={(e) => setFilters((prev) => ({ ...prev, status: e.target.value }))}
-          className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 w-48 shadow-sm text-slate-700"
-        >
-          <option value="">All Statuses</option>
-          <option value="PENDING">Pending</option>
-          <option value="APPROVED">Approved</option>
-          <option value="REJECTED">Rejected</option>
-          <option value="CANCELLED">Cancelled</option>
-        </select>
+        <div className="relative w-full sm:w-56" ref={statusDropdownRef}>
+          <button
+            type="button"
+            onClick={() => setStatusDropdownOpen((prev) => !prev)}
+            className="w-full bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 shadow-sm text-slate-700 flex items-center justify-between"
+            aria-haspopup="listbox"
+            aria-expanded={statusDropdownOpen}
+          >
+            <span className="flex items-center gap-2 font-medium">
+              <span className={`w-2 h-2 rounded-full ${selectedStatusOption.dotClass}`} />
+              <span>{selectedStatusOption.label}</span>
+            </span>
+            <svg
+              className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${statusDropdownOpen ? 'rotate-180' : ''}`}
+              viewBox="0 0 20 20"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+
+          {statusDropdownOpen && (
+            <div className="absolute z-30 mt-2 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg animate-in fade-in slide-in-from-top-1 duration-150" role="listbox">
+              {statusOptions.map((option) => {
+                const isSelected = option.value === filters.status;
+                return (
+                  <button
+                    key={option.value || 'all-statuses'}
+                    type="button"
+                    onClick={() => {
+                      setFilters((prev) => ({ ...prev, status: option.value }));
+                      setStatusDropdownOpen(false);
+                    }}
+                    className={`w-full px-4 py-2.5 text-sm text-left flex items-center gap-2 transition-colors ${
+                      isSelected
+                        ? 'bg-indigo-50 text-indigo-700 font-semibold'
+                        : 'text-slate-700 hover:bg-slate-50 font-medium'
+                    }`}
+                    role="option"
+                    aria-selected={isSelected}
+                  >
+                    <span className={`w-2 h-2 rounded-full ${option.dotClass}`} />
+                    <span>{option.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Bookings List */}
