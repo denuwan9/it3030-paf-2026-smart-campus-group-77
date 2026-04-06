@@ -186,6 +186,35 @@ const AdminBookingsPage = () => {
     }
   };
 
+  const getPendingAttentionState = (booking) => {
+    if (booking?.status !== 'PENDING' || !booking?.bookingDate || !booking?.startTime) {
+      return 'none';
+    }
+
+    const [hours = '', minutes = ''] = booking.startTime.split(':');
+    const startDateTime = new Date(`${booking.bookingDate}T${hours}:${minutes}:00`);
+    if (Number.isNaN(startDateTime.getTime())) {
+      return 'none';
+    }
+
+    const msUntilStart = startDateTime.getTime() - Date.now();
+    const oneDayMs = 24 * 60 * 60 * 1000;
+
+    if (msUntilStart < 0) {
+      return 'overdue';
+    }
+
+    if (msUntilStart <= oneDayMs) {
+      return 'soon';
+    }
+
+    return 'none';
+  };
+
+  const selectedBookingAttentionState = selectedBooking
+    ? getPendingAttentionState(selectedBooking)
+    : 'none';
+
   const stats = {
     pending: bookings.filter(b => b.status === 'PENDING').length,
     approved: bookings.filter(b => b.status === 'APPROVED').length,
@@ -312,7 +341,11 @@ const AdminBookingsPage = () => {
                     if (!term) return true;
                     return b.resourceName?.toLowerCase().includes(term) || b.requestedByName?.toLowerCase().includes(term) || b.purpose?.toLowerCase().includes(term);
                   })
-                  .map((booking) => (
+                  .map((booking) => {
+                    const attentionState = getPendingAttentionState(booking);
+                    const needsAttention = attentionState !== 'none';
+
+                    return (
                     <tr key={booking.id} className="hover:bg-slate-50/80 transition-colors group">
                       <td className="px-6 py-4">
                         <p className="font-bold text-slate-900 text-sm">{booking.resourceName}</p>
@@ -333,7 +366,22 @@ const AdminBookingsPage = () => {
                         {booking.expectedAttendees || '—'}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <StatusBadge status={booking.status} />
+                        <div className="flex items-center justify-center gap-2">
+                          <StatusBadge status={booking.status} />
+                          {needsAttention && (
+                            <span
+                              title={attentionState === 'overdue' ? 'Pending request is overdue and needs immediate attention' : 'Pending request starts within 24 hours'}
+                              aria-label={attentionState === 'overdue' ? 'Overdue pending request' : 'Pending request needs attention'}
+                              className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black border ${
+                                attentionState === 'overdue'
+                                  ? 'bg-red-50 text-red-600 border-red-200'
+                                  : 'bg-amber-50 text-amber-700 border-amber-200'
+                              }`}
+                            >
+                              !
+                            </span>
+                          )}
+                        </div>
                       </td>
                       <td className="px-6 py-4 text-center">
                         <div className="flex items-center justify-center gap-2 flex-wrap">
@@ -365,7 +413,7 @@ const AdminBookingsPage = () => {
                         </div>
                       </td>
                     </tr>
-                  ))
+                  )})
                 )}
               </tbody>
             </table>
@@ -422,6 +470,22 @@ const AdminBookingsPage = () => {
                   <p className="text-xs uppercase tracking-wider text-slate-400 font-bold">Status</p>
                   <div className="mt-1">
                     <StatusBadge status={selectedBooking.status} />
+                    {selectedBookingAttentionState !== 'none' && (
+                      <div className="mt-2 flex items-center gap-2">
+                        <span
+                          className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black border ${
+                            selectedBookingAttentionState === 'overdue'
+                              ? 'bg-red-50 text-red-600 border-red-200'
+                              : 'bg-amber-50 text-amber-700 border-amber-200'
+                          }`}
+                        >
+                          !
+                        </span>
+                        <span className={`text-xs font-semibold ${selectedBookingAttentionState === 'overdue' ? 'text-red-600' : 'text-amber-700'}`}>
+                          {selectedBookingAttentionState === 'overdue' ? 'Overdue pending request' : 'Needs attention'}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
