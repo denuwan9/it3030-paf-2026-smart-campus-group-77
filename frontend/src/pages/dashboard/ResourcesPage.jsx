@@ -91,6 +91,22 @@ const ResourcesPage = () => {
       return;
     }
 
+    const attendeesCount = bookingForm.expectedAttendees
+      ? Number(bookingForm.expectedAttendees)
+      : null;
+
+    if (attendeesCount !== null) {
+      if (attendeesCount < 1) {
+        toast.error('Attendees must be at least 1.');
+        return;
+      }
+
+      if (attendeesCount > selectedResource.capacity) {
+        toast.error(`Attendees cannot exceed the maximum capacity (${selectedResource.capacity}).`);
+        return;
+      }
+    }
+
     try {
       setSubmitting(true);
       const payload = {
@@ -100,8 +116,8 @@ const ResourcesPage = () => {
         endTime: bookingForm.endTime,
         purpose: bookingForm.purpose,
       };
-      if (bookingForm.expectedAttendees) {
-        payload.expectedAttendees = Number(bookingForm.expectedAttendees);
+      if (attendeesCount !== null) {
+        payload.expectedAttendees = attendeesCount;
       }
 
       await bookingService.createBooking(payload);
