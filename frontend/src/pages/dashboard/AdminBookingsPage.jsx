@@ -186,14 +186,32 @@ const AdminBookingsPage = () => {
     }
   };
 
+  const getBookingDateTime = (dateStr, timeStr) => {
+    if (!dateStr || !timeStr) {
+      return null;
+    }
+
+    const [hours = '', minutes = ''] = timeStr.split(':');
+    const dateTime = new Date(`${dateStr}T${hours}:${minutes}:00`);
+    return Number.isNaN(dateTime.getTime()) ? null : dateTime;
+  };
+
+  const isBookingExpired = (booking) => {
+    const endDateTime = getBookingDateTime(booking?.bookingDate, booking?.endTime);
+    if (!endDateTime) {
+      return false;
+    }
+
+    return endDateTime.getTime() < Date.now();
+  };
+
   const getPendingAttentionState = (booking) => {
     if (booking?.status !== 'PENDING' || !booking?.bookingDate || !booking?.startTime) {
       return 'none';
     }
 
-    const [hours = '', minutes = ''] = booking.startTime.split(':');
-    const startDateTime = new Date(`${booking.bookingDate}T${hours}:${minutes}:00`);
-    if (Number.isNaN(startDateTime.getTime())) {
+    const startDateTime = getBookingDateTime(booking.bookingDate, booking.startTime);
+    if (!startDateTime) {
       return 'none';
     }
 
@@ -221,6 +239,123 @@ const AdminBookingsPage = () => {
     rejected: bookings.filter(b => b.status === 'REJECTED').length,
     total: bookings.length
   };
+
+  const filteredBookings = bookings.filter((booking) => {
+    const term = filters.search.toLowerCase();
+    if (!term) return true;
+    return booking.resourceName?.toLowerCase().includes(term)
+      || booking.requestedByName?.toLowerCase().includes(term)
+      || booking.purpose?.toLowerCase().includes(term);
+  });
+
+  const activeBookings = filteredBookings.filter((booking) => !isBookingExpired(booking));
+  const pastBookings = filteredBookings.filter((booking) => isBookingExpired(booking));
+
+  const renderBookingRows = (rows, emptyMessage) => {
+    if (rows.length === 0) {
+      return (
+        <tr>
+          <td colSpan="7" className="px-6 py-8 text-center text-slate-500 font-medium">{emptyMessage}</td>
+        </tr>
+      );
+    }
+
+    return rows.map((booking) => {
+      const attentionState = getPendingAttentionState(booking);
+      const needsAttention = attentionState !== 'none';
+
+      return (
+        <tr key={booking.id} className="hover:bg-slate-50/80 transition-colors group">
+          <td className="px-6 py-4">
+            <p className="font-bold text-slate-900 text-sm">{booking.resourceName}</p>
+            <p className="text-xs text-slate-500 mt-1">{booking.resourceLocation || 'Campus Hub'}</p>
+          </td>
+          <td className="px-6 py-4">
+            <p className="font-bold text-slate-900 text-sm max-w-[160px] truncate">{booking.requestedByName}</p>
+            <p className="text-xs text-slate-500 mt-1 max-w-[160px] truncate">{booking.requestedByEmail}</p>
+          </td>
+          <td className="px-6 py-4">
+            <p className="text-slate-700 font-medium text-sm">{formatDate(booking.bookingDate)}</p>
+            <p className="text-xs text-slate-500 mt-1">{formatTime(booking.startTime)} - {formatTime(booking.endTime)}</p>
+          </td>
+          <td className="px-6 py-4">
+            <p className="max-w-[180px] truncate text-slate-600 text-sm font-medium">{booking.purpose || '—'}</p>
+          </td>
+          <td className="px-6 py-4 text-center text-slate-600 font-medium">
+            {booking.expectedAttendees || '—'}
+          </td>
+          <td className="px-6 py-4 text-center">
+            <div className="flex items-center justify-center gap-2">
+              <StatusBadge status={booking.status} />
+              {needsAttention && (
+                <span
+                  title={attentionState === 'overdue' ? 'Pending request is overdue and needs immediate attention' : 'Pending request starts within 24 hours'}
+                  aria-label={attentionState === 'overdue' ? 'Overdue pending request' : 'Pending request needs attention'}
+                  className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black border ${
+                    attentionState === 'overdue'
+                      ? 'bg-red-50 text-red-600 border-red-200'
+                      : 'bg-amber-50 text-amber-700 border-amber-200'
+                  }`}
+                >
+                  !
+                </span>
+              )}
+            </div>
+          </td>
+          <td className="px-6 py-4 text-center">
+            <div className="flex items-center justify-center gap-2 flex-wrap">
+              {booking.status === 'PENDING' ? (
+                <>
+                  <button
+                    onClick={() => openApproveModal(booking.id)}
+                    disabled={actionLoadingId === booking.id}
+                    className="px-4 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-200 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm disabled:opacity-50"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => openRejectModal(booking.id)}
+                    disabled={actionLoadingId === booking.id}
+                    className="px-4 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white border border-rose-200 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm disabled:opacity-50"
+                  >
+                    Reject
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => openDetails(booking)}
+                  className="px-4 py-1.5 bg-white text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 border border-slate-200 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm"
+                >
+                  Details
+                </button>
+              )}
+            </div>
+          </td>
+        </tr>
+      );
+    });
+  };
+
+  const renderBookingsTable = (rows, emptyMessage) => (
+    <div className="overflow-x-auto">
+      <table className="w-full text-left text-sm whitespace-nowrap">
+        <thead className="bg-slate-50/50 text-slate-500 font-bold text-[11px] tracking-wider uppercase border-b border-slate-200">
+          <tr>
+            <th className="px-6 py-4">Resource</th>
+            <th className="px-6 py-4">Requested By</th>
+            <th className="px-6 py-4">Date & Time</th>
+            <th className="px-6 py-4">Purpose</th>
+            <th className="px-6 py-4 text-center">Attendees</th>
+            <th className="px-6 py-4 text-center">Status</th>
+            <th className="px-6 py-4 text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-slate-100">
+          {renderBookingRows(rows, emptyMessage)}
+        </tbody>
+      </table>
+    </div>
+  );
 
   return (
     <div className="bg-transparent min-h-[calc(100vh-80px)] font-sans text-slate-600">
@@ -312,112 +447,25 @@ const AdminBookingsPage = () => {
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm whitespace-nowrap">
-              <thead className="bg-slate-50/50 text-slate-500 font-bold text-[11px] tracking-wider uppercase border-b border-slate-200">
-                <tr>
-                  <th className="px-6 py-4">Resource</th>
-                  <th className="px-6 py-4">Requested By</th>
-                  <th className="px-6 py-4">Date & Time</th>
-                  <th className="px-6 py-4">Purpose</th>
-                  <th className="px-6 py-4 text-center">Attendees</th>
-                  <th className="px-6 py-4 text-center">Status</th>
-                  <th className="px-6 py-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {loading ? (
-                  <tr>
-                    <td colSpan="7" className="px-6 py-8 text-center text-slate-500 font-medium">Loading bookings...</td>
-                  </tr>
-                ) : bookings.length === 0 ? (
-                   <tr>
-                    <td colSpan="7" className="px-6 py-8 text-center text-slate-500 font-medium">No bookings found.</td>
-                  </tr>
-                ) : (
-                  bookings
-                  .filter(b => {
-                    const term = filters.search.toLowerCase();
-                    if (!term) return true;
-                    return b.resourceName?.toLowerCase().includes(term) || b.requestedByName?.toLowerCase().includes(term) || b.purpose?.toLowerCase().includes(term);
-                  })
-                  .map((booking) => {
-                    const attentionState = getPendingAttentionState(booking);
-                    const needsAttention = attentionState !== 'none';
+          {loading ? (
+            <div className="px-6 py-8 text-center text-slate-500 font-medium">Loading bookings...</div>
+          ) : filteredBookings.length === 0 ? (
+            <div className="px-6 py-8 text-center text-slate-500 font-medium">No bookings found.</div>
+          ) : (
+            <>
+              <div className="px-4 py-3 border-t border-b border-slate-200 bg-slate-50/40 flex items-center justify-between">
+                <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-600">Current Requests</h3>
+                <span className="text-xs font-semibold text-slate-500">{activeBookings.length}</span>
+              </div>
+              {renderBookingsTable(activeBookings, 'No current requests.')}
 
-                    return (
-                    <tr key={booking.id} className="hover:bg-slate-50/80 transition-colors group">
-                      <td className="px-6 py-4">
-                        <p className="font-bold text-slate-900 text-sm">{booking.resourceName}</p>
-                        <p className="text-xs text-slate-500 mt-1">{booking.resourceLocation || 'Campus Hub'}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="font-bold text-slate-900 text-sm max-w-[160px] truncate">{booking.requestedByName}</p>
-                        <p className="text-xs text-slate-500 mt-1 max-w-[160px] truncate">{booking.requestedByEmail}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                        <p className="text-slate-700 font-medium text-sm">{formatDate(booking.bookingDate)}</p>
-                        <p className="text-xs text-slate-500 mt-1">{formatTime(booking.startTime)} - {formatTime(booking.endTime)}</p>
-                      </td>
-                      <td className="px-6 py-4">
-                         <p className="max-w-[180px] truncate text-slate-600 text-sm font-medium">{booking.purpose || '—'}</p>
-                      </td>
-                      <td className="px-6 py-4 text-center text-slate-600 font-medium">
-                        {booking.expectedAttendees || '—'}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          <StatusBadge status={booking.status} />
-                          {needsAttention && (
-                            <span
-                              title={attentionState === 'overdue' ? 'Pending request is overdue and needs immediate attention' : 'Pending request starts within 24 hours'}
-                              aria-label={attentionState === 'overdue' ? 'Overdue pending request' : 'Pending request needs attention'}
-                              className={`inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-black border ${
-                                attentionState === 'overdue'
-                                  ? 'bg-red-50 text-red-600 border-red-200'
-                                  : 'bg-amber-50 text-amber-700 border-amber-200'
-                              }`}
-                            >
-                              !
-                            </span>
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <div className="flex items-center justify-center gap-2 flex-wrap">
-                          {booking.status === 'PENDING' ? (
-                            <>
-                              <button
-                                onClick={() => openApproveModal(booking.id)}
-                                disabled={actionLoadingId === booking.id}
-                                className="px-4 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-200 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm disabled:opacity-50"
-                              >
-                                Approve
-                              </button>
-                              <button
-                                onClick={() => openRejectModal(booking.id)}
-                                disabled={actionLoadingId === booking.id}
-                                className="px-4 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white border border-rose-200 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm disabled:opacity-50"
-                              >
-                                Reject
-                              </button>
-                            </>
-                          ) : (
-                            <button
-                              onClick={() => openDetails(booking)}
-                              className="px-4 py-1.5 bg-white text-slate-600 hover:bg-slate-50 hover:text-indigo-600 hover:border-indigo-200 border border-slate-200 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm"
-                            >
-                              Details
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )})
-                )}
-              </tbody>
-            </table>
-          </div>
+              <div className="px-4 py-3 border-t border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
+                <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-600">Past Requests</h3>
+                <span className="text-xs font-semibold text-slate-500">{pastBookings.length}</span>
+              </div>
+              {renderBookingsTable(pastBookings, 'No past requests.')}
+            </>
+          )}
         </div>
 
         {selectedBooking && (
