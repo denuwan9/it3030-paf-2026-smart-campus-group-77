@@ -213,9 +213,9 @@ const AdminBookingsPage = () => {
             <h3 className="text-[11px] font-bold text-emerald-700 uppercase tracking-widest">Approved</h3>
             <p className="text-4xl font-extrabold !text-emerald-500">{stats.approved}</p>
           </div>
-          <div className="rounded-xl p-5 border border-rose-200 bg-gradient-to-br from-rose-50 to-white shadow-sm flex flex-col justify-between h-28 hover:-translate-y-1 hover:shadow-md hover:scale-105 transition-all duration-300">
-            <h3 className="text-[11px] font-bold text-rose-700 uppercase tracking-widest">Rejected</h3>
-            <p className="text-4xl font-extrabold text-rose-800">{stats.rejected}</p>
+          <div className="rounded-xl p-5 border border-red-200 bg-gradient-to-br from-red-50 to-white shadow-sm flex flex-col justify-between h-28 hover:-translate-y-1 hover:shadow-md hover:scale-105 transition-all duration-300">
+            <h3 className="text-[11px] font-bold text-red-700 uppercase tracking-widest">Rejected</h3>
+            <p className="text-4xl font-extrabold !text-red-500">{stats.rejected}</p>
           </div>
           <div className="rounded-xl p-5 border border-indigo-200 bg-gradient-to-br from-indigo-50 to-white shadow-sm flex flex-col justify-between h-28 hover:-translate-y-1 hover:shadow-md hover:scale-105 transition-all duration-300">
             <h3 className="text-[11px] font-bold text-indigo-700 uppercase tracking-widest">Total</h3>
