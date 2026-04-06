@@ -14,6 +14,14 @@ const emptyBookingForm = {
   expectedAttendees: '',
 };
 
+const getTodayDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
 const formatType = (type) => type?.replaceAll('_', ' ') || '-';
 
 const getResourceIcon = (type) => {
@@ -43,6 +51,7 @@ const ResourcesPage = () => {
     status: 'ACTIVE', // Default to ACTIVE based on UI
   });
   const [bookingForm, setBookingForm] = useState(emptyBookingForm);
+  const minBookingDate = useMemo(() => getTodayDateString(), []);
 
   const queryParams = useMemo(() => {
     const params = {};
@@ -76,6 +85,11 @@ const ResourcesPage = () => {
   const handleBookResource = async (e) => {
     e.preventDefault();
     if (!selectedResource) return;
+
+    if (bookingForm.bookingDate < minBookingDate) {
+      toast.error('Past dates are not allowed. Please select today or a future date.');
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -271,7 +285,15 @@ const ResourcesPage = () => {
                   <input
                     type="date"
                     value={bookingForm.bookingDate}
-                    onChange={(e) => setBookingForm((prev) => ({ ...prev, bookingDate: e.target.value }))}
+                    onChange={(e) => {
+                      const selectedDate = e.target.value;
+                      if (selectedDate && selectedDate < minBookingDate) {
+                        toast.error('You cannot select a past date.');
+                        return;
+                      }
+                      setBookingForm((prev) => ({ ...prev, bookingDate: selectedDate }));
+                    }}
+                    min={minBookingDate}
                     className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-[#6B65FB]/20 focus:border-[#6B65FB] transition-all"
                     required
                   />
