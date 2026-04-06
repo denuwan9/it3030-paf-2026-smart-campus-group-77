@@ -212,12 +212,10 @@ const ResourcesPage = () => {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {resources.map((resource, i) => (
+          {resources.map((resource) => (
             <div 
               key={resource.id} 
-              className={`bg-white rounded-[24px] p-6 shadow-sm border transition-all hover:shadow-md group ${
-                i === 0 ? 'border-[#6B65FB]/50' : 'border-slate-100 hover:border-[#6B65FB]/30'
-              }`}
+              className="bg-white rounded-[24px] p-6 shadow-sm border border-slate-100 transition-all hover:shadow-md hover:border-[#6B65FB]/30 group"
             >
               <div className="flex items-start justify-between">
                 <div className="w-12 h-12 rounded-xl bg-[#6B65FB]/10 flex items-center justify-center">
@@ -229,7 +227,7 @@ const ResourcesPage = () => {
               </div>
 
               <div className="mt-5">
-                <h3 className={`text-xl font-bold transition-colors ${i === 0 ? 'text-[#6B65FB]' : 'text-slate-800 group-hover:text-[#6B65FB]'}`}>
+                <h3 className="text-xl font-bold text-slate-800 transition-colors group-hover:text-[#6B65FB]">
                   {resource.name}
                 </h3>
                 <p className="text-sm text-slate-500 mt-2 line-clamp-2 h-10">
@@ -240,7 +238,7 @@ const ResourcesPage = () => {
               <div className="grid grid-cols-2 gap-4 border-t border-slate-100 mt-5 pt-5">
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Capacity</p>
-                  <p className={`text-lg font-bold mt-0.5 ${i === 0 ? 'text-[#6B65FB]' : 'text-slate-800'}`}>
+                  <p className="text-lg font-bold mt-0.5 text-slate-800">
                     {resource.capacity}
                   </p>
                 </div>
