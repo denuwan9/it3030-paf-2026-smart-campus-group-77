@@ -33,6 +33,22 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
                                   @Param("statuses") List<BookingStatus> statuses);
 
     @Query("""
+            SELECT COUNT(b) FROM Booking b
+            WHERE b.resource.id = :resourceId
+              AND b.bookingDate = :bookingDate
+              AND b.status IN :statuses
+              AND b.id <> :excludeBookingId
+              AND b.startTime < :endTime
+              AND b.endTime > :startTime
+            """)
+    long countConflictingBookingsExcludingBooking(@Param("resourceId") UUID resourceId,
+                                                  @Param("bookingDate") LocalDate bookingDate,
+                                                  @Param("startTime") LocalTime startTime,
+                                                  @Param("endTime") LocalTime endTime,
+                                                  @Param("statuses") List<BookingStatus> statuses,
+                                                  @Param("excludeBookingId") UUID excludeBookingId);
+
+    @Query("""
             SELECT b FROM Booking b
             JOIN FETCH b.resource r
             JOIN FETCH b.requestedBy u

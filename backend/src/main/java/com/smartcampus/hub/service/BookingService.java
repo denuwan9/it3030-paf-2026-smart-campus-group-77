@@ -5,6 +5,7 @@ import com.smartcampus.hub.dto.BookingCheckInResponse;
 import com.smartcampus.hub.dto.BookingResponse;
 import com.smartcampus.hub.dto.CheckInVerifyRequest;
 import com.smartcampus.hub.dto.CreateBookingRequest;
+import com.smartcampus.hub.dto.UpdateBookingRequest;
 import com.smartcampus.hub.entity.*;
 import com.smartcampus.hub.repository.BookingRepository;
 import com.smartcampus.hub.repository.UserRepository;
@@ -61,6 +62,45 @@ public class BookingService {
                 .expectedAttendees(request.getExpectedAttendees())
                 .status(BookingStatus.PENDING)
                 .build();
+
+        return toResponse(bookingRepository.save(booking));
+    }
+
+    @Transactional
+    public BookingResponse updateBooking(UUID bookingId, UpdateBookingRequest request) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        User currentUser = getCurrentUser();
+        if (!booking.getRequestedBy().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You are not allowed to edit this booking");
+        }
+
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new RuntimeException("Only pending bookings can be edited");
+        }
+
+        validateBookingTimeOrder(request.getStartTime(), request.getEndTime());
+        validateWithinAvailability(booking.getResource(), request.getStartTime(), request.getEndTime());
+
+        if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > booking.getResource().getCapacity()) {
+            throw new RuntimeException("Expected attendees exceed resource capacity");
+        }
+
+        ensureNoConflictExcludingBooking(
+                booking.getResource().getId(),
+                request.getBookingDate(),
+                request.getStartTime(),
+                request.getEndTime(),
+                List.of(BookingStatus.PENDING, BookingStatus.APPROVED),
+                booking.getId()
+        );
+
+        booking.setBookingDate(request.getBookingDate());
+        booking.setStartTime(request.getStartTime());
+        booking.setEndTime(request.getEndTime());
+        booking.setPurpose(request.getPurpose().trim());
+        booking.setExpectedAttendees(request.getExpectedAttendees());
 
         return toResponse(bookingRepository.save(booking));
     }
@@ -252,6 +292,25 @@ public class BookingService {
                                   java.time.LocalTime endTime,
                                   List<BookingStatus> statuses) {
         long conflicts = bookingRepository.countConflictingBookings(resourceId, bookingDate, startTime, endTime, statuses);
+        if (conflicts > 0) {
+            throw new RuntimeException("Requested time overlaps with an existing booking");
+        }
+    }
+
+    private void ensureNoConflictExcludingBooking(UUID resourceId,
+                                                  LocalDate bookingDate,
+                                                  java.time.LocalTime startTime,
+                                                  java.time.LocalTime endTime,
+                                                  List<BookingStatus> statuses,
+                                                  UUID excludeBookingId) {
+        long conflicts = bookingRepository.countConflictingBookingsExcludingBooking(
+                resourceId,
+                bookingDate,
+                startTime,
+                endTime,
+                statuses,
+                excludeBookingId
+        );
         if (conflicts > 0) {
             throw new RuntimeException("Requested time overlaps with an existing booking");
         }

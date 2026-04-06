@@ -8,6 +8,7 @@ import {
   CheckCircle2, 
   Pin, 
   MinusCircle,
+  Pencil,
   Plus,
   QrCode,
   X
@@ -25,6 +26,22 @@ const statusOptions = [
   { value: 'REJECTED', label: 'Rejected', dotClass: 'bg-rose-500' },
   { value: 'CANCELLED', label: 'Cancelled', dotClass: 'bg-slate-500' },
 ];
+
+const getTodayDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+const toTimeInputValue = (value) => {
+  if (!value) {
+    return '';
+  }
+
+  return value.length >= 5 ? value.slice(0, 5) : value;
+};
 
 const StatusBadge = ({ status }) => {
   const getStyles = (s) => {
@@ -74,6 +91,16 @@ const BookingsPage = () => {
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState(null);
   const [cancelReason, setCancelReason] = useState('');
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [bookingToEdit, setBookingToEdit] = useState(null);
+  const [editSubmitting, setEditSubmitting] = useState(false);
+  const [editForm, setEditForm] = useState({
+    bookingDate: '',
+    startTime: '',
+    endTime: '',
+    purpose: '',
+    expectedAttendees: '',
+  });
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
 
   const [filters, setFilters] = useState({
@@ -81,6 +108,7 @@ const BookingsPage = () => {
     fromDate: '',
     toDate: '',
   });
+  const minBookingDate = getTodayDateString();
 
   const selectedStatusOption =
     statusOptions.find((option) => option.value === filters.status) || statusOptions[0];
@@ -190,10 +218,90 @@ const BookingsPage = () => {
     setCancelModalOpen(true);
   };
 
+  const openEditModal = (booking) => {
+    if (booking.status !== 'PENDING') {
+      toast.error('Only pending bookings can be edited');
+      return;
+    }
+
+    setBookingToEdit(booking);
+    setEditForm({
+      bookingDate: booking.bookingDate || '',
+      startTime: toTimeInputValue(booking.startTime),
+      endTime: toTimeInputValue(booking.endTime),
+      purpose: booking.purpose || '',
+      expectedAttendees: booking.expectedAttendees ? String(booking.expectedAttendees) : '',
+    });
+    setEditModalOpen(true);
+  };
+
+  const closeEditModal = () => {
+    setEditModalOpen(false);
+    setBookingToEdit(null);
+    setEditForm({
+      bookingDate: '',
+      startTime: '',
+      endTime: '',
+      purpose: '',
+      expectedAttendees: '',
+    });
+  };
+
   const closeCancelModal = () => {
     setCancelModalOpen(false);
     setBookingToCancel(null);
     setCancelReason('');
+  };
+
+  const submitBookingEdit = async (e) => {
+    e.preventDefault();
+    if (!bookingToEdit) {
+      return;
+    }
+
+    if (bookingToEdit.status !== 'PENDING') {
+      toast.error('Only pending bookings can be edited');
+      return;
+    }
+
+    if (editForm.bookingDate < minBookingDate) {
+      toast.error('Past dates are not allowed');
+      return;
+    }
+
+    if (!editForm.startTime || !editForm.endTime || editForm.startTime >= editForm.endTime) {
+      toast.error('Start time must be earlier than end time');
+      return;
+    }
+
+    const attendeesValue = editForm.expectedAttendees.trim();
+    if (attendeesValue) {
+      const attendeesCount = Number(attendeesValue);
+      if (!Number.isInteger(attendeesCount) || attendeesCount < 1) {
+        toast.error('Attendees must be a whole number and at least 1');
+        return;
+      }
+    }
+
+    const payload = {
+      bookingDate: editForm.bookingDate,
+      startTime: editForm.startTime,
+      endTime: editForm.endTime,
+      purpose: editForm.purpose.trim(),
+      expectedAttendees: attendeesValue ? Number(attendeesValue) : null,
+    };
+
+    try {
+      setEditSubmitting(true);
+      await bookingService.updateBooking(bookingToEdit.id, payload);
+      toast.success('Booking request updated successfully');
+      closeEditModal();
+      await loadBookings();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update booking request');
+    } finally {
+      setEditSubmitting(false);
+    }
   };
 
   const confirmCancellation = async () => {
@@ -340,6 +448,7 @@ const BookingsPage = () => {
           bookings.map((booking) => {
             const canApprove = isAdmin && booking.status === 'PENDING';
             const canCancel = booking.status === 'APPROVED' || booking.status === 'PENDING';
+            const canEdit = !isAdmin && booking.status === 'PENDING';
             const isApproved = booking.status === 'APPROVED';
             const actionLoading = actionLoadingId === booking.id;
 
@@ -359,6 +468,16 @@ const BookingsPage = () => {
                   
                   {/* Actions */}
                   <div className="flex items-center gap-2">
+                    {canEdit && (
+                      <button
+                        onClick={() => openEditModal(booking)}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-indigo-200 text-indigo-600 text-sm font-bold hover:bg-indigo-50 transition-colors"
+                      >
+                        <Pencil className="w-4 h-4" />
+                        Edit
+                      </button>
+                    )}
+
                     {isApproved && (
                       <button
                         onClick={() => handleOpenQr(booking.id)}
@@ -458,6 +577,108 @@ const BookingsPage = () => {
           })
         )}
       </div>
+
+      {/* Edit Modal */}
+      {editModalOpen && bookingToEdit && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-xl bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-6 py-4 border-b border-indigo-100 flex items-center justify-between bg-indigo-50/50">
+              <div>
+                <h2 className="text-lg font-bold text-indigo-700 tracking-tight">Edit Booking Request</h2>
+                <p className="text-xs text-indigo-600 mt-0.5">Only pending bookings can be edited.</p>
+              </div>
+              <button
+                onClick={closeEditModal}
+                disabled={editSubmitting}
+                className="w-8 h-8 rounded-lg border border-transparent text-indigo-500 hover:text-indigo-700 hover:bg-indigo-100 flex items-center justify-center transition-colors font-bold disabled:opacity-50"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={submitBookingEdit} className="p-6 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pl-1">Booking Date</label>
+                  <input
+                    type="date"
+                    value={editForm.bookingDate}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, bookingDate: e.target.value }))}
+                    min={minBookingDate}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pl-1">Attendees</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={editForm.expectedAttendees}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, expectedAttendees: e.target.value }))}
+                    placeholder="Optional"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pl-1">Start Time</label>
+                  <input
+                    type="time"
+                    value={editForm.startTime}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, startTime: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pl-1">End Time</label>
+                  <input
+                    type="time"
+                    value={editForm.endTime}
+                    onChange={(e) => setEditForm((prev) => ({ ...prev, endTime: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pl-1">Booking Purpose</label>
+                <textarea
+                  value={editForm.purpose}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, purpose: e.target.value }))}
+                  rows="3"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none"
+                  required
+                />
+              </div>
+
+              <div className="px-0 py-1 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={closeEditModal}
+                  disabled={editSubmitting}
+                  className="px-5 py-2 min-w-[100px] text-center bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-800 border border-slate-200 rounded-xl text-sm font-bold transition-all shadow-sm disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={editSubmitting}
+                  className="px-5 py-2 min-w-[120px] text-center bg-indigo-600 text-white hover:bg-indigo-500 rounded-xl text-sm font-bold transition-all shadow-sm active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100 disabled:cursor-not-allowed"
+                >
+                  {editSubmitting ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Cancel Modal */}
       {cancelModalOpen && (

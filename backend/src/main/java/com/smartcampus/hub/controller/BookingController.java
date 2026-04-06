@@ -5,6 +5,7 @@ import com.smartcampus.hub.dto.BookingCancelRequest;
 import com.smartcampus.hub.dto.BookingCheckInResponse;
 import com.smartcampus.hub.dto.BookingResponse;
 import com.smartcampus.hub.dto.CreateBookingRequest;
+import com.smartcampus.hub.dto.UpdateBookingRequest;
 import com.smartcampus.hub.entity.BookingStatus;
 import com.smartcampus.hub.service.BookingService;
 import jakarta.validation.Valid;
@@ -31,6 +32,12 @@ public class BookingController {
     public ResponseEntity<ApiResponse<BookingResponse>> createBooking(@Valid @RequestBody CreateBookingRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success("Booking request submitted", bookingService.createBooking(request)));
+    }
+
+    @PutMapping("/{bookingId}")
+    public ResponseEntity<ApiResponse<BookingResponse>> updateBooking(@PathVariable UUID bookingId,
+                                                                      @Valid @RequestBody UpdateBookingRequest request) {
+        return ResponseEntity.ok(ApiResponse.success("Booking updated successfully", bookingService.updateBooking(bookingId, request)));
     }
 
     @GetMapping("/my")

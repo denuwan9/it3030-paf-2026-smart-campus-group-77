@@ -9,6 +9,10 @@ const bookingService = {
     return axiosInstance.post('/bookings', payload);
   },
 
+  updateBooking: async (bookingId, payload) => {
+    return axiosInstance.put(`/bookings/${bookingId}`, payload);
+  },
+
   cancelBooking: async (bookingId, reason) => {
     return axiosInstance.patch(`/bookings/${bookingId}/cancel`, reason ? { reason } : {});
   },
