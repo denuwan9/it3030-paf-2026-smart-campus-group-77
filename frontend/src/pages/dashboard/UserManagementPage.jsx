@@ -199,10 +199,10 @@ const UserManagementPage = () => {
             </div>
             <div>
               <h1 className="text-4xl md:text-5xl font-black text-white tracking-widest uppercase">
-                COMMAND CENTER
+                User Management
               </h1>
               <p className="text-white/40 text-xs md:text-sm font-bold tracking-[0.3em] mt-2 uppercase">
-                Strategic Platform Administration
+                Manage user accounts and permissions
               </p>
             </div>
           </div>

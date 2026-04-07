@@ -68,7 +68,7 @@ const DashboardLayout = () => {
       roles: ['ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
     },
     { 
-      label: 'Command Center', 
+      label: 'User Management', 
       to: '/admin/users', 
       icon: ShieldCheck, 
       roles: ['ROLE_ADMIN'] 

@@ -124,7 +124,7 @@ const RegisterPage = () => {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight mb-2">
-                Establish Identity
+                Create Account
               </h1>
               <p className="text-slate-500 font-medium text-base sm:text-lg">
                 Create your Smart Campus profile today
