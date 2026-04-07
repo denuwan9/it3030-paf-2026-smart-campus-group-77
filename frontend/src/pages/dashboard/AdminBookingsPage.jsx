@@ -50,6 +50,7 @@ const AdminBookingsPage = () => {
   const [approveModalOpen, setApproveModalOpen] = useState(false);
   const [bookingToApprove, setBookingToApprove] = useState(null);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState(false);
+  const [showPastRequests, setShowPastRequests] = useState(false);
   const [filters, setFilters] = useState({
     status: 'All Statuses',
     search: '',
@@ -302,25 +303,25 @@ const AdminBookingsPage = () => {
               )}
             </div>
           </td>
-          <td className="px-6 py-4 text-center">
-            <div className="flex items-center justify-center gap-2 flex-wrap">
+          <td className="px-6 py-4 text-center min-w-[240px]">
+            <div className="flex items-center justify-center gap-2 whitespace-nowrap">
               {booking.status === 'PENDING' ? (
-                <>
+                <div className="inline-flex items-center">
                   <button
                     onClick={() => openApproveModal(booking.id)}
                     disabled={actionLoadingId === booking.id}
-                    className="px-4 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-200 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm disabled:opacity-50"
+                    className="px-3 py-1.5 bg-emerald-50 text-emerald-600 hover:bg-emerald-500 hover:text-white border border-emerald-200 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all shadow-sm disabled:opacity-50"
                   >
                     Approve
                   </button>
                   <button
                     onClick={() => openRejectModal(booking.id)}
                     disabled={actionLoadingId === booking.id}
-                    className="px-4 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white border border-rose-200 rounded-lg text-[11px] font-bold uppercase tracking-wide transition-all shadow-sm disabled:opacity-50"
+                    className="ml-2 px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white border border-rose-200 rounded-lg text-[10px] font-bold uppercase tracking-wide transition-all shadow-sm disabled:opacity-50"
                   >
                     Reject
                   </button>
-                </>
+                </div>
               ) : (
                 <button
                   onClick={() => openDetails(booking)}
@@ -336,10 +337,10 @@ const AdminBookingsPage = () => {
     });
   };
 
-  const renderBookingsTable = (rows, emptyMessage) => (
+  const renderBookingsTable = (rows, emptyMessage, headerClassName = 'bg-slate-50/50') => (
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm whitespace-nowrap">
-        <thead className="bg-slate-50/50 text-slate-500 font-bold text-[11px] tracking-wider uppercase border-b border-slate-200">
+        <thead className={`${headerClassName} text-slate-500 font-bold text-[11px] tracking-wider uppercase border-b border-slate-200`}>
           <tr>
             <th className="px-6 py-4">Resource</th>
             <th className="px-6 py-4">Requested By</th>
@@ -452,19 +453,42 @@ const AdminBookingsPage = () => {
           ) : filteredBookings.length === 0 ? (
             <div className="px-6 py-8 text-center text-slate-500 font-medium">No bookings found.</div>
           ) : (
-            <>
-              <div className="px-4 py-3 border-t border-b border-slate-200 bg-slate-50/40 flex items-center justify-between">
-                <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-600">Current Requests</h3>
-                <span className="text-xs font-semibold text-slate-500">{activeBookings.length}</span>
+            <div className="p-4 space-y-4 bg-white">
+              <div className="rounded-xl border border-emerald-200/80 overflow-hidden">
+                <div className="px-4 py-3 bg-emerald-50/50 border-b border-emerald-200 flex items-center justify-between">
+                  <div>
+                    <h3 className="text-[11px] font-bold uppercase tracking-widest text-emerald-700">Current Requests</h3>
+                    <p className="text-xs text-emerald-700/80 mt-1">Requests that still need attention or action</p>
+                  </div>
+                  <span className="px-2.5 py-1 rounded-full bg-white border border-emerald-200 text-emerald-700 text-xs font-bold">
+                    {activeBookings.length}
+                  </span>
+                </div>
+                {renderBookingsTable(activeBookings, 'No current requests.', 'bg-emerald-50/30')}
               </div>
-              {renderBookingsTable(activeBookings, 'No current requests.')}
 
-              <div className="px-4 py-3 border-t border-b border-slate-200 bg-slate-50/70 flex items-center justify-between">
-                <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-600">Past Requests</h3>
-                <span className="text-xs font-semibold text-slate-500">{pastBookings.length}</span>
+              <div className="rounded-xl border border-slate-200 overflow-hidden">
+                <div className="px-4 py-3 bg-slate-50/70 border-b border-slate-200 flex items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-[11px] font-bold uppercase tracking-widest text-slate-600">Past Requests</h3>
+                    <p className="text-xs text-slate-500 mt-1">Archived requests whose booking time has already passed</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="px-2.5 py-1 rounded-full bg-white border border-slate-200 text-slate-600 text-xs font-bold">
+                      {pastBookings.length}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowPastRequests((prev) => !prev)}
+                      className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-slate-600 hover:bg-slate-100 text-xs font-bold uppercase tracking-wide transition-colors"
+                    >
+                      {showPastRequests ? 'Hide' : 'Show'}
+                    </button>
+                  </div>
+                </div>
+                {showPastRequests && renderBookingsTable(pastBookings, 'No past requests.', 'bg-slate-50/80')}
               </div>
-              {renderBookingsTable(pastBookings, 'No past requests.')}
-            </>
+            </div>
           )}
         </div>
 
