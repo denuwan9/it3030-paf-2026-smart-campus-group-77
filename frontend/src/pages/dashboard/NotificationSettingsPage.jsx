@@ -62,15 +62,9 @@ const NotificationSettingsPage = () => {
   const fetchSettings = useCallback(async () => {
     try {
       const res = await notificationService.getSettings();
-      console.log('Notification settings response:', res);
-      if (res.success) {
-        setSettings(res.data);
-      } else {
-        toast.error(res.message || 'Could not load notification settings');
-      }
-    } catch (error) {
-      console.error('Fetch settings error:', error);
-      toast.error(error.response?.data?.message || 'Could not load notification settings');
+      if (res.success) setSettings(res.data);
+    } catch {
+      toast.error('Could not load notification settings');
     } finally {
       setLoading(false);
     }
@@ -89,16 +83,12 @@ const NotificationSettingsPage = () => {
     setSaving(true);
     try {
       const res = await notificationService.updateSettings(settings);
-      console.log('Update settings response:', res);
       if (res.success) {
         setSettings(res.data);
         toast.success('Notification preferences saved');
-      } else {
-        toast.error(res.message || 'Failed to save settings');
       }
-    } catch (error) {
-      console.error('Save settings error:', error);
-      toast.error(error.response?.data?.message || 'Failed to save settings');
+    } catch {
+      toast.error('Failed to save settings');
     } finally {
       setSaving(false);
     }

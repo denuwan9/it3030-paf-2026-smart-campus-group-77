@@ -1,0 +1,12 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Run Backend",
+			"type": "shell",
+			"command": "mvn clean compile exec:java -Dexec.mainClass=com.smartcampus.hub.SmartCampusApplication",
+			"isBackground": false,
+			"problemMatcher": []
+		}
+	]
+}

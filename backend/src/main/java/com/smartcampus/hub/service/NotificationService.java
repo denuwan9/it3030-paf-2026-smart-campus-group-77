@@ -225,13 +225,12 @@ public class NotificationService {
     }
 
     private NotificationSettingDTO toSettingDTO(NotificationSetting s) {
-        NotificationSettingDTO dto = NotificationSettingDTO.builder()
-                .emailEnabled(s.getEmailEnabled() != null ? s.getEmailEnabled() : true)
-                .bookingAlerts(s.getBookingAlerts() != null ? s.getBookingAlerts() : true)
-                .ticketAlerts(s.getTicketAlerts() != null ? s.getTicketAlerts() : true)
-                .systemAlerts(s.getSystemAlerts() != null ? s.getSystemAlerts() : true)
-                .announcementAlerts(s.getAnnouncementAlerts() != null ? s.getAnnouncementAlerts() : true)
-                .build();
+        NotificationSettingDTO dto = new NotificationSettingDTO();
+        dto.setEmailEnabled(s.getEmailEnabled());
+        dto.setBookingAlerts(s.getBookingAlerts());
+        dto.setTicketAlerts(s.getTicketAlerts());
+        dto.setSystemAlerts(s.getSystemAlerts());
+        dto.setAnnouncementAlerts(s.getAnnouncementAlerts());
         return dto;
     }
 }
