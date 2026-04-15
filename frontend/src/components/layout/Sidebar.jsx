@@ -32,6 +32,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
     },
     { 
+      label: 'User Management', 
+      to: '/admin/users', 
+      icon: ShieldCheck, 
+      roles: ['ROLE_ADMIN'] 
+    },
+    { 
       label: 'Resources', 
       to: '/resources', 
       icon: Package, 
@@ -42,12 +48,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       to: '/tickets', 
       icon: Ticket, 
       roles: ['ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
-    },
-    { 
-      label: 'Command Center', 
-      to: '/admin/users', 
-      icon: ShieldCheck, 
-      roles: ['ROLE_ADMIN'] 
     },
   ];
 
@@ -125,7 +125,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
             <div className="relative z-10 p-1.5 bg-rose-500/10 rounded-lg group-hover:bg-rose-500/20 transition-colors shadow-sm">
               <LogOut className="w-4.5 h-4.5" />
             </div>
-            <span className="relative z-10 text-sm">Disconnect Access</span>
+            <span className="relative z-10 text-sm">Logout</span>
           </button>
         </div>
       </aside>

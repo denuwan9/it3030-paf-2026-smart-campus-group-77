@@ -51,17 +51,17 @@ const WelcomeBanner = () => {
         </div>
         
         <div className="hidden lg:block">
-          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 shadow-2xl space-y-4 w-64 transform rotate-1 hover:rotate-0 transition-transform duration-500">
+          <div className="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 shadow-2xl space-y-4 w-72 transform rotate-1 hover:rotate-0 transition-transform duration-500">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-100/60">Campus Pulse</p>
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               {[
                 { label: 'Active Bookings', value: '02', color: 'bg-white' },
                 { label: 'System Status', value: 'Optimal', color: 'bg-emerald-300' },
                 { label: 'Unread Alerts', value: '05', color: 'bg-emerald-100' }
               ].map((stat, i) => (
-                <div key={i} className="flex items-center justify-between">
-                  <span className="text-xs font-bold text-white/90">{stat.label}</span>
-                  <span className={`text-xs font-black min-w-8 text-center py-0.5 rounded-lg text-emerald-900 ${stat.color}`}>
+                <div key={i} className="flex items-center justify-between gap-4">
+                  <span className="text-xs font-bold text-white/90 whitespace-nowrap">{stat.label}</span>
+                  <span className={`text-[10px] font-black min-w-[3rem] text-center px-2.5 py-1 rounded-lg text-emerald-900 shadow-sm ${stat.color}`}>
                     {stat.value}
                   </span>
                 </div>

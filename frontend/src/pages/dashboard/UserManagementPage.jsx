@@ -96,7 +96,7 @@ const UserManagementPage = () => {
       const response = await userService.getAllUsers();
       setUsers(response.data.data);
     } catch (error) {
-      toast.error('Failed to sync personnel registry node.');
+      toast.error('Failed to load user directory.');
       console.error(error);
     } finally {
       setLoading(false);
@@ -112,11 +112,11 @@ const UserManagementPage = () => {
     try {
       setIsUpdating(true);
       await userService.adminUpdateUser(selectedUser.id, { isActive: !selectedUser.isActive });
-      toast.success(`Protocol sequence: Node ${selectedUser.isActive ? 'DEACTIVATED' : 'ACTIVATED'} successfully.`);
+      toast.success(`User account ${selectedUser.isActive ? 'DEACTIVATED' : 'ACTIVATED'} successfully.`);
       fetchUsers();
       setShowStatusModal(false);
     } catch (error) {
-      toast.error('Strategic override failed. Please re-authenticate.');
+      toast.error('Update failed. Please check your permissions.');
     } finally {
       setIsUpdating(false);
     }
@@ -127,11 +127,11 @@ const UserManagementPage = () => {
     try {
       setIsUpdating(true);
       await userService.adminDeleteUser(selectedUser.id);
-      toast.success('Personnel record successfully purged from the registry.');
+      toast.success('User record successfully removed from the system.');
       fetchUsers();
       setShowDeleteModal(false);
     } catch (error) {
-      toast.error('Purge sequence aborted. System dependency conflict.');
+      toast.error('Delete operation failed. System dependency conflict.');
     } finally {
       setIsUpdating(false);
     }
@@ -160,7 +160,7 @@ const UserManagementPage = () => {
       }
       
       await userService.adminUpdateUser(selectedUser.id, data);
-      toast.success('Authorization node identity updated successfully.');
+      toast.success('User profile updated successfully.');
       fetchUsers();
       setShowEditModal(false);
       setEditData({ role: '', password: '' });
@@ -181,7 +181,7 @@ const UserManagementPage = () => {
 
   return (
     <div className="space-y-8 pb-10">
-      {/* COMMAND CENTER HEADER */}
+      {/* USER MANAGEMENT HEADER */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -199,10 +199,10 @@ const UserManagementPage = () => {
             </div>
             <div>
               <h1 className="text-2xl sm:text-4xl md:text-5xl font-black text-white tracking-widest uppercase">
-                COMMAND CENTER
+                User Management
               </h1>
               <p className="text-white/40 text-[10px] sm:text-xs md:text-sm font-bold tracking-[0.2em] sm:tracking-[0.3em] mt-1 sm:mt-2 uppercase truncate">
-                Strategic Platform Administration
+                Manage Platform Users and Permissions
               </p>
             </div>
           </div>
@@ -217,7 +217,7 @@ const UserManagementPage = () => {
               className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl flex items-center justify-center gap-2 text-white/50 hover:text-white transition-all font-black text-[10px] sm:text-xs tracking-widest group active:scale-95"
             >
               <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform ${loading ? 'animate-spin' : 'group-hover:rotate-180'}`} />
-              SYNC REGISTRY
+              REFRESH DATA
             </button>
           </div>
         </div>
@@ -231,9 +231,9 @@ const UserManagementPage = () => {
         className="bg-white rounded-[2rem] sm:rounded-[2.5rem] p-5 sm:p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6"
       >
         <div className="text-center md:text-left">
-          <h2 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">System Registry</h2>
+          <h2 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight">User Directory</h2>
           <p className="text-[9px] sm:text-[10px] font-black text-slate-400 tracking-[0.2em] uppercase mt-0.5">
-            Operational Personnel Management
+            Campus Access Management
           </p>
         </div>
         
@@ -242,7 +242,7 @@ const UserManagementPage = () => {
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
             <input 
               type="text" 
-              placeholder="Search personnel..."
+              placeholder="Search users..."
               className="w-full pl-10 pr-4 py-3 bg-slate-50 border-transparent rounded-xl sm:rounded-2xl text-xs sm:text-sm font-medium focus:bg-white focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500/20 transition-all outline-none"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -251,27 +251,27 @@ const UserManagementPage = () => {
         </div>
       </motion.div>
 
-      {/* PERSONNEL REGISTRY LIST */}
+      {/* USER LISTING */}
       <div className="space-y-6">
         <div className="grid grid-cols-12 px-6 sm:px-8 text-[10px] font-black text-slate-400 tracking-[0.2em] uppercase">
-          <div className="col-span-12 lg:col-span-3">Operator Identity</div>
-          <div className="hidden lg:block lg:col-span-3">Registry Endpoint</div>
-          <div className="hidden md:block md:col-span-3 lg:col-span-2">Authorization</div>
+          <div className="col-span-12 lg:col-span-3">User Identity</div>
+          <div className="hidden lg:block lg:col-span-3">Email Address</div>
+          <div className="hidden md:block md:col-span-3 lg:col-span-2">Role</div>
           <div className="hidden md:block md:col-span-3 lg:col-span-2 text-center">Status</div>
-          <div className="hidden md:block md:col-span-6 lg:col-span-2 text-right">Protocol</div>
+          <div className="hidden md:block md:col-span-6 lg:col-span-2 text-right">Actions</div>
         </div>
         
         <div className="space-y-4">
           <AnimatePresence mode='popLayout'>
             {loading ? (
-              <div className="flex flex-col items-center justify-center py-16 sm:py-20 bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 space-y-4">
+              <div className="flex flex-col items-center justify-center py-12 sm:py-20 bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-slate-100 space-y-4">
                 <Loader2 className="w-10 h-10 sm:w-12 sm:h-12 text-indigo-500 animate-spin" />
-                <p className="text-[10px] font-black text-slate-400 tracking-[0.4em] uppercase animate-pulse">Establishing Secure Stream...</p>
+                <p className="text-[10px] font-black text-slate-400 tracking-[0.4em] uppercase animate-pulse">Loading User Records...</p>
               </div>
             ) : filteredUsers.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-16 sm:py-20 bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-dashed border-slate-200">
+              <div className="flex flex-col items-center justify-center py-12 sm:py-20 bg-white rounded-[2rem] sm:rounded-[2.5rem] border border-dashed border-slate-200">
                 <Users className="w-10 h-10 sm:w-12 sm:h-12 text-slate-200 mb-4" />
-                <p className="text-xs sm:text-sm font-bold text-slate-500 px-4 text-center">No personnel records detected in the current node cache.</p>
+                <p className="text-xs sm:text-sm font-bold text-slate-500 px-4 text-center">No users matching your search were detected.</p>
               </div>
             ) : (
               filteredUsers.map((user, idx) => (
@@ -295,7 +295,7 @@ const UserManagementPage = () => {
                     <div className="min-w-0">
                       <h3 className="font-bold text-slate-800 group-hover:text-indigo-600 transition-colors uppercase tracking-tight text-xs sm:text-sm truncate">{user.fullName}</h3>
                       <p className="text-[8px] sm:text-[9px] font-black text-slate-400 tracking-widest uppercase truncate">
-                        {user.role?.replace('ROLE_', '')} PERSONNEL
+                        {user.role?.replace('ROLE_', '')} ACCOUNT
                       </p>
                     </div>
                   </div>
@@ -320,7 +320,7 @@ const UserManagementPage = () => {
                         : 'bg-rose-50 text-rose-600 border-rose-100'
                     }`}>
                       <span className={`w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full ${user.isActive ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
-                      {user.isActive ? 'Active' : 'Offline'}
+                      {user.isActive ? 'Active' : 'Deactivated'}
                     </span>
                   </div>
                   
@@ -332,7 +332,7 @@ const UserManagementPage = () => {
                           ? 'bg-amber-50 text-amber-500 border-amber-100 hover:bg-amber-500 hover:text-white' 
                           : 'bg-emerald-50 text-emerald-500 border-emerald-100 hover:bg-emerald-500 hover:text-white'
                       }`}
-                      title={user.isActive ? 'Deactivate Authorization' : 'Activate Authorization'}
+                      title={user.isActive ? 'Deactivate Account' : 'Activate Account'}
                     >
                       {user.isActive ? <Ban className="w-4 h-4 sm:w-4.5 sm:h-4.5" /> : <UserCheck className="w-4 h-4 sm:w-4.5 sm:h-4.5" />}
                     </button>
@@ -343,14 +343,14 @@ const UserManagementPage = () => {
                         setShowEditModal(true); 
                       }}
                       className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white text-slate-400 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all transform hover:scale-110 active:scale-95 shadow-sm border border-slate-100"
-                      title="Update Identity Parameters"
+                      title="Edit User Details"
                     >
                       <Key className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                     </button>
                     <button 
                       onClick={() => { setSelectedUser(user); setShowDeleteModal(true); }}
                       className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-white text-slate-400 flex items-center justify-center hover:bg-rose-600 hover:text-white transition-all transform hover:scale-110 active:scale-95 shadow-sm border border-slate-100"
-                      title="Secure Record Purge"
+                      title="Delete User Record"
                     >
                       <Trash2 className="w-4 h-4 sm:w-4.5 sm:h-4.5" />
                     </button>
@@ -407,7 +407,7 @@ const UserManagementPage = () => {
           </div>
           <div className="text-center">
             <p className="text-slate-600">
-              This action initiates a <span className="text-rose-600 font-bold">TOTAL PURGE</span> of user records for:
+              This action initiates a <span className="text-rose-600 font-bold">PERMANENT DELETION</span> of user records for:
             </p>
             <p className="text-2xl font-black text-slate-800 tracking-tighter mt-1">{selectedUser?.fullName}</p>
           </div>
@@ -417,7 +417,7 @@ const UserManagementPage = () => {
               <span className="text-[10px] font-black uppercase tracking-widest text-rose-700">Irreversible Action</span>
             </div>
             <p className="text-xs text-rose-600/70 font-medium leading-relaxed">
-              Purging a personnel record removes all associated data, logs, and security clearance permanently. This sequence cannot be aborted once confirmed.
+              Deleting a user record removes all associated data and security clearance permanently. This action cannot be undone once confirmed.
             </p>
           </div>
         </div>
@@ -438,7 +438,7 @@ const UserManagementPage = () => {
                 <Users className="w-5 h-5" />
              </div>
              <div>
-                <p className="text-xs font-black text-slate-400 uppercase tracking-widest leading-none">Target Personnel</p>
+                <p className="text-xs font-black text-slate-400 uppercase tracking-widest leading-none">Target User</p>
                 <p className="text-sm font-bold text-slate-800 mt-1">{selectedUser?.fullName}</p>
              </div>
           </div>
