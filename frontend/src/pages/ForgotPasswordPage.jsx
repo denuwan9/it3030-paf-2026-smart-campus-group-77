@@ -1,14 +1,13 @@
-import React from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useState } from 'react';
+import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Link } from 'react-router-dom';
-import { Mail, ArrowLeft, RefreshCw, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Mail, ArrowLeft, RefreshCw, Sparkles, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import axiosInstance from '../api/axiosInstance';
 import FormInput from '../components/common/FormInput';
-import { FormProvider } from 'react-hook-form';
 import logo from '../assets/logo.png';
 
 const schema = z.object({
@@ -20,6 +19,9 @@ const schema = z.object({
 });
 
 const ForgotPasswordPage = () => {
+  const [isSent, setIsSent] = useState(false);
+  const [submittedEmail, setSubmittedEmail] = useState('');
+
   const methods = useForm({
     resolver: zodResolver(schema),
     mode: 'onChange'
@@ -30,10 +32,12 @@ const ForgotPasswordPage = () => {
   const onSubmit = async (data) => {
     try {
       const response = await axiosInstance.post('/auth/forgot-password', data);
+      setSubmittedEmail(data.email);
+      setIsSent(true);
       toast.success(response.data.message || 'Reset link sent if account exists');
     } catch (error) {
-      // toast.error is handled by axiosInstance interceptor generally, 
-      // but we can add specific handling if needed
+      const errorMsg = error?.response?.data?.message || 'Failed to initiate recovery';
+      toast.error(errorMsg);
     }
   };
 
