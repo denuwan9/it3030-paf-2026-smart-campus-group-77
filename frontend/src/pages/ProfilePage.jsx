@@ -147,10 +147,21 @@ const ProfilePage = () => {
     }
   };
 
-  const handleImageSuccess = (url) => {
+  const handleImageSuccess = async (url) => {
     setProfileImageUrl(url);
-    // Automatically save profile image update? Or let user click save?
-    // User expects to click "Save Changes" for everything.
+    
+    // Auto-save the image to the backend immediately
+    try {
+      const currentValues = profileForm.getValues();
+      const updateData = { ...currentValues, profileImageUrl: url };
+      const response = await userService.updateProfile(updateData);
+      
+      if (response.data.success) {
+        updateUserProfile(response.data.data);
+      }
+    } catch (error) {
+      toast.error('Failed to save profile photo to database');
+    }
   };
 
   return (
