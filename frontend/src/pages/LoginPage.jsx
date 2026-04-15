@@ -86,35 +86,34 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-4 sm:p-6 lg:p-8">
+    <div className="min-h-screen flex items-center justify-center bg-slate-100 p-3 sm:p-6 lg:p-8">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-[1100px] flex flex-col md:flex-row bg-white rounded-3xl sm:rounded-[2.5rem] shadow-2xl overflow-hidden md:min-h-[700px]"
       >
         {/* Left Side: Illustration & Branding */}
-        <div className="hidden md:flex md:w-1/2 bg-nexer-bg-accent p-12 flex-col justify-between items-center text-center relative overflow-hidden">
+        <div className="hidden md:flex md:w-1/2 bg-nexer-bg-accent p-8 lg:p-12 flex-col justify-between items-center text-center relative overflow-hidden">
           
-          
-          <div className="flex-1 flex flex-col justify-center items-center gap-10">
+          <div className="flex-1 flex flex-col justify-center items-center gap-6 lg:gap-10">
             <motion.img 
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
               src={loginIllustration} 
               alt="SLIIT Nexer Illustration" 
-              className="max-h-[350px] object-contain drop-shadow-2xl"
+              className="max-h-[250px] lg:max-h-[350px] object-contain drop-shadow-2xl"
             />
             
-            <div className="space-y-8">
-              <h2 className="text-3xl font-black text-slate-800 tracking-tight">
+            <div className="space-y-4 lg:space-y-8">
+              <h2 className="text-2xl lg:text-3xl font-black text-slate-800 tracking-tight">
                 University Resource Management
               </h2>
-              <p className="text-slate-600 max-w-[620px] font-medium leading-relaxed">
+              <p className="text-slate-600 max-w-[620px] font-medium leading-relaxed text-sm lg:text-base">
                 The centralized operations hub for students to explore, manage, and succeed in the smart campus.
               </p>
               
-              <div className="flex justify-center gap-2 mt-6">
+              <div className="flex justify-center gap-2 mt-4 lg:mt-6">
                 <div className="w-8 h-2 bg-nexer-brand-primary rounded-full" />
                 <div className="w-2 h-2 bg-slate-300 rounded-full" />
                 <div className="w-2 h-2 bg-slate-300 rounded-full" />
@@ -124,16 +123,16 @@ const LoginPage = () => {
         </div>
 
         {/* Right Side: Login Form */}
-        <div className="w-full md:w-1/2 p-6 sm:p-8 lg:p-12 flex flex-col justify-center relative bg-white">
-          <div className="mb-8 flex flex-col items-start gap-6">
-            <div className="w-16 h-16 bg-white rounded-3xl flex items-center justify-center shadow-nexer-sm border border-slate-100 p-2 transform -rotate-3 hover:rotate-0 transition-transform">
+        <div className="w-full md:w-1/2 p-5 sm:p-8 lg:p-12 flex flex-col justify-center relative bg-white">
+          <div className="mb-6 sm:mb-8 flex flex-col items-start gap-4 sm:gap-6">
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-white rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-nexer-sm border border-slate-100 p-1.5 sm:p-2 transform -rotate-3 hover:rotate-0 transition-transform">
               <img src={logo} alt="SLIIT Nexer" className="w-full h-full object-contain" />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight mb-2">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 tracking-tight mb-1 sm:mb-2">
                 Welcome to SLIIT Nexar
               </h1>
-              <p className="text-sm sm:text-base text-slate-500 font-medium">
+              <p className="text-xs sm:text-sm lg:text-base text-slate-500 font-medium">
                 Please login to your system account
               </p>
             </div>

@@ -72,30 +72,30 @@ const ResetPasswordPage = () => {
   }
 
   return (
-    <div className="flex items-center justify-center p-4 min-h-[80vh]">
+    <div className="flex items-center justify-center min-h-[85vh] p-4 sm:p-6">
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md bg-white border border-slate-100 p-8 sm:p-10 rounded-[2.5rem] shadow-nexer-lg relative overflow-hidden"
+        className="w-full max-w-md bg-white border border-slate-100 p-6 sm:p-10 rounded-[2rem] sm:rounded-[2.5rem] shadow-nexer-lg relative overflow-hidden"
       >
-        <div className="absolute top-0 left-0 w-full h-2 bg-nexer-brand-secondary" />
+        <div className="absolute top-0 left-0 w-full h-1.5 sm:h-2 bg-nexer-brand-secondary" />
         
-        <div className="text-center mb-10 flex flex-col items-center">
-          <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center shadow-nexer-sm border border-slate-100 p-3 mb-6 relative group">
+        <div className="text-center mb-8 sm:mb-10 flex flex-col items-center">
+          <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-nexer-sm border border-slate-100 p-2.5 sm:p-3 mb-5 sm:mb-6 relative group">
              <img src={logo} alt="SLIIT Nexer" className="w-full h-full object-contain group-hover:scale-110 transition-transform" />
-             <div className="absolute -top-2 -right-2 w-8 h-8 bg-nexer-brand-secondary/10 rounded-2xl flex items-center justify-center border border-white">
-                <ShieldCheck className="w-5 h-5 text-nexer-brand-secondary" />
+             <div className="absolute -top-1.5 -right-1.5 w-6 h-6 sm:w-8 sm:h-8 bg-nexer-brand-secondary/10 rounded-xl sm:rounded-2xl flex items-center justify-center border border-white">
+                <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5 text-nexer-brand-secondary" />
              </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Set New Password</h1>
-          <p className="text-slate-500 font-medium mt-3">
+          <h1 className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">Set New Password</h1>
+          <p className="text-slate-500 text-xs sm:text-sm font-medium mt-2 sm:mt-3 px-2 sm:px-4">
             Choose a strong, unique password for your SLIIT Nexer account.
           </p>
         </div>
 
         <FormProvider {...methods}>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5 sm:space-y-6">
             <FormInput 
               name="newPassword" 
               label="New Password" 
@@ -113,11 +113,11 @@ const ResetPasswordPage = () => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary w-full flex items-center justify-center gap-2 group h-12 bg-nexer-brand-secondary hover:bg-nexer-brand-secondary/90 shadow-nexer-md shadow-nexer-brand-secondary/20"
+              className="btn-primary w-full flex items-center justify-center gap-2 group h-11 sm:h-12 bg-nexer-brand-secondary hover:bg-nexer-brand-secondary/90 shadow-nexer-md shadow-nexer-brand-secondary/20 text-xs sm:text-sm font-black"
             >
               {isSubmitting ? (
                 <>
-                  <div className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+                  <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 sm:border-3 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>Updating Security...</span>
                 </>
               ) : (
@@ -130,7 +130,7 @@ const ResetPasswordPage = () => {
           </form>
         </FormProvider>
 
-        <div className="mt-10 pt-8 border-t border-slate-50 text-center text-xs font-bold text-slate-400">
+        <div className="mt-8 sm:mt-10 pt-6 sm:pt-8 border-t border-slate-50 text-center text-[10px] sm:text-xs font-bold text-slate-400">
            SLIIT Nexer SECURITY PROTOCOL V1.0
         </div>
       </motion.div>

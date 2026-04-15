@@ -154,20 +154,19 @@ const ProfilePage = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-4 sm:px-6 lg:px-8">
+    <div className="max-w-4xl mx-auto py-6 sm:py-10 px-3 sm:px-6 lg:px-8">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">Account Core</h1>
-          <p className="text-slate-500 font-medium mt-1">Manage your identity, visibility, and security.</p>
+        <div className="text-center md:text-left">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">Account Core</h1>
+          <p className="text-slate-500 text-xs sm:text-sm font-medium mt-1">Manage your identity, visibility, and security.</p>
         </div>
-        <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex bg-slate-100 p-1.5 rounded-2xl border border-slate-200 shadow-sm w-full md:w-auto">
           {['profile', 'security'].map((tab) => (
-
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+              className={`flex-1 md:flex-none px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${
                 activeTab === tab 
                   ? 'bg-white text-blue-600 shadow-nexer-sm' 
                   : 'text-slate-400 hover:text-slate-600'
@@ -179,10 +178,10 @@ const ProfilePage = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10">
         {/* Left Column: Avatar & Quick Info */}
-        <div className="lg:col-span-1 space-y-8">
-          <div className="bg-white border border-slate-100 p-8 rounded-[2.5rem] shadow-nexer-sm flex flex-col items-center text-center">
+        <div className="lg:col-span-1 space-y-6 sm:space-y-8">
+          <div className="bg-white border border-slate-100 p-6 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] shadow-nexer-sm flex flex-col items-center text-center">
             <ImageUpload 
               currentImage={profileImageUrl} 
               onUploadSuccess={handleImageSuccess} 
@@ -190,15 +189,15 @@ const ProfilePage = () => {
             
             <div className="mt-6">
               <h2 className="text-xl font-black text-slate-900">{user?.fullName}</h2>
-              <p className="text-sm text-slate-400 font-medium">{user?.email}</p>
+              <p className="text-xs sm:text-sm text-slate-400 font-medium">{user?.email}</p>
             </div>
 
-            <div className="w-full mt-8 pt-8 border-t border-slate-50 space-y-4">
-              <div className="flex items-center gap-3 text-slate-500 text-sm">
+            <div className="w-full mt-6 sm:mt-8 pt-6 sm:pt-8 border-t border-slate-50 space-y-4">
+              <div className="flex items-center gap-3 text-slate-500 text-xs sm:text-sm">
                 <Calendar className="w-4 h-4" />
                 <span className="font-medium">Joined Mar 2026</span>
               </div>
-              <div className="flex items-center gap-3 text-slate-500 text-sm">
+              <div className="flex items-center gap-3 text-slate-500 text-xs sm:text-sm">
                 <MapPin className="w-4 h-4" />
                 <span className="font-medium">Colombo, Sri Lanka</span>
               </div>
@@ -207,8 +206,8 @@ const ProfilePage = () => {
 
           <div className="bg-slate-900 rounded-[2rem] p-6 text-white overflow-hidden relative group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/20 rounded-full blur-3xl -mr-16 -mt-16 group-hover:scale-110 transition-transform" />
-            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Verified Identity</h3>
-            <p className="text-xs text-slate-300 leading-relaxed font-medium">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Verified Identity</h3>
+            <p className="text-[11px] text-slate-300 leading-relaxed font-medium">
               Your profile is linked to the SLIIT Academic Registry. Critical changes may require administrative approval.
             </p>
           </div>
@@ -221,80 +220,80 @@ const ProfilePage = () => {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               onSubmit={profileForm.handleSubmit(onProfileSubmit)} 
-              className="bg-white border border-slate-100 rounded-[2.5rem] shadow-nexer-sm overflow-hidden"
+              className="bg-white border border-slate-100 rounded-[2rem] sm:rounded-[2.5rem] shadow-nexer-sm overflow-hidden"
             >
-              <div className="p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
-                <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
+              <div className="p-6 sm:p-8 border-b border-slate-50 flex items-center justify-between bg-slate-50/30">
+                <h3 className="text-base sm:text-lg font-black text-slate-800 flex items-center gap-2">
                   <User className="w-5 h-5 text-blue-600" />
                   Personal Information
                 </h3>
               </div>
 
-              <div className="p-8 space-y-6">
+              <div className="p-5 sm:p-8 space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                       <User className="w-3.5 h-3.5" /> Full Name
                     </label>
                     <input 
                       {...profileForm.register('fullName')}
-                      className={`w-full px-4 py-3 bg-slate-50 border ${profileForm.formState.errors.fullName ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-800`}
+                      className={`w-full px-4 py-3 bg-slate-50 border ${profileForm.formState.errors.fullName ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-800 text-sm sm:text-base`}
                     />
-                    {profileForm.formState.errors.fullName && <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{profileForm.formState.errors.fullName.message}</p>}
+                    {profileForm.formState.errors.fullName && <p className="text-[8px] sm:text-[10px] font-black text-rose-500 uppercase tracking-widest">{profileForm.formState.errors.fullName.message}</p>}
                   </div>
 
                   <div className="space-y-2 opacity-60">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                       <Mail className="w-3.5 h-3.5" /> Institutional Email
                     </label>
-                    <div className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-2xl font-bold text-slate-500 cursor-not-allowed">
+                    <div className="w-full px-4 py-3 bg-slate-100 border border-slate-200 rounded-2xl font-bold text-slate-500 cursor-not-allowed text-sm sm:text-base">
                       {user?.email}
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                       <Phone className="w-3.5 h-3.5" /> Phone Number
                     </label>
                     <input 
                       {...profileForm.register('phoneNumber')}
                       placeholder="+94 7X XXX XXXX"
-                      className={`w-full px-4 py-3 bg-slate-50 border ${profileForm.formState.errors.phoneNumber ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-800`}
+                      className={`w-full px-4 py-3 bg-slate-50 border ${profileForm.formState.errors.phoneNumber ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-800 text-sm sm:text-base`}
                     />
-                    {profileForm.formState.errors.phoneNumber && <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{profileForm.formState.errors.phoneNumber.message}</p>}
+                    {profileForm.formState.errors.phoneNumber && <p className="text-[8px] sm:text-[10px] font-black text-rose-500 uppercase tracking-widest">{profileForm.formState.errors.phoneNumber.message}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                       <Building className="w-3.5 h-3.5" /> Department / Unit
                     </label>
                     <input 
                       {...profileForm.register('department')}
                       placeholder="e.g. Computing Cabinet"
-                      className={`w-full px-4 py-3 bg-slate-50 border ${profileForm.formState.errors.department ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-800`}
+                      className={`w-full px-4 py-3 bg-slate-50 border ${profileForm.formState.errors.department ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-800 text-sm sm:text-base`}
                     />
-                    {profileForm.formState.errors.department && <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{profileForm.formState.errors.department.message}</p>}
+                    {profileForm.formState.errors.department && <p className="text-[8px] sm:text-[10px] font-black text-rose-500 uppercase tracking-widest">{profileForm.formState.errors.department.message}</p>}
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                     <FileText className="w-3.5 h-3.5" /> Bio / Brief Description
                   </label>
                   <textarea 
                     {...profileForm.register('bio')}
                     rows={4}
                     placeholder="Tell us about your campus role..."
-                    className={`w-full px-4 py-3 bg-slate-50 border ${profileForm.formState.errors.bio ? 'border-rose-500' : 'border-slate-100'} rounded-3xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-800 resize-none`}
+                    className={`w-full px-4 py-3 bg-slate-50 border ${profileForm.formState.errors.bio ? 'border-rose-500' : 'border-slate-100'} rounded-3xl focus:ring-4 focus:ring-blue-600/5 focus:border-blue-600 outline-none transition-all font-bold text-slate-800 resize-none text-sm sm:text-base`}
                   />
-                  {profileForm.formState.errors.bio && <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{profileForm.formState.errors.bio.message}</p>}
+                  {profileForm.formState.errors.bio && <p className="text-[8px] sm:text-[10px] font-black text-rose-500 uppercase tracking-widest">{profileForm.formState.errors.bio.message}</p>}
                 </div>
 
                 <div className="pt-6 border-t border-slate-50">
                   <button 
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full sm:w-auto px-8 py-4 bg-slate-900 hover:bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-slate-900/10 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-slate-900 hover:bg-blue-600 text-white font-black rounded-2xl shadow-xl shadow-slate-900/10 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 group text-xs sm:text-sm"
                   >
                     {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
                     Save Identity
@@ -304,32 +303,30 @@ const ProfilePage = () => {
             </motion.form>
           )}
 
-
-
           {activeTab === 'security' && (
             <motion.form 
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               onSubmit={passwordForm.handleSubmit(onPasswordSubmit)}
-              className="bg-white border border-slate-100 rounded-[2.5rem] shadow-nexer-sm overflow-hidden"
+              className="bg-white border border-slate-100 rounded-[2rem] sm:rounded-[2.5rem] shadow-nexer-sm overflow-hidden"
             >
-              <div className="p-8 border-b border-slate-50 bg-slate-50/30">
-                <h3 className="text-lg font-black text-slate-800 flex items-center gap-2">
+              <div className="p-6 sm:p-8 border-b border-slate-50 bg-slate-50/30">
+                <h3 className="text-base sm:text-lg font-black text-slate-800 flex items-center gap-2">
                   <Lock className="w-5 h-5 text-rose-600" />
                   Security Credential Update
                 </h3>
               </div>
 
-              <div className="p-8 space-y-6">
+              <div className="p-5 sm:p-8 space-y-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                     <Shield className="w-3.5 h-3.5" /> Current Password
                   </label>
                   <div className="relative">
                     <input 
                       type={showCurrentPw ? 'text' : 'password'}
                       {...passwordForm.register('currentPassword')}
-                      className={`w-full px-4 py-3 pr-12 bg-slate-50 border ${passwordForm.formState.errors.currentPassword ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-rose-600/5 focus:border-rose-600 outline-none transition-all font-bold text-slate-800`}
+                      className={`w-full px-4 py-3 pr-12 bg-slate-50 border ${passwordForm.formState.errors.currentPassword ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-rose-600/5 focus:border-rose-600 outline-none transition-all font-bold text-slate-800 text-sm sm:text-base`}
                     />
                     <button 
                       type="button" 
@@ -339,19 +336,19 @@ const ProfilePage = () => {
                       {showCurrentPw ? <EyeOffIcon className="w-5 h-5" /> : <EyeIcon className="w-5 h-5" />}
                     </button>
                   </div>
-                  {passwordForm.formState.errors.currentPassword && <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{passwordForm.formState.errors.currentPassword.message}</p>}
+                  {passwordForm.formState.errors.currentPassword && <p className="text-[8px] sm:text-[10px] font-black text-rose-500 uppercase tracking-widest">{passwordForm.formState.errors.currentPassword.message}</p>}
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
                       <Unlock className="w-3.5 h-3.5" /> New Access Password
                     </label>
                     <div className="relative">
                       <input 
                         type={showNewPw ? 'text' : 'password'}
                         {...passwordForm.register('newPassword')}
-                        className={`w-full px-4 py-3 pr-12 bg-slate-50 border ${passwordForm.formState.errors.newPassword ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-rose-600/5 focus:border-rose-600 outline-none transition-all font-bold text-slate-800`}
+                        className={`w-full px-4 py-3 pr-12 bg-slate-50 border ${passwordForm.formState.errors.newPassword ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-rose-600/5 focus:border-rose-600 outline-none transition-all font-bold text-slate-800 text-sm sm:text-base`}
                       />
                       <button 
                         type="button" 
@@ -362,10 +359,10 @@ const ProfilePage = () => {
                       </button>
                     </div>
                     {/* Strength Indicator */}
-                    <div className="space-y-2 mt-3 p-1.5 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="space-y-2 mt-3 p-2 bg-slate-50 rounded-xl border border-slate-100">
                       <div className="flex justify-between items-center px-1">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Strength Level</span>
-                        <span className={`text-[10px] font-black uppercase tracking-widest ${passwordStrength.color.replace('bg-', 'text-')}`}>
+                        <span className="text-[9px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">Strength Level</span>
+                        <span className={`text-[9px] sm:text-[10px] font-black uppercase tracking-widest ${passwordStrength.color.replace('bg-', 'text-')}`}>
                           {passwordStrength.label}
                         </span>
                       </div>
@@ -378,17 +375,17 @@ const ProfilePage = () => {
                         ))}
                       </div>
                     </div>
-                    {passwordForm.formState.errors.newPassword && <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{passwordForm.formState.errors.newPassword.message}</p>}
+                    {passwordForm.formState.errors.newPassword && <p className="text-[8px] sm:text-[10px] font-black text-rose-500 uppercase tracking-widest">{passwordForm.formState.errors.newPassword.message}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Confirm Access</label>
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Confirm Access</label>
                     <input 
                       type="password"
                       {...passwordForm.register('confirmPassword')}
-                      className={`w-full px-4 py-3 bg-slate-50 border ${passwordForm.formState.errors.confirmPassword ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-rose-600/5 focus:border-rose-600 outline-none transition-all font-bold text-slate-800`}
+                      className={`w-full px-4 py-3 bg-slate-50 border ${passwordForm.formState.errors.confirmPassword ? 'border-rose-500' : 'border-slate-100'} rounded-2xl focus:ring-4 focus:ring-rose-600/5 focus:border-rose-600 outline-none transition-all font-bold text-slate-800 text-sm sm:text-base`}
                     />
-                    {passwordForm.formState.errors.confirmPassword && <p className="text-[10px] font-black text-rose-500 uppercase tracking-widest">{passwordForm.formState.errors.confirmPassword.message}</p>}
+                    {passwordForm.formState.errors.confirmPassword && <p className="text-[8px] sm:text-[10px] font-black text-rose-500 uppercase tracking-widest">{passwordForm.formState.errors.confirmPassword.message}</p>}
                   </div>
                 </div>
 
@@ -396,13 +393,13 @@ const ProfilePage = () => {
                   <button 
                     type="submit"
                     disabled={isSubmitting || passwordStrength.score < 3}
-                    className="w-full sm:w-auto px-8 py-4 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-2xl shadow-xl shadow-rose-900/10 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3"
+                    className="w-full sm:w-auto px-8 py-3.5 bg-rose-600 hover:bg-rose-700 text-white font-black rounded-2xl shadow-xl shadow-rose-900/10 transition-all active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-3 text-xs sm:text-sm"
                   >
                     {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Lock className="w-5 h-5" />}
                     Authorize Change
                   </button>
                   {passwordStrength.score < 3 && newPasswordValue && (
-                    <p className="text-[10px] font-black text-rose-400 uppercase tracking-widest mt-2">Requirement: Minimum 'Fair' intensity is required to proceed.</p>
+                    <p className="text-[9px] sm:text-[10px] font-black text-rose-400 uppercase tracking-widest mt-2">Requirement: Minimum 'Fair' intensity is required to proceed.</p>
                   )}
                 </div>
               </div>
