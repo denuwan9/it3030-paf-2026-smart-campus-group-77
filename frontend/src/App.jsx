@@ -22,6 +22,7 @@ import UserDashboard from './pages/dashboard/UserDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 import TechnicianDashboard from './pages/dashboard/TechnicianDashboard';
 import UserManagementPage from './pages/dashboard/UserManagementPage';
+import NotificationSettingsPage from './pages/dashboard/NotificationSettingsPage';
 
 
 
@@ -107,6 +108,13 @@ function App() {
             <Route path="/profile" element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            } />
+
+            {/* Notification Settings (all logged-in roles) */}
+            <Route path="/notifications/settings" element={
+              <ProtectedRoute>
+                <NotificationSettingsPage />
               </ProtectedRoute>
             } />
           </Route>
