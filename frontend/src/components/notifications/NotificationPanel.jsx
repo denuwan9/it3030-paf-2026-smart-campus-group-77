@@ -267,10 +267,10 @@ const NotificationPanel = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.97 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute right-0 top-[calc(100%+12px)] w-[380px] bg-white rounded-3xl shadow-nexer-md border border-slate-100 z-50 overflow-hidden"
+            className="absolute right-0 top-[calc(100%+12px)] w-[calc(100vw-32px)] sm:w-[380px] bg-white rounded-3xl shadow-nexer-md border border-slate-100 z-50 overflow-hidden"
           >
             {/* Panel header */}
-            <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-slate-50">
+            <div className="flex items-center justify-between px-4 sm:px-5 pt-4 sm:pt-5 pb-3 border-b border-slate-50">
               <div>
                 <h3 className="text-sm font-black text-nexer-text-header">Notifications</h3>
                 {unreadCount > 0 && (
