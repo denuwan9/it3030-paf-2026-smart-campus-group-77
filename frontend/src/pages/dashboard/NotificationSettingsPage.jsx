@@ -62,9 +62,19 @@ const NotificationSettingsPage = () => {
   const fetchSettings = useCallback(async () => {
     try {
       const res = await notificationService.getSettings();
-      if (res.success) setSettings(res.data);
-    } catch {
-      toast.error('Could not load notification settings');
+      if (res.success) {
+        setSettings(res.data);
+      } else {
+        // Use defaults so the page still renders; user can still toggle and save
+        setSettings({ emailEnabled: true, bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true });
+        toast.error(res.message || 'Could not load notification settings');
+      }
+    } catch (error) {
+      // Show the real backend error if available
+      const msg = error?.response?.data?.message || error?.message || 'Could not load notification settings';
+      toast.error(msg);
+      // Use defaults so the page still renders
+      setSettings({ emailEnabled: true, bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true });
     } finally {
       setLoading(false);
     }
@@ -85,10 +95,14 @@ const NotificationSettingsPage = () => {
       const res = await notificationService.updateSettings(settings);
       if (res.success) {
         setSettings(res.data);
-        toast.success('Notification preferences saved');
+        toast.success('Notification preferences saved!');
+      } else {
+        toast.error(res.message || 'Failed to save settings');
       }
-    } catch {
-      toast.error('Failed to save settings');
+    } catch (error) {
+      // Show the actual backend error message for easier debugging
+      const msg = error?.response?.data?.message || error?.message || 'Failed to save settings';
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
