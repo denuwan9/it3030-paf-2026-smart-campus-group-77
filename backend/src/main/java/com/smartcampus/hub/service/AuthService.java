@@ -128,19 +128,24 @@ public class AuthService {
 
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
+        // Silently succeed if email not found — prevents email enumeration attacks.
+        // The controller always returns the same generic message regardless.
         User user = userRepository.findByEmail(request.getEmail().toLowerCase())
-                .orElseThrow(() -> new RuntimeException("No account found with this email"));
+                .orElse(null);
 
-        // Delete existing token if any
-        tokenRepository.deleteByUser(user);
+        if (user == null) {
+            // Don't reveal that the email doesn't exist
+            return;
+        }
 
-        // Generate new token (UUID)
+        // Fetch existing token or create a new one to avoid Hibernate duplicate key constraint on insert-after-delete
+        PasswordResetToken resetToken = tokenRepository.findByUser(user)
+                .orElse(new PasswordResetToken());
+
         String token = UUID.randomUUID().toString();
-        PasswordResetToken resetToken = PasswordResetToken.builder()
-                .token(token)
-                .user(user)
-                .expiryDate(Instant.now().plus(15, ChronoUnit.MINUTES))
-                .build();
+        resetToken.setToken(token);
+        resetToken.setUser(user);
+        resetToken.setExpiryDate(Instant.now().plus(15, ChronoUnit.MINUTES));
 
         tokenRepository.save(resetToken);
 

@@ -48,7 +48,8 @@ const ResetPasswordPage = () => {
       toast.success(response.data.message || 'Password reset successful!');
       navigate('/login');
     } catch (error) {
-      // toast.error is handled by axiosInstance interceptor
+      const errorMsg = error?.response?.data?.message || 'Failed to reset password. The link might be expired.';
+      toast.error(errorMsg);
     }
   };
 
