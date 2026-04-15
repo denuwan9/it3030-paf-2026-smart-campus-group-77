@@ -1,0 +1,10 @@
+{
+    "java.debug.settings.onBuildFailureProceed": true,
+    "java.import.maven.enabled": true,
+    "java.project.referencedLibraries": [
+        "backend/target/**/*.jar"
+    ],
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.autobuild.enabled": true,
+    "spring-boot.ls.java.home": "${env:JAVA_HOME}"
+}

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import NotificationPanel from '../components/notifications/NotificationPanel';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
@@ -8,7 +9,6 @@ import {
   LogOut, 
   Menu, 
   X, 
-  Bell, 
   Search,
   ChevronRight,
   Package,
@@ -180,10 +180,7 @@ const DashboardLayout = () => {
               />
             </div>
             
-            <button className="relative p-2.5 text-slate-400 hover:bg-slate-50 hover:text-nexer-brand-primary rounded-2xl transition-all border border-transparent hover:border-slate-100">
-              <Bell className="w-5.5 h-5.5" />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-nexer-status-error rounded-full border-2 border-white" />
-            </button>
+            <NotificationPanel />
 
             <div className="h-10 w-px bg-slate-100 mx-2" />
 
