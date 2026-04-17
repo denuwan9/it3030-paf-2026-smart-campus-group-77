@@ -51,7 +51,7 @@ public class Notification {
     @Builder.Default
     private Boolean isAnnouncement = false;
 
-    @Column(name = "is_archived", nullable = false)
+    @Column(name = "is_archived", nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
     @Builder.Default
     private Boolean isArchived = false;
 

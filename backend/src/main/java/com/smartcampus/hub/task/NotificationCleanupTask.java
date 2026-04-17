@@ -30,7 +30,7 @@ public class NotificationCleanupTask {
         Instant cutoff = Instant.now().minus(7, ChronoUnit.DAYS);
         log.info("Starting automated cleanup: Archiving SYSTEM alerts created before {}", cutoff);
         
-        int archivedCount = notificationRepository.archiveOldSystemAlerts(cutoff);
+        int archivedCount = notificationRepository.archiveOldSystemAlerts(cutoff, com.smartcampus.hub.entity.NotificationType.SYSTEM);
         
         log.info("Cleanup complete. {} notifications were archived.", archivedCount);
     }

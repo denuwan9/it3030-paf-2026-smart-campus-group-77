@@ -22,6 +22,6 @@ public interface NotificationRepository extends JpaRepository<Notification, UUID
     void markAllAsReadByRecipientId(@Param("recipientId") UUID recipientId);
 
     @Modifying
-    @Query("UPDATE Notification n SET n.isArchived = true WHERE n.type = 'SYSTEM' AND n.createdAt < :cutoff AND n.isArchived = false")
-    int archiveOldSystemAlerts(@Param("cutoff") java.time.Instant cutoff);
+    @Query("UPDATE Notification n SET n.isArchived = true WHERE n.type = :type AND n.createdAt < :cutoff AND n.isArchived = false")
+    int archiveOldSystemAlerts(@Param("cutoff") java.time.Instant cutoff, @Param("type") com.smartcampus.hub.entity.NotificationType type);
 }
