@@ -8,6 +8,7 @@ import toast from 'react-hot-toast';
 const UserTicketsPage = () => {
   const [activeTab, setActiveTab] = useState('list');
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [isEditingSidebar, setIsEditingSidebar] = useState(false);
 
   useEffect(() => {
     // Simulate a technician adding/updating a ticket after a short delay
@@ -108,6 +109,14 @@ const UserTicketsPage = () => {
     setAttachments([]);
     setErrors({});
     setActiveTab('list');
+  };
+
+  const handleDeleteTicket = (id) => {
+    setTickets(tickets.filter(t => t.id !== id));
+    toast.success('Ticket deleted successfully');
+    if (selectedTicket?.id === id) {
+      setSelectedTicket(null);
+    }
   };
 
   return (
@@ -300,7 +309,15 @@ const UserTicketsPage = () => {
                     <TicketItemCard 
                       {...ticket} 
                       theme="light"
-                      onClick={() => setSelectedTicket(ticket)}
+                      onClick={() => {
+                        setSelectedTicket(ticket);
+                        setIsEditingSidebar(false);
+                      }}
+                      onEdit={() => {
+                        setSelectedTicket(ticket);
+                        setIsEditingSidebar(true);
+                      }}
+                      onDelete={handleDeleteTicket}
                     />
                   </motion.div>
                 ))}
@@ -318,8 +335,13 @@ const UserTicketsPage = () => {
 
       <TicketDetailsSidebar 
         isOpen={!!selectedTicket}
-        onClose={() => setSelectedTicket(null)}
+        onClose={() => {
+          setSelectedTicket(null);
+          setIsEditingSidebar(false);
+        }}
         ticket={selectedTicket}
+        isEditMode={isEditingSidebar}
+        setIsEditMode={setIsEditingSidebar}
       />
     </div>
   );

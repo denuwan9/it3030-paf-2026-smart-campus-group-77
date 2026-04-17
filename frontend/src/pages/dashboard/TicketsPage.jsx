@@ -10,6 +10,9 @@ import toast from 'react-hot-toast';
 const TicketsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
+  const [isEditingSidebar, setIsEditingSidebar] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [priorityFilter, setPriorityFilter] = useState('ALL');
   const [tickets, setTickets] = useState([
     {
       id: 'TKT-001',
@@ -75,6 +78,19 @@ const TicketsPage = () => {
     { label: 'Resolved/Closed', value: tickets.filter(t => ['RESOLVED', 'CLOSED'].includes(t.status)).length, colorClass: 'text-emerald-500' },
   ];
 
+  const filteredTickets = tickets.filter(ticket => {
+    return (statusFilter === 'ALL' || ticket.status === statusFilter) &&
+           (priorityFilter === 'ALL' || ticket.priority === priorityFilter);
+  });
+
+  const handleDeleteTicket = (id) => {
+    setTickets(tickets.filter(t => t.id !== id));
+    toast.success('Ticket deleted successfully');
+    if (selectedTicket?.id === id) {
+      setSelectedTicket(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-blue-50 -m-8 p-8">
       <div className="max-w-6xl mx-auto space-y-8">
@@ -83,8 +99,8 @@ const TicketsPage = () => {
         <section>
           <TicketFilters 
             onSearch={() => {}} 
-            onFilterStatus={() => {}} 
-            onFilterPriority={() => {}} 
+            onFilterStatus={setStatusFilter} 
+            onFilterPriority={setPriorityFilter} 
             onNewTicket={() => setIsModalOpen(true)} 
           />
         </section>
@@ -105,12 +121,12 @@ const TicketsPage = () => {
 
         {/* List Header */}
         <div className="flex items-center gap-2 pt-4">
-          <span className="text-slate-800 text-lg font-bold">{tickets.length} tickets</span>
+          <span className="text-slate-800 text-lg font-bold">{filteredTickets.length} tickets</span>
         </div>
 
         {/* Ticket List */}
         <section className="space-y-4">
-          {tickets.map((ticket, i) => (
+          {filteredTickets.map((ticket, i) => (
             <motion.div
               key={ticket.id}
               initial={{ opacity: 0, x: -20 }}
@@ -120,7 +136,15 @@ const TicketsPage = () => {
               <TicketItemCard 
                 {...ticket} 
                 theme="light"
-                onClick={() => setSelectedTicket(ticket)}
+                onClick={() => {
+                  setSelectedTicket(ticket);
+                  setIsEditingSidebar(false);
+                }}
+                onEdit={() => {
+                  setSelectedTicket(ticket);
+                  setIsEditingSidebar(true);
+                }}
+                onDelete={handleDeleteTicket}
               />
             </motion.div>
           ))}
@@ -147,8 +171,13 @@ const TicketsPage = () => {
 
       <TicketDetailsSidebar 
         isOpen={!!selectedTicket}
-        onClose={() => setSelectedTicket(null)}
+        onClose={() => {
+          setSelectedTicket(null);
+          setIsEditingSidebar(false);
+        }}
         ticket={selectedTicket}
+        isEditMode={isEditingSidebar}
+        setIsEditMode={setIsEditingSidebar}
       />
     </div>
   );
