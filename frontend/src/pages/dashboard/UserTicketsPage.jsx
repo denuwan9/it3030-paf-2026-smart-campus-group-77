@@ -286,6 +286,7 @@ const UserTicketsPage = () => {
                   >
                     <TicketItemCard 
                       {...ticket} 
+                      theme="light"
                       onClick={() => setSelectedTicket(ticket)}
                     />
                   </motion.div>
