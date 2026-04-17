@@ -6,17 +6,18 @@ import {
   Ticket,
   Megaphone,
   Shield,
-  Mail,
   Loader2,
   Save,
+  Volume2,
 } from 'lucide-react';
 import notificationService from '../../services/notificationService';
 import toast from 'react-hot-toast';
-import { useAuth } from '../../context/AuthContext';
+
+import { playNotificationSound } from '../../assets/sounds';
 
 // ─── Toggle Row ───────────────────────────────────────────────────────────────
 
-const ToggleRow = ({ icon: Icon, iconColor, iconBg, label, description, checked, onChange, disabled }) => (
+const ToggleRow = ({ icon: Icon, iconColor, iconBg, label, description, checked, onChange, disabled, extra }) => (
   <div className={`flex items-center justify-between p-4 rounded-2xl border transition-all ${
     checked ? 'border-nexer-brand-primary/20 bg-nexer-brand-primary/[0.02]' : 'border-slate-100 bg-white'
   } ${disabled ? 'opacity-40' : ''}`}>
@@ -31,30 +32,33 @@ const ToggleRow = ({ icon: Icon, iconColor, iconBg, label, description, checked,
     </div>
 
     {/* Toggle switch */}
-    <button
-      role="switch"
-      aria-checked={checked}
-      disabled={disabled}
-      onClick={() => !disabled && onChange(!checked)}
-      className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-nexer-brand-primary/30 ${
-        checked ? 'bg-nexer-brand-primary' : 'bg-slate-200'
-      }`}
-    >
-      <motion.span
-        layout
-        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-        className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm ${
-          checked ? 'left-6' : 'left-1'
+    <div className="flex items-center gap-3">
+      {extra}
+      <button
+        role="switch"
+        aria-checked={checked}
+        disabled={disabled}
+        onClick={() => !disabled && onChange(!checked)}
+        className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-nexer-brand-primary/30 ${
+          checked ? 'bg-nexer-brand-primary' : 'bg-slate-200'
         }`}
-      />
-    </button>
+      >
+        <motion.span
+          layout
+          transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+          className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow-sm ${
+            checked ? 'left-6' : 'left-1'
+          }`}
+        />
+      </button>
+    </div>
   </div>
 );
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const NotificationSettingsPage = () => {
-  const { user } = useAuth();
+
   const [settings, setSettings] = useState(null);
   const [loading, setLoading]   = useState(true);
   const [saving, setSaving]     = useState(false);
@@ -66,7 +70,7 @@ const NotificationSettingsPage = () => {
         setSettings(res.data);
       } else {
         // Use defaults so the page still renders; user can still toggle and save
-        setSettings({ emailEnabled: true, bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true });
+        setSettings({ bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true, soundEnabled: true });
         toast.error(res.message || 'Could not load notification settings');
       }
     } catch (error) {
@@ -74,7 +78,7 @@ const NotificationSettingsPage = () => {
       const msg = error?.response?.data?.message || error?.message || 'Could not load notification settings';
       toast.error(msg);
       // Use defaults so the page still renders
-      setSettings({ emailEnabled: true, bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true });
+      setSettings({ bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true, soundEnabled: true });
     } finally {
       setLoading(false);
     }
@@ -105,6 +109,16 @@ const NotificationSettingsPage = () => {
       toast.error(msg);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const playTestSound = () => {
+    try {
+      playNotificationSound(0.5);
+      toast.success("Sound triggered successfully!");
+    } catch (err) {
+      console.error("Audio playback error:", err);
+      toast.error("Failed to play sound.");
     }
   };
 
@@ -141,6 +155,14 @@ const NotificationSettingsPage = () => {
       label: 'Announcements',
       description: 'Campus-wide announcements from administrators',
     },
+    {
+      field: 'soundEnabled',
+      icon: Volume2,
+      iconColor: 'text-indigo-500',
+      iconBg: 'bg-indigo-50',
+      label: 'Notification Sound',
+      description: 'Play a sound alert when a new notification arrives',
+    },
   ];
 
   if (loading) {
@@ -172,26 +194,6 @@ const NotificationSettingsPage = () => {
         </div>
       </motion.div>
 
-      {/* Email section */}
-      <motion.section
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.05 }}
-        className="space-y-3"
-      >
-        <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.18em] px-1">
-          Delivery Channel
-        </h2>
-        <ToggleRow
-          icon={Mail}
-          iconColor="text-slate-500"
-          iconBg="bg-slate-100"
-          label="Email Notifications"
-          description={`Send email copies of alerts to ${user?.email}`}
-          checked={settings?.emailEnabled ?? true}
-          onChange={handleToggle('emailEnabled')}
-        />
-      </motion.section>
 
       {/* Alert categories section */}
       <motion.section
@@ -210,6 +212,15 @@ const NotificationSettingsPage = () => {
               {...rest}
               checked={settings?.[field] ?? true}
               onChange={handleToggle(field)}
+              extra={field === 'soundEnabled' && (
+                <button
+                  title="Test Sound"
+                  onClick={(e) => { e.stopPropagation(); playTestSound(); }}
+                  className="p-1.5 rounded-lg bg-slate-50 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 transition-all active:scale-90"
+                >
+                  <Volume2 className="w-3.5 h-3.5" />
+                </button>
+              )}
             />
           ))}
         </div>
