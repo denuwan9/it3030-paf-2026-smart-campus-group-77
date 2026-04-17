@@ -9,8 +9,7 @@ const UserTicketsPage = () => {
   const [activeTab, setActiveTab] = useState('new');
   const [selectedTicket, setSelectedTicket] = useState(null);
 
-  // Dummy user tickets
-  const [tickets] = useState([
+  const [tickets, setTickets] = useState([
     {
       id: 'TKT-001',
       title: 'Projector not turning on',
@@ -35,50 +34,73 @@ const UserTicketsPage = () => {
     }
   ]);
 
+  const [formData, setFormData] = useState({
+    location: '', category: 'Electrical', title: '', description: '', priority: 'Medium', contact: ''
+  });
+  const [attachments, setAttachments] = useState([]);
+
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (attachments.length + files.length > 3) {
+      toast.error('You can only upload a maximum of 3 images');
+      const allowedFiles = files.slice(0, 3 - attachments.length);
+      setAttachments([...attachments, ...allowedFiles]);
+      return;
+    }
+    setAttachments([...attachments, ...files]);
+  };
+
+  const removeAttachment = (index) => {
+    setAttachments(attachments.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newTicket = {
+      id: `TKT-${Math.floor(Math.random() * 900) + 100}`,
+      title: formData.title,
+      location: formData.location,
+      reporter: { name: 'My Self' },
+      category: formData.category,
+      attachmentsCount: 0,
+      commentsCount: 0,
+      status: 'OPEN',
+      priority: formData.priority.toUpperCase()
+    };
+    setTickets([newTicket, ...tickets]);
     toast.success('Ticket submitted successfully');
+    setFormData({ location: '', category: 'Electrical', title: '', description: '', priority: 'Medium', contact: '' });
+    setAttachments([]);
     setActiveTab('list');
   };
 
   return (
-    <div className="h-[calc(100vh-80px)] -m-8 bg-blue-50 text-slate-800 flex overflow-hidden">
-      {/* Mini Sidebar */}
-      <aside className="w-64 border-r border-slate-200 bg-white flex flex-col p-4 z-10">
-        <nav className="space-y-1">
-          <button
-            onClick={() => setActiveTab('list')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-              activeTab === 'list' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <List className="w-4 h-4" />
-            My tickets
-          </button>
-          <button
-            onClick={() => setActiveTab('new')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-              activeTab === 'new' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <PlusCircle className="w-4 h-4" />
-            New ticket
-          </button>
-          <button
-            onClick={() => setActiveTab('notifications')}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-              activeTab === 'notifications' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
-            }`}
-          >
-            <Bell className="w-4 h-4" />
-            Notifications
-          </button>
-        </nav>
-      </aside>
-
-      {/* Main Content Area */}
-      <main className="flex-1 p-8 overflow-y-auto">
+    <div className="h-[calc(100vh-80px)] -m-8 bg-blue-50 text-slate-800 flex flex-col overflow-y-auto">
+      <main className="flex-1 p-8">
         <div className="max-w-3xl mx-auto">
+          {/* Top Right Horizontal Tabs */}
+          <div className="flex justify-end mb-6">
+            <div className="bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm flex items-center gap-1">
+              <button
+                onClick={() => setActiveTab('list')}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  activeTab === 'list' ? 'bg-blue-50 text-blue-600 shadow-sm border border-blue-100/50' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <List className="w-4 h-4" />
+                My tickets
+              </button>
+              <button
+                onClick={() => setActiveTab('new')}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                  activeTab === 'new' ? 'bg-blue-50 text-blue-600 shadow-sm border border-blue-100/50' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                }`}
+              >
+                <PlusCircle className="w-4 h-4" />
+                New ticket
+              </button>
+            </div>
+          </div>
           {activeTab === 'new' && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <div className="bg-white rounded-xl border border-slate-200 p-8 shadow-sm">
@@ -90,6 +112,8 @@ const UserTicketsPage = () => {
                       <input
                         type="text"
                         required
+                        value={formData.location}
+                        onChange={(e) => setFormData({...formData, location: e.target.value})}
                         placeholder="e.g. Lab A-201, Projector #"
                         className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors"
                       />
@@ -97,7 +121,11 @@ const UserTicketsPage = () => {
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-slate-700">Category</label>
                       <div className="relative">
-                        <select className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none appearance-none transition-colors">
+                        <select 
+                          value={formData.category}
+                          onChange={(e) => setFormData({...formData, category: e.target.value})}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none appearance-none transition-colors"
+                        >
                           <option>Electrical</option>
                           <option>Plumbing</option>
                           <option>Network</option>
@@ -114,6 +142,8 @@ const UserTicketsPage = () => {
                     <input
                       type="text"
                       required
+                      value={formData.title}
+                      onChange={(e) => setFormData({...formData, title: e.target.value})}
                       placeholder="Brief summary of the issue"
                       className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors"
                     />
@@ -124,6 +154,8 @@ const UserTicketsPage = () => {
                     <textarea
                       rows="4"
                       required
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
                       placeholder="Describe the problem in detail..."
                       className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none resize-none transition-colors"
                     ></textarea>
@@ -133,7 +165,11 @@ const UserTicketsPage = () => {
                     <div className="space-y-2">
                       <label className="text-sm font-medium text-slate-700">Priority</label>
                       <div className="relative">
-                        <select className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none appearance-none transition-colors">
+                        <select 
+                          value={formData.priority}
+                          onChange={(e) => setFormData({...formData, priority: e.target.value})}
+                          className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none appearance-none transition-colors"
+                        >
                           <option>Medium</option>
                           <option>High</option>
                           <option>Low</option>
@@ -146,6 +182,8 @@ const UserTicketsPage = () => {
                       <input
                         type="text"
                         required
+                        value={formData.contact}
+                        onChange={(e) => setFormData({...formData, contact: e.target.value})}
                         placeholder="Phone or email"
                         className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors"
                       />
@@ -154,9 +192,33 @@ const UserTicketsPage = () => {
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700">Attachments (max 3 images)</label>
-                    <div className="border border-dashed border-slate-300 hover:border-blue-400 bg-slate-50 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors">
-                      <p className="text-sm text-slate-500">Click to upload or drag images here</p>
+                    <div className="border border-dashed border-slate-300 hover:border-blue-400 bg-slate-50 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors relative focus-within:ring-2 focus-within:ring-blue-500">
+                      <input 
+                        type="file" 
+                        multiple 
+                        accept="image/*"
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                        onChange={handleFileChange}
+                      />
+                      <Upload className="w-6 h-6 text-slate-400 mb-2 pointer-events-none" />
+                      <p className="text-sm text-slate-500 pointer-events-none">Click to upload or drag images here</p>
                     </div>
+                    {attachments.length > 0 && (
+                      <div className="flex gap-4 pt-2 overflow-x-auto">
+                        {attachments.map((file, idx) => (
+                          <div key={idx} className="relative w-20 h-20 flex-shrink-0 group rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm">
+                            <img src={URL.createObjectURL(file)} alt="preview" className="w-full h-full object-cover" />
+                            <button
+                              type="button"
+                              onClick={() => removeAttachment(idx)}
+                              className="absolute inset-0 bg-black/60 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <span className="text-[10px] font-bold uppercase tracking-wider">Remove</span>
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
                   <div className="pt-4">
@@ -198,14 +260,6 @@ const UserTicketsPage = () => {
             </motion.div>
           )}
 
-          {activeTab === 'notifications' && (
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <h2 className="text-xl font-semibold mb-6 text-slate-800">Notifications</h2>
-              <div className="text-slate-500 text-center py-12 bg-white rounded-xl border border-slate-200">
-                No new notifications.
-              </div>
-            </motion.div>
-          )}
         </div>
       </main>
 
