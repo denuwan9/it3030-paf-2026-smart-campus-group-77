@@ -1,8 +1,7 @@
 package com.smartcampus.hub.entity;
 
-public enum ResourceStatus {
+public enum FacilityStatus {
     AVAILABLE,
-    IN_USE,
     MAINTENANCE,
-    BROKEN
+    CLOSED
 }

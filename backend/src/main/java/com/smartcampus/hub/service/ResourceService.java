@@ -1,125 +1,100 @@
 package com.smartcampus.hub.service;
 
-import com.smartcampus.hub.dto.CreateResourceRequest;
-import com.smartcampus.hub.dto.ResourceResponse;
-import com.smartcampus.hub.dto.UpdateResourceRequest;
+import com.smartcampus.hub.dto.ResourceDTO;
+import com.smartcampus.hub.entity.Facility;
 import com.smartcampus.hub.entity.Resource;
-import com.smartcampus.hub.entity.ResourceStatus;
-import com.smartcampus.hub.entity.ResourceType;
+import com.smartcampus.hub.repository.FacilityRepository;
 import com.smartcampus.hub.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ResourceService {
 
     private final ResourceRepository resourceRepository;
+    private final FacilityRepository facilityRepository;
+
+    @Transactional(readOnly = true)
+    public List<ResourceDTO> getResourcesByFacilityId(UUID facilityId) {
+        if (!facilityRepository.existsById(facilityId)) {
+            throw new NoSuchElementException("Facility not found with id: " + facilityId);
+        }
+        return resourceRepository.findByFacilityId(facilityId).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public ResourceDTO getResourceById(UUID id) {
+        Resource resource = resourceRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Resource not found with id: " + id));
+        return mapToDTO(resource);
+    }
 
     @Transactional
-    public ResourceResponse createResource(CreateResourceRequest request) {
-        validateAvailabilityWindow(request.getAvailabilityStart(), request.getAvailabilityEnd());
+    public ResourceDTO createResource(UUID facilityId, ResourceDTO dto) {
+        Facility facility = facilityRepository.findById(facilityId)
+                .orElseThrow(() -> new NoSuchElementException("Facility not found with id: " + facilityId));
 
         Resource resource = Resource.builder()
-                .name(request.getName().trim())
-                .type(request.getType())
-                .capacity(request.getCapacity())
-                .location(request.getLocation().trim())
-                .availabilityStart(request.getAvailabilityStart())
-                .availabilityEnd(request.getAvailabilityEnd())
-                .status(request.getStatus() == null ? ResourceStatus.ACTIVE : request.getStatus())
-                .description(request.getDescription())
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .type(dto.getType() != null ? dto.getType() : com.smartcampus.hub.entity.ResourceType.EQUIPMENT)
+                .quantity(dto.getQuantity() != null ? dto.getQuantity() : 1)
+                .status(dto.getStatus() != null ? dto.getStatus() : com.smartcampus.hub.entity.ResourceStatus.AVAILABLE)
+                .facility(facility)
                 .build();
 
-        return toResponse(resourceRepository.save(resource));
+        Resource saved = resourceRepository.save(resource);
+        return mapToDTO(saved);
     }
 
     @Transactional
-    public ResourceResponse updateResource(UUID resourceId, UpdateResourceRequest request) {
-        Resource resource = resourceRepository.findById(resourceId)
-                .orElseThrow(() -> new RuntimeException("Resource not found"));
+    public ResourceDTO updateResource(UUID id, ResourceDTO dto) {
+        Resource resource = resourceRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Resource not found with id: " + id));
 
-        if (request.getName() != null && !request.getName().isBlank()) {
-            resource.setName(request.getName().trim());
-        }
-        if (request.getType() != null) {
-            resource.setType(request.getType());
-        }
-        if (request.getCapacity() != null) {
-            resource.setCapacity(request.getCapacity());
-        }
-        if (request.getLocation() != null && !request.getLocation().isBlank()) {
-            resource.setLocation(request.getLocation().trim());
-        }
-        if (request.getStatus() != null) {
-            resource.setStatus(request.getStatus());
-        }
-        if (request.getDescription() != null) {
-            resource.setDescription(request.getDescription());
+        if (dto.getName() != null) resource.setName(dto.getName());
+        if (dto.getDescription() != null) resource.setDescription(dto.getDescription());
+        if (dto.getType() != null) resource.setType(dto.getType());
+        if (dto.getQuantity() != null) resource.setQuantity(dto.getQuantity());
+        if (dto.getStatus() != null) resource.setStatus(dto.getStatus());
+        
+        // Allow moving to a different facility
+        if (dto.getFacilityId() != null && !dto.getFacilityId().equals(resource.getFacility().getId())) {
+             Facility newFacility = facilityRepository.findById(dto.getFacilityId())
+                     .orElseThrow(() -> new NoSuchElementException("Facility not found with id: " + dto.getFacilityId()));
+             resource.setFacility(newFacility);
         }
 
-        LocalTime start = request.getAvailabilityStart() != null
-                ? request.getAvailabilityStart()
-                : resource.getAvailabilityStart();
-        LocalTime end = request.getAvailabilityEnd() != null
-                ? request.getAvailabilityEnd()
-                : resource.getAvailabilityEnd();
-        validateAvailabilityWindow(start, end);
-        resource.setAvailabilityStart(start);
-        resource.setAvailabilityEnd(end);
-
-        return toResponse(resourceRepository.save(resource));
+        Resource updated = resourceRepository.save(resource);
+        return mapToDTO(updated);
     }
 
-    @Transactional(readOnly = true)
-    public List<ResourceResponse> searchResources(ResourceType type,
-                                                  Integer minCapacity,
-                                                  String location,
-                                                  ResourceStatus status,
-                                                  String search) {
-        return resourceRepository.searchResources(type, status, minCapacity, normalizeParam(location), normalizeParam(search))
-                .stream()
-                .map(this::toResponse)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
-    public Resource getResourceEntityById(UUID resourceId) {
-        return resourceRepository.findById(resourceId)
-                .orElseThrow(() -> new RuntimeException("Resource not found"));
-    }
-
-    private String normalizeParam(String value) {
-        if (value == null || value.isBlank()) {
-            return null;
+    @Transactional
+    public void deleteResource(UUID id) {
+        if (!resourceRepository.existsById(id)) {
+            throw new NoSuchElementException("Resource not found with id: " + id);
         }
-        return value.trim();
+        resourceRepository.deleteById(id);
     }
 
-    private void validateAvailabilityWindow(LocalTime start, LocalTime end) {
-        if (!start.isBefore(end)) {
-            throw new RuntimeException("Availability start time must be before end time");
-        }
-    }
-
-    private ResourceResponse toResponse(Resource resource) {
-        return ResourceResponse.builder()
-                .id(resource.getId())
-                .name(resource.getName())
-                .type(resource.getType())
-                .capacity(resource.getCapacity())
-                .location(resource.getLocation())
-                .availabilityStart(resource.getAvailabilityStart())
-                .availabilityEnd(resource.getAvailabilityEnd())
-                .status(resource.getStatus())
-                .description(resource.getDescription())
-                .createdAt(resource.getCreatedAt())
-                .updatedAt(resource.getUpdatedAt())
+    private ResourceDTO mapToDTO(Resource entity) {
+        return ResourceDTO.builder()
+                .id(entity.getId())
+                .name(entity.getName())
+                .description(entity.getDescription())
+                .type(entity.getType())
+                .quantity(entity.getQuantity())
+                .status(entity.getStatus())
+                .facilityId(entity.getFacility().getId())
                 .build();
     }
 }

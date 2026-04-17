@@ -1,12 +1,9 @@
 package com.smartcampus.hub.controller;
 
-import com.smartcampus.hub.dto.*;
-import com.smartcampus.hub.entity.ResourceStatus;
-import com.smartcampus.hub.entity.ResourceType;
+import com.smartcampus.hub.dto.ApiResponse;
+import com.smartcampus.hub.dto.ResourceDTO;
 import com.smartcampus.hub.service.ResourceService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -21,31 +18,32 @@ public class ResourceController {
 
     private final ResourceService resourceService;
 
-    @GetMapping
-    public ResponseEntity<ApiResponse<List<ResourceResponse>>> getResources(
-            @RequestParam(name = "type", required = false) ResourceType type,
-            @RequestParam(name = "minCapacity", required = false) Integer minCapacity,
-            @RequestParam(name = "location", required = false) String location,
-            @RequestParam(name = "status", required = false) ResourceStatus status,
-            @RequestParam(name = "search", required = false) String search
-    ) {
-        return ResponseEntity.ok(ApiResponse.success(
-                "Resources fetched successfully",
-                resourceService.searchResources(type, minCapacity, location, status, search)
-        ));
+    @GetMapping("/facility/{facilityId}")
+    public ResponseEntity<ApiResponse<List<ResourceDTO>>> getResourcesByFacilityId(@PathVariable UUID facilityId) {
+        return ResponseEntity.ok(ApiResponse.success("Resources fetched successfully", resourceService.getResourcesByFacilityId(facilityId)));
     }
 
-    @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<ResourceResponse>> createResource(@Valid @RequestBody CreateResourceRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Resource created successfully", resourceService.createResource(request)));
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<ResourceDTO>> getResourceById(@PathVariable UUID id) {
+        return ResponseEntity.ok(ApiResponse.success("Resource fetched successfully", resourceService.getResourceById(id)));
     }
 
-    @PutMapping("/{resourceId}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<ResourceResponse>> updateResource(@PathVariable UUID resourceId,
-                                                                        @Valid @RequestBody UpdateResourceRequest request) {
-        return ResponseEntity.ok(ApiResponse.success("Resource updated successfully", resourceService.updateResource(resourceId, request)));
+    @PostMapping("/facility/{facilityId}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<ResourceDTO>> createResource(@PathVariable UUID facilityId, @RequestBody ResourceDTO dto) {
+        return ResponseEntity.ok(ApiResponse.success("Resource created successfully", resourceService.createResource(facilityId, dto)));
+    }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<ResourceDTO>> updateResource(@PathVariable UUID id, @RequestBody ResourceDTO dto) {
+        return ResponseEntity.ok(ApiResponse.success("Resource updated successfully", resourceService.updateResource(id, dto)));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<Void>> deleteResource(@PathVariable UUID id) {
+        resourceService.deleteResource(id);
+        return ResponseEntity.ok(ApiResponse.success("Resource deleted successfully", null));
     }
 }

@@ -10,6 +10,7 @@ import {
   Package, 
   Ticket, 
   ShieldCheck, 
+  Building2,
   User, 
   LogOut,
   Calendar
@@ -49,6 +50,18 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       label: 'User Management', 
       to: '/admin/users', 
       icon: ShieldCheck, 
+      roles: ['ROLE_ADMIN'] 
+    },
+    { 
+      label: 'Facilities', 
+      to: '/facilities', 
+      icon: Building2, 
+      roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
+    },
+    { 
+      label: 'Manage Facilities', 
+      to: '/admin/facilities', 
+      icon: Package, 
       roles: ['ROLE_ADMIN'] 
     },
     { 

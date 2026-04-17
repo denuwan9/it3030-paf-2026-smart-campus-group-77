@@ -1,19 +1,22 @@
 package com.smartcampus.hub.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "resources")
+@Table(name = "facilities")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Resource {
+public class Facility {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -26,23 +29,24 @@ public class Resource {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 30)
-    @Builder.Default
-    private ResourceType type = ResourceType.EQUIPMENT;
+    @Column(length = 150)
+    private String location;
 
-    @Column(nullable = false)
-    @Builder.Default
-    private Integer quantity = 1;
+    @Column
+    private Integer capacity;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 30)
     @Builder.Default
-    private ResourceStatus status = ResourceStatus.AVAILABLE;
+    private FacilityStatus status = FacilityStatus.AVAILABLE;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "facility_id", nullable = false)
-    private Facility facility;
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    @JsonIgnore
+    private List<Resource> resources = new ArrayList<>();
 
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
