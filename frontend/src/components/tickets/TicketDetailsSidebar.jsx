@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronDown, User, Calendar, MapPin, Tag, Shield, Phone, Send, Edit } from 'lucide-react';
 import toast from 'react-hot-toast';
 
-const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMode }) => {
+const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMode, onUpdateTicket }) => {
   if (!ticket) return null;
 
   const initialComments = [
@@ -64,13 +64,17 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
       isTechnician: true,
       isOwn: true // Flag to identify own comments
     };
-    setComments([...comments, comment]);
+    const updatedComments = [...comments, comment];
+    setComments(updatedComments);
     setNewComment("");
+    onUpdateTicket?.(ticket.id, { commentsCount: updatedComments.length });
   };
 
   const handleDeleteComment = (id) => {
-    setComments(comments.filter(c => c.id !== id));
+    const updatedComments = comments.filter(c => c.id !== id);
+    setComments(updatedComments);
     toast.success("Comment deleted");
+    onUpdateTicket?.(ticket.id, { commentsCount: updatedComments.length });
   };
 
   const handleEditComment = (comment) => {
@@ -97,11 +101,13 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
     const formattedStatus = newStatus.replace(' ', '_').toUpperCase();
     setActiveStatus(formattedStatus);
     toast.success(`Ticket status updated to ${newStatus}`);
+    onUpdateTicket?.(ticket.id, { status: formattedStatus });
   };
 
   const handleSaveTicket = () => {
     setIsEditMode?.(false);
     toast.success('Ticket updated successfully');
+    onUpdateTicket?.(ticket.id, { ...editData });
   };
 
   return (

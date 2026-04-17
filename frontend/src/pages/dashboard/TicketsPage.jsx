@@ -13,7 +13,10 @@ const TicketsPage = () => {
   const [isEditingSidebar, setIsEditingSidebar] = useState(false);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
-  const [tickets, setTickets] = useState([
+  const [tickets, setTickets] = useState(() => {
+    const saved = localStorage.getItem('adminTickets');
+    if (saved) return JSON.parse(saved);
+    return [
     {
       id: 'TKT-001',
       title: 'Projector not turning on',
@@ -69,7 +72,11 @@ const TicketsPage = () => {
       status: 'CLOSED',
       priority: 'HIGH'
     }
-  ]);
+  ]});
+
+  React.useEffect(() => {
+    localStorage.setItem('adminTickets', JSON.stringify(tickets));
+  }, [tickets]);
 
   const stats = [
     { label: 'Total tickets', value: tickets.length },
@@ -88,6 +95,13 @@ const TicketsPage = () => {
     toast.success('Ticket deleted successfully');
     if (selectedTicket?.id === id) {
       setSelectedTicket(null);
+    }
+  };
+
+  const handleUpdateTicketProps = (id, updatedFields) => {
+    setTickets(prev => prev.map(t => t.id === id ? { ...t, ...updatedFields } : t));
+    if (selectedTicket?.id === id) {
+      setSelectedTicket(prev => ({ ...prev, ...updatedFields }));
     }
   };
 
@@ -178,6 +192,7 @@ const TicketsPage = () => {
         ticket={selectedTicket}
         isEditMode={isEditingSidebar}
         setIsEditMode={setIsEditingSidebar}
+        onUpdateTicket={handleUpdateTicketProps}
       />
     </div>
   );
