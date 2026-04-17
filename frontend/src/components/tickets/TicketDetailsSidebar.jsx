@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronDown, User, Calendar, MapPin, Tag, Shield, Phone, Send } from 'lucide-react';
 
 const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
   if (!ticket) return null;
 
-  const mockComments = [
+  const initialComments = [
     {
       id: 1,
       user: 'Kavindu Silva',
@@ -25,6 +25,35 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
     }
   ];
 
+  const [comments, setComments] = useState(initialComments);
+  const [newComment, setNewComment] = useState("");
+
+  // Reset comments or fetch them when ticket changes
+  useEffect(() => {
+    setComments(initialComments);
+    setNewComment("");
+  }, [ticket?.id]);
+
+  const handleAddComment = () => {
+    if (!newComment.trim()) return;
+    const comment = {
+      id: Date.now(),
+      user: 'My Self',
+      role: 'USER',
+      time: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }),
+      message: newComment,
+      initials: 'MS',
+      isTechnician: false,
+      isOwn: true // Flag to identify own comments
+    };
+    setComments([...comments, comment]);
+    setNewComment("");
+  };
+
+  const handleDeleteComment = (id) => {
+    setComments(comments.filter(c => c.id !== id));
+  };
+
   const statuses = ['Open', 'In progress', 'Resolved', 'Closed'];
 
   return (
@@ -37,7 +66,7 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[110]"
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[110]"
           />
           
           {/* Sidebar */}
@@ -46,17 +75,17 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed top-0 right-0 h-screen w-full max-w-md bg-[#1f1f1f] border-l border-white/5 z-[120] overflow-y-auto custom-scrollbar shadow-2xl"
+            className="fixed top-0 right-0 h-screen w-full max-w-md bg-blue-50 border-l border-blue-100 z-[120] overflow-y-auto custom-scrollbar shadow-2xl"
           >
             {/* Header */}
-            <div className="sticky top-0 bg-[#1f1f1f]/80 backdrop-blur-xl z-10 flex items-center justify-between p-6 border-b border-white/5">
-              <h2 className="text-white text-lg font-black tracking-tight flex items-center gap-3">
-                <span className="text-slate-500">{ticket.id} —</span>
+            <div className="sticky top-0 bg-blue-50/90 backdrop-blur-xl z-10 flex items-center justify-between p-6 border-b border-blue-100">
+              <h2 className="text-slate-800 text-lg font-black tracking-tight flex items-center gap-3">
+                <span className="text-blue-500">{ticket.id} —</span>
                 {ticket.title}
               </h2>
               <button 
                 onClick={onClose}
-                className="w-10 h-10 bg-[#2b2b2b] hover:bg-[#363636] flex items-center justify-center rounded-xl text-slate-400 transition-colors border border-white/5"
+                className="w-10 h-10 bg-white hover:bg-blue-100 flex items-center justify-center rounded-xl text-slate-500 transition-colors border border-blue-200 shadow-sm"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -66,7 +95,7 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
               {/* Workflow */}
               <div>
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Workflow</p>
-                <div className="flex bg-[#181818] p-1.5 rounded-2xl border border-white/5 gap-1">
+                <div className="flex bg-white p-1.5 rounded-2xl border border-blue-100 gap-1 shadow-sm">
                   {statuses.map((s) => {
                     const isActive = ticket.status.replace('_', ' ').toLowerCase() === s.toLowerCase();
                     return (
@@ -74,8 +103,8 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
                         key={s} 
                         className={`flex-1 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
                           isActive 
-                            ? 'bg-[#10b981]/10 text-[#10b981] ring-1 ring-[#10b981]/30 ring-inset' 
-                            : 'text-slate-500 hover:text-slate-300'
+                            ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-300 ring-inset' 
+                            : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                         }`}
                       >
                         {s}
@@ -95,9 +124,9 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
                   { label: 'Contact', value: 'ext. 4421', icon: Phone },
                   { label: 'Assignee', value: 'Ashan Perera', icon: User },
                 ].map((item) => (
-                  <div key={item.label} className="bg-[#181818] border border-white/5 p-3 rounded-xl transition-all hover:bg-white/[0.02]">
-                    <p className="text-[9px] font-black text-slate-600 uppercase tracking-widest mb-1.5">{item.label}</p>
-                    <p className="text-sm font-bold text-slate-200">{item.value}</p>
+                  <div key={item.label} className="bg-white border border-blue-100 p-3 rounded-xl transition-all hover:border-blue-200 shadow-sm">
+                    <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">{item.label}</p>
+                    <p className="text-sm font-bold text-slate-700">{item.value}</p>
                   </div>
                 ))}
               </div>
@@ -107,8 +136,8 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Attachments</p>
                 <div className="flex gap-3">
                   {[1, 2].map(i => (
-                    <div key={i} className="w-16 h-16 bg-[#181818] border border-white/5 rounded-xl flex items-center justify-center text-slate-700 hover:text-slate-500 hover:border-white/10 transition-all cursor-pointer">
-                      <Tag className="w-5 h-5 opacity-20" />
+                    <div key={i} className="w-16 h-16 bg-white border border-blue-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-500 hover:border-blue-300 transition-all cursor-pointer shadow-sm">
+                      <Tag className="w-5 h-5 opacity-50" />
                     </div>
                   ))}
                 </div>
@@ -119,13 +148,13 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Assign Technician</p>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <select className="w-full bg-[#181818] border border-white/5 rounded-xl px-4 py-2.5 text-white text-xs font-bold outline-none appearance-none">
+                    <select className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-slate-700 text-xs font-bold outline-none appearance-none focus:ring-2 focus:ring-blue-100 shadow-sm">
                       <option>Ashan Perera</option>
                       <option>Lilantha Siriwardana</option>
                     </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   </div>
-                  <button className="px-6 py-2.5 bg-[#2b2b2b] border border-white/5 text-white text-xs font-black uppercase rounded-xl hover:bg-[#363636] transition-all active:scale-95 shadow-lg shadow-black/20">
+                  <button className="px-6 py-2.5 bg-blue-600 border border-blue-700 text-white text-xs font-black uppercase rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-sm">
                     Assign
                   </button>
                 </div>
@@ -136,14 +165,14 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Update Status</p>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <select className="w-full bg-[#181818] border border-white/5 rounded-xl px-4 py-2.5 text-white text-xs font-bold outline-none appearance-none">
+                    <select className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-slate-700 text-xs font-bold outline-none appearance-none focus:ring-2 focus:ring-blue-100 shadow-sm">
                       <option>In progress</option>
                       <option>Resolved</option>
                       <option>Closed</option>
                     </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
+                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   </div>
-                  <button className="px-6 py-2.5 bg-[#2b2b2b] border border-white/5 text-white text-xs font-black uppercase rounded-xl hover:bg-[#363636] transition-all active:scale-95 shadow-lg shadow-black/20">
+                  <button className="px-6 py-2.5 bg-blue-600 border border-blue-700 text-white text-xs font-black uppercase rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-sm">
                     Update
                   </button>
                 </div>
@@ -153,23 +182,23 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
               <div className="space-y-4 pt-4">
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Comments</p>
                 <div className="space-y-4">
-                  {mockComments.map(comment => (
+                  {comments.map(comment => (
                     <div key={comment.id} className="group">
                       <div className="flex items-start gap-3">
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black border border-white/5 ${comment.isTechnician ? 'bg-[#10b981]/10 text-[#10b981]' : 'bg-[#2b2b2b] text-slate-300'}`}>
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-[10px] font-black border ${comment.isTechnician ? 'bg-blue-100 text-blue-600 border-blue-200' : 'bg-white text-slate-500 border-slate-200 shadow-sm'}`}>
                           {comment.initials}
                         </div>
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center gap-2">
-                            <span className="text-xs font-black text-slate-200">{comment.user}</span>
-                            <span className="text-[9px] font-black text-slate-600 bg-white/5 px-1.5 py-0.5 rounded tracking-widest">{comment.role}</span>
-                            <span className="text-[9px] text-slate-600 ml-auto">{comment.time}</span>
+                            <span className="text-xs font-black text-slate-700">{comment.user}</span>
+                            <span className="text-[9px] font-black text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded tracking-widest">{comment.role}</span>
+                            <span className="text-[9px] text-slate-400 ml-auto">{comment.time}</span>
                           </div>
-                          <p className="text-xs text-slate-400 leading-relaxed font-medium">{comment.message}</p>
-                          {comment.isTechnician && (
+                          <p className="text-xs text-slate-600 leading-relaxed font-medium">{comment.message}</p>
+                          {(comment.isTechnician || comment.isOwn) && (
                             <div className="flex items-center gap-2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button className="text-[9px] font-black text-slate-500 hover:text-white uppercase tracking-widest px-3 py-1 bg-white/5 border border-white/5 rounded-lg transition-all">Edit</button>
-                              <button className="text-[9px] font-black text-rose-500/80 hover:text-rose-400 uppercase tracking-widest px-3 py-1 bg-rose-500/5 border border-rose-500/10 rounded-lg transition-all">Delete</button>
+                              <button className="text-[9px] font-black text-slate-500 hover:text-blue-600 uppercase tracking-widest px-3 py-1 bg-white border border-slate-200 shadow-sm rounded-lg transition-all">Edit</button>
+                              <button onClick={() => handleDeleteComment(comment.id)} className="text-[9px] font-black text-rose-500/80 hover:text-rose-600 uppercase tracking-widest px-3 py-1 bg-white border border-rose-100 shadow-sm rounded-lg transition-all">Delete</button>
                             </div>
                           )}
                         </div>
@@ -181,10 +210,15 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
                 {/* Add Comment */}
                 <div className="pt-6 relative">
                   <textarea 
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
                     placeholder="Add a comment..."
-                    className="w-full bg-[#181818] border border-white/5 rounded-2xl p-4 pr-16 text-xs text-white outline-none focus:ring-1 focus:ring-amber-500/20 transition-all placeholder:text-slate-600 resize-none h-20"
+                    className="w-full bg-white border border-blue-200 shadow-sm rounded-2xl p-4 pr-16 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-slate-400 resize-none h-20"
                   ></textarea>
-                  <button className="absolute right-3 bottom-3 p-2 bg-[#2b2b2b] hover:bg-amber-500/90 text-slate-400 hover:text-white rounded-xl transition-all active:scale-95 border border-white/5 shadow-lg group">
+                  <button 
+                    onClick={handleAddComment}
+                    className="absolute right-3 bottom-3 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all active:scale-95 shadow-sm group"
+                  >
                     <Send className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                   </button>
                 </div>
