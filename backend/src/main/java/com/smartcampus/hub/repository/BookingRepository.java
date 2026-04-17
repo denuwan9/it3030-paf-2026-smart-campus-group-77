@@ -81,4 +81,11 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
                                   @Param("requesterId") UUID requesterId,
                                   @Param("fromDate") LocalDate fromDate,
                                   @Param("toDate") LocalDate toDate);
+
+    @Query("""
+            SELECT b.requestedBy.id FROM Booking b
+            WHERE b.resource.id = :assetId
+              AND b.status IN ('ACTIVE', 'PENDING')
+            """)
+    List<UUID> findImpactedUserIds(@Param("assetId") UUID assetId);
 }

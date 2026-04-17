@@ -28,6 +28,7 @@ import BookingsPage from './pages/dashboard/BookingsPage';
 import AdminBookingsPage from './pages/dashboard/AdminBookingsPage';
 import AdminCheckInVerifyPage from './pages/dashboard/AdminCheckInVerifyPage';
 import NotificationSettingsPage from './pages/dashboard/NotificationSettingsPage';
+import TicketsPage from './pages/dashboard/TicketsPage';
 
 
 
@@ -175,6 +176,13 @@ function App() {
             <Route path="/technician" element={
               <ProtectedRoute allowedRoles={['TECHNICIAN']}>
                 <TechnicianDashboard />
+              </ProtectedRoute>
+            } />
+
+            {/* Incident Tickets Module */}
+            <Route path="/tickets" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'TECHNICIAN']}>
+                <TicketsPage />
               </ProtectedRoute>
             } />
 

@@ -14,14 +14,14 @@ const StatusBadge = ({ status }) => {
       case 'APPROVED':
       case 'RESOLVED':
       case 'COMPLETED':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+        return 'bg-blue-50 text-blue-600 border-blue-200';
       case 'REJECTED':
       case 'CLOSED':
       case 'CANCELLED':
       case 'OUT_OF_SERVICE':
         return 'bg-red-500/10 text-red-400 border-red-500/20';
       default:
-        return 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+        return 'bg-slate-50 text-slate-600 border-slate-200';
     }
   };
 
