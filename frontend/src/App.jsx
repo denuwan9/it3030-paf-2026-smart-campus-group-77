@@ -29,6 +29,7 @@ import AdminBookingsPage from './pages/dashboard/AdminBookingsPage';
 import AdminCheckInVerifyPage from './pages/dashboard/AdminCheckInVerifyPage';
 import NotificationSettingsPage from './pages/dashboard/NotificationSettingsPage';
 import TicketsPage from './pages/dashboard/TicketsPage';
+import UserTicketsPage from './pages/dashboard/UserTicketsPage';
 
 
 
@@ -138,6 +139,12 @@ function App() {
             <Route path="/dashboard" element={
               <ProtectedRoute allowedRoles={['USER']}>
                 <UserDashboard />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/user/tickets" element={
+              <ProtectedRoute allowedRoles={['USER']}>
+                <UserTicketsPage />
               </ProtectedRoute>
             } />
             
