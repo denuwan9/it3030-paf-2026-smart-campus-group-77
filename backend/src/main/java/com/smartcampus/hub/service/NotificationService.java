@@ -43,6 +43,7 @@ public class NotificationService {
         return notificationRepo
                 .findByRecipientIdOrderByCreatedAtDesc(userId)
                 .stream()
+                .filter(n -> !Boolean.TRUE.equals(n.getIsArchived()))
                 .limit(50)
                 .map(this::toDTO)
                 .collect(Collectors.toList());
@@ -258,6 +259,7 @@ public class NotificationService {
                 .actionUrl(n.getActionUrl())
                 .isRead(n.getIsRead())
                 .isAnnouncement(n.getIsAnnouncement())
+                .isArchived(n.getIsArchived())
                 .createdAt(n.getCreatedAt())
                 .build();
     }

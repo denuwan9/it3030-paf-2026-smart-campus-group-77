@@ -22,5 +22,6 @@ public class NotificationDTO {
     private String actionUrl;
     private Boolean isRead;
     private Boolean isAnnouncement;
+    private Boolean isArchived;
     private Instant createdAt;
 }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, forwardRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -12,6 +12,7 @@ import {
   Ticket,
   Megaphone,
   Shield,
+  Wrench,
   Loader2,
 } from 'lucide-react';
 import notificationService from '../../services/notificationService';
@@ -43,8 +44,8 @@ const TYPE_CONFIG = {
   },
   SYSTEM: {
     icon: Shield,
-    color: 'text-nexer-brand-primary',
-    bg: 'bg-nexer-brand-primary/10',
+    color: 'text-indigo-600',
+    bg: 'bg-indigo-50',
     label: 'System',
   },
 };
@@ -63,13 +64,23 @@ function relativeTime(isoString) {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const NotificationItem = ({ notification, onMarkRead, onDelete }) => {
+const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete }, ref) => {
   const config = TYPE_CONFIG[notification.type] || TYPE_CONFIG.SYSTEM;
-  const Icon = config.icon;
+  
+  // Dynamic icon for System Alerts (Security vs Maintenance)
+  let Icon = config.icon;
+  if (notification.type === 'SYSTEM') {
+    if (notification.title?.toLowerCase().includes('maintenance') || 
+        notification.message?.toLowerCase().includes('maintenance')) {
+      Icon = Wrench;
+    }
+  }
+
   const isUnread = !notification.isRead;
 
   return (
     <motion.div
+      ref={ref}
       layout
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
@@ -132,7 +143,9 @@ const NotificationItem = ({ notification, onMarkRead, onDelete }) => {
       </div>
     </motion.div>
   );
-};
+});
+
+NotificationItem.displayName = 'NotificationItem';
 
 // ─── Main Panel Component ─────────────────────────────────────────────────────
 
@@ -361,7 +374,7 @@ const NotificationPanel = () => {
                     />
                   ))}
                 </AnimatePresence>
-              )}
+              ) }
             </div>
 
             {/* Panel footer */}

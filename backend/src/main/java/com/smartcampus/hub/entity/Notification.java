@@ -51,6 +51,10 @@ public class Notification {
     @Builder.Default
     private Boolean isAnnouncement = false;
 
+    @Column(name = "is_archived", nullable = false)
+    @Builder.Default
+    private Boolean isArchived = false;
+
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
