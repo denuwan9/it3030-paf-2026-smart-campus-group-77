@@ -3,8 +3,11 @@ import { motion } from 'framer-motion';
 import TicketStatCard from '../../components/tickets/TicketStatCard';
 import TicketFilters from '../../components/tickets/TicketFilters';
 import TicketItemCard from '../../components/tickets/TicketItemCard';
+import NewTicketModal from '../../components/tickets/NewTicketModal';
+import toast from 'react-hot-toast';
 
 const TicketsPage = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [tickets] = useState([
     {
       id: 'TKT-001',
@@ -80,7 +83,7 @@ const TicketsPage = () => {
             onSearch={() => {}} 
             onFilterStatus={() => {}} 
             onFilterPriority={() => {}} 
-            onNewTicket={() => {}} 
+            onNewTicket={() => setIsModalOpen(true)} 
           />
         </section>
 
@@ -117,6 +120,15 @@ const TicketsPage = () => {
           ))}
         </section>
       </div>
+
+      <NewTicketModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={() => {
+          toast.success('Ticket submitted successfully (Demo)');
+          setIsModalOpen(false);
+        }}
+      />
     </div>
   );
 };
