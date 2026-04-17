@@ -24,6 +24,7 @@ import AdminDashboard from './pages/dashboard/AdminDashboard';
 import TechnicianDashboard from './pages/dashboard/TechnicianDashboard';
 import UserManagementPage from './pages/dashboard/UserManagementPage';
 import NotificationSettingsPage from './pages/dashboard/NotificationSettingsPage';
+import TicketsPage from './pages/dashboard/TicketsPage';
 
 
 
@@ -152,6 +153,13 @@ function App() {
             <Route path="/technician" element={
               <ProtectedRoute allowedRoles={['TECHNICIAN']}>
                 <TechnicianDashboard />
+              </ProtectedRoute>
+            } />
+
+            {/* Incident Tickets Module */}
+            <Route path="/tickets" element={
+              <ProtectedRoute allowedRoles={['ADMIN', 'TECHNICIAN']}>
+                <TicketsPage />
               </ProtectedRoute>
             } />
 
