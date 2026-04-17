@@ -4,7 +4,6 @@ import {
   Building2,
   MapPin,
   Users,
-  Package,
   X,
   Loader2,
   ArrowRight,
@@ -13,7 +12,7 @@ import {
   List,
 } from 'lucide-react';
 import facilityService from '../../services/facilityService';
-import resourceService from '../../services/resourceService';
+import bookingService from '../../services/bookingService';
 import toast from 'react-hot-toast';
 
 const statusColors = {
@@ -22,11 +21,20 @@ const statusColors = {
   CLOSED: { bg: 'bg-rose-50', text: 'text-rose-600', border: 'border-rose-100', dot: 'bg-rose-500' },
 };
 
-const resourceStatusColors = {
-  AVAILABLE: 'text-emerald-600 bg-emerald-50 border-emerald-100',
-  IN_USE: 'text-blue-600 bg-blue-50 border-blue-100',
-  MAINTENANCE: 'text-amber-600 bg-amber-50 border-amber-100',
-  BROKEN: 'text-rose-600 bg-rose-50 border-rose-100',
+const emptyBookingForm = {
+  bookingDate: '',
+  startTime: '',
+  endTime: '',
+  purpose: '',
+  expectedAttendees: '',
+};
+
+const getTodayDateString = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 const getFacilityType = (facility) => facility?.type || facility?.facilityType || facility?.category || '';
@@ -39,9 +47,12 @@ const FacilitiesPage = () => {
   const [statusFilter, setStatusFilter] = useState('AVAILABLE');
   const [minCapacityFilter, setMinCapacityFilter] = useState('');
   const [selectedFacility, setSelectedFacility] = useState(null);
-  const [facilityResources, setFacilityResources] = useState([]);
-  const [loadingResources, setLoadingResources] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
+  const [bookingModalOpen, setBookingModalOpen] = useState(false);
+  const [bookingForm, setBookingForm] = useState(emptyBookingForm);
+  const [submittingBooking, setSubmittingBooking] = useState(false);
+
+  const minBookingDate = useMemo(() => getTodayDateString(), []);
 
   const facilityTypes = useMemo(() => {
     const allTypes = facilities
@@ -66,17 +77,74 @@ const FacilitiesPage = () => {
     }
   };
 
-  const openFacilityDetails = async (facility) => {
+  const openFacilityDetails = (facility) => {
     setSelectedFacility(facility);
-    setLoadingResources(true);
+    setBookingModalOpen(false);
+  };
+
+  const closeBookingModal = () => {
+    setBookingModalOpen(false);
+    setBookingForm(emptyBookingForm);
+  };
+
+  const openScheduleBookingModal = () => {
+    if (!selectedFacility) {
+      return;
+    }
+
+    if (selectedFacility.status !== 'AVAILABLE') {
+      toast.error('This facility is currently not available for booking.');
+      return;
+    }
+
+    setBookingModalOpen(true);
+  };
+
+  const handleBookResourceFromFacility = async (e) => {
+    e.preventDefault();
+    if (!selectedFacility) return;
+
+    if (bookingForm.bookingDate < minBookingDate) {
+      toast.error('Past dates are not allowed. Please select today or a future date.');
+      return;
+    }
+
+    const maxAttendees = Number(selectedFacility.capacity || 0);
+    const attendeesCount = bookingForm.expectedAttendees
+      ? Number(bookingForm.expectedAttendees)
+      : null;
+
+    if (attendeesCount !== null && attendeesCount < 1) {
+      toast.error('Attendees must be at least 1.');
+      return;
+    }
+
+    if (attendeesCount !== null && maxAttendees > 0 && attendeesCount > maxAttendees) {
+      toast.error(`Attendees cannot exceed the maximum capacity (${maxAttendees}).`);
+      return;
+    }
+
     try {
-      const res = await resourceService.getResourcesByFacilityId(facility.id);
-      setFacilityResources(res.data || []);
-    } catch (err) {
-      toast.error('Failed to load resources');
-      setFacilityResources([]);
+      setSubmittingBooking(true);
+      const payload = {
+        facilityId: selectedFacility.id,
+        bookingDate: bookingForm.bookingDate,
+        startTime: bookingForm.startTime,
+        endTime: bookingForm.endTime,
+        purpose: bookingForm.purpose,
+      };
+
+      if (attendeesCount !== null) {
+        payload.expectedAttendees = attendeesCount;
+      }
+
+      await bookingService.createBooking(payload);
+      toast.success('Booking request submitted for approval');
+      closeBookingModal();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to submit booking request');
     } finally {
-      setLoadingResources(false);
+      setSubmittingBooking(false);
     }
   };
 
@@ -331,7 +399,10 @@ const FacilitiesPage = () => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              onClick={() => setSelectedFacility(null)}
+              onClick={() => {
+                setSelectedFacility(null);
+                setBookingModalOpen(false);
+              }}
               className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-50"
             />
 
@@ -350,7 +421,10 @@ const FacilitiesPage = () => {
                   <p className="text-xs text-slate-400 font-medium mt-0.5">{selectedFacility.location || 'No location set'}</p>
                 </div>
                 <button
-                  onClick={() => setSelectedFacility(null)}
+                  onClick={() => {
+                    setSelectedFacility(null);
+                    setBookingModalOpen(false);
+                  }}
                   className="p-2 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"
                 >
                   <X className="w-5 h-5" />
@@ -382,58 +456,143 @@ const FacilitiesPage = () => {
                   )}
                 </div>
 
-                {/* Resources List */}
+                {/* Booking */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-black text-slate-700 uppercase tracking-widest">Resources ({facilityResources.length})</h3>
-                    <Package className="w-4 h-4 text-slate-300" />
+                    <h3 className="text-sm font-black text-slate-700 uppercase tracking-widest">Schedule Booking</h3>
                   </div>
 
-                  {loadingResources && (
-                    <div className="flex items-center justify-center py-10">
-                      <Loader2 className="w-6 h-6 text-blue-600 animate-spin" />
-                    </div>
-                  )}
+                  <div className="bg-slate-50 rounded-2xl border border-slate-100 p-5 space-y-4">
+                    <p className="text-sm text-slate-500">
+                      Book this facility directly by choosing your schedule details.
+                    </p>
 
-                  {!loadingResources && facilityResources.length === 0 && (
-                    <div className="text-center py-10 bg-slate-50 rounded-2xl border border-slate-100">
-                      <Package className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-                      <p className="text-sm font-bold text-slate-400">No resources listed</p>
-                      <p className="text-xs text-slate-300 mt-0.5">This facility has no equipment or resources yet.</p>
-                    </div>
-                  )}
-
-                  {!loadingResources && facilityResources.length > 0 && (
-                    <div className="space-y-3">
-                      {facilityResources.map((res) => (
-                        <div
-                          key={res.id}
-                          className="bg-white border border-slate-100 rounded-xl p-4 flex items-center gap-4 hover:bg-slate-50 transition-all"
-                        >
-                          <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                            <Package className="w-4 h-4 text-blue-500" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-bold text-sm text-slate-800 truncate">{res.name}</p>
-                            <div className="flex items-center gap-3 mt-0.5">
-                              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">{res.type}</span>
-                              <span className="text-[10px] text-slate-300">•</span>
-                              <span className="text-[10px] font-bold text-slate-400">Qty: {res.quantity}</span>
-                            </div>
-                          </div>
-                          <div className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${resourceStatusColors[res.status] || 'text-slate-500 bg-slate-50 border-slate-100'}`}>
-                            {res.status}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                    <button
+                      onClick={openScheduleBookingModal}
+                      disabled={selectedFacility.status !== 'AVAILABLE'}
+                      className={`w-full py-3 rounded-xl text-sm font-semibold transition-all ${
+                        selectedFacility.status !== 'AVAILABLE'
+                          ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
+                          : 'bg-[#6B65FB]/5 text-[#6B65FB] hover:bg-[#6B65FB] hover:text-white border border-[#6B65FB]/20'
+                      }`}
+                    >
+                      Schedule Booking
+                    </button>
+                  </div>
                 </div>
               </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
+
+      {bookingModalOpen && selectedFacility && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-[24px] border border-slate-200 w-full max-w-xl p-8 shadow-2xl">
+            <div className="flex items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">Request Booking</h2>
+                <p className="text-sm font-medium text-slate-500 mt-1">{selectedFacility.name} • {selectedFacility.location || 'No location set'}</p>
+              </div>
+              <button
+                onClick={closeBookingModal}
+                className="text-slate-400 hover:text-slate-700 bg-slate-50 hover:bg-slate-100 rounded-full p-2 transition-all"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleBookResourceFromFacility} className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pl-1">Booking Date</label>
+                  <input
+                    type="date"
+                    value={bookingForm.bookingDate}
+                    onChange={(e) => {
+                      const selectedDate = e.target.value;
+                      if (selectedDate && selectedDate < minBookingDate) {
+                        toast.error('You cannot select a past date.');
+                        return;
+                      }
+                      setBookingForm((prev) => ({ ...prev, bookingDate: selectedDate }));
+                    }}
+                    min={minBookingDate}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-[#6B65FB]/20 focus:border-[#6B65FB] transition-all"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pl-1">
+                    Attendees {Number(selectedFacility.capacity || 0) > 0 ? `(Max ${Number(selectedFacility.capacity || 0)})` : ''}
+                  </label>
+                  <input
+                    type="number"
+                    min="1"
+                    max={Number(selectedFacility.capacity || 0) || undefined}
+                    value={bookingForm.expectedAttendees}
+                    onChange={(e) => setBookingForm((prev) => ({ ...prev, expectedAttendees: e.target.value }))}
+                    placeholder="E.g., 30"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-[#6B65FB]/20 focus:border-[#6B65FB] transition-all"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pl-1">Start Time</label>
+                  <input
+                    type="time"
+                    value={bookingForm.startTime}
+                    onChange={(e) => setBookingForm((prev) => ({ ...prev, startTime: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-[#6B65FB]/20 focus:border-[#6B65FB] transition-all"
+                    required
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pl-1">End Time</label>
+                  <input
+                    type="time"
+                    value={bookingForm.endTime}
+                    onChange={(e) => setBookingForm((prev) => ({ ...prev, endTime: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-[#6B65FB]/20 focus:border-[#6B65FB] transition-all"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pl-1">Booking Purpose</label>
+                <textarea
+                  value={bookingForm.purpose}
+                  onChange={(e) => setBookingForm((prev) => ({ ...prev, purpose: e.target.value }))}
+                  placeholder="Provide a brief reason for booking this resource..."
+                  rows={3}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-[#6B65FB]/20 focus:border-[#6B65FB] transition-all resize-none"
+                  required
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={closeBookingModal}
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={submittingBooking}
+                  className="px-5 py-2.5 rounded-xl bg-[#6B65FB] text-white text-sm font-bold hover:bg-[#5a54da] disabled:bg-slate-300 transition-all shadow-sm shadow-[#6B65FB]/20"
+                >
+                  {submittingBooking ? 'Submitting...' : 'Submit Request'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

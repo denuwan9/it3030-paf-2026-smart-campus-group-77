@@ -2,7 +2,10 @@ package com.smartcampus.hub.service;
 
 import com.smartcampus.hub.dto.ResourceDTO;
 import com.smartcampus.hub.entity.Facility;
+import com.smartcampus.hub.entity.FacilityStatus;
 import com.smartcampus.hub.entity.Resource;
+import com.smartcampus.hub.entity.ResourceStatus;
+import com.smartcampus.hub.entity.ResourceType;
 import com.smartcampus.hub.repository.FacilityRepository;
 import com.smartcampus.hub.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,12 +21,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ResourceService {
 
+    public static final String FACILITY_BOOKING_SLOT_PREFIX = "__FACILITY_BOOKING_SLOT__::";
+
     private final ResourceRepository resourceRepository;
     private final FacilityRepository facilityRepository;
 
     @Transactional(readOnly = true)
     public List<ResourceDTO> getAllResources(com.smartcampus.hub.entity.ResourceStatus status, com.smartcampus.hub.entity.ResourceType type, String search) {
         return resourceRepository.findAllWithFacility().stream()
+                .filter(r -> !isFacilityBookingSlot(r))
                 .filter(r -> status == null || r.getStatus() == status)
                 .filter(r -> type == null || r.getType() == type)
                 .filter(r -> search == null || r.getName().toLowerCase().contains(search.toLowerCase()))
@@ -37,8 +43,43 @@ public class ResourceService {
             throw new NoSuchElementException("Facility not found with id: " + facilityId);
         }
         return resourceRepository.findByFacilityId(facilityId).stream()
+                .filter(r -> !isFacilityBookingSlot(r))
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public Resource getOrCreateFacilityBookingSlot(UUID facilityId) {
+        Facility facility = facilityRepository.findById(facilityId)
+                .orElseThrow(() -> new NoSuchElementException("Facility not found with id: " + facilityId));
+
+        if (facility.getStatus() != FacilityStatus.AVAILABLE) {
+            throw new RuntimeException("Facility is currently out of service");
+        }
+
+        String slotName = FACILITY_BOOKING_SLOT_PREFIX + facilityId;
+        Resource slot = resourceRepository.findFirstByFacilityIdAndName(facilityId, slotName)
+                .orElseGet(() -> resourceRepository.save(
+                        Resource.builder()
+                                .name(slotName)
+                                .description("System-managed booking slot for facility-level bookings")
+                                .type(ResourceType.OTHER)
+                                .quantity(facility.getCapacity() != null && facility.getCapacity() > 0 ? facility.getCapacity() : 1)
+                                .status(ResourceStatus.AVAILABLE)
+                                .facility(facility)
+                                .build()
+                ));
+
+        if (slot.getStatus() != ResourceStatus.AVAILABLE) {
+            slot.setStatus(ResourceStatus.AVAILABLE);
+            slot = resourceRepository.save(slot);
+        }
+
+        return slot;
+    }
+
+    public static boolean isFacilityBookingSlotName(String name) {
+        return name != null && name.startsWith(FACILITY_BOOKING_SLOT_PREFIX);
     }
 
     @Transactional(readOnly = true)
@@ -100,6 +141,10 @@ public class ResourceService {
     public Resource getResourceEntityById(UUID id) {
         return resourceRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("Resource not found with id: " + id));
+    }
+
+    private boolean isFacilityBookingSlot(Resource resource) {
+        return isFacilityBookingSlotName(resource.getName());
     }
 
     private ResourceDTO mapToDTO(Resource entity) {

@@ -376,7 +376,7 @@ const BookingsPage = () => {
           </div>
         </div>
         <button 
-          onClick={() => navigate('/resources')}
+          onClick={() => navigate('/facilities')}
           className="bg-white text-indigo-600 px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-50 transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />

@@ -23,7 +23,6 @@ import UserDashboard from './pages/dashboard/UserDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 import TechnicianDashboard from './pages/dashboard/TechnicianDashboard';
 import UserManagementPage from './pages/dashboard/UserManagementPage';
-import ResourcesPage from './pages/dashboard/ResourcesPage';
 import BookingsPage from './pages/dashboard/BookingsPage';
 import AdminBookingsPage from './pages/dashboard/AdminBookingsPage';
 import AdminCheckInVerifyPage from './pages/dashboard/AdminCheckInVerifyPage';
@@ -166,12 +165,6 @@ function App() {
             <Route path="/admin/bookings" element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <AdminBookingsPage />
-              </ProtectedRoute>
-            } />
-
-            <Route path="/resources" element={
-              <ProtectedRoute allowedRoles={['USER']}>
-                <ResourcesPage />
               </ProtectedRoute>
             } />
 
