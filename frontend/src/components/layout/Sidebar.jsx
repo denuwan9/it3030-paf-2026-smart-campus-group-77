@@ -68,7 +68,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       label: 'Resources', 
       to: '/resources', 
       icon: Package, 
-      roles: ['ROLE_USER', 'ROLE_ADMIN'] 
+      roles: ['ROLE_USER'] 
     },
     {
       label: 'Bookings',
