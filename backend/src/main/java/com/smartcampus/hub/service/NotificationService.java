@@ -136,31 +136,62 @@ public class NotificationService {
     }
 
     /**
-     * Admin-only: sends a notification to every active user in the system.
+     * Creates a targeted announcement based on the provided selection.
+     * Supports targeting ALL users, a specific ROLE, or a single USER.
+     *
+     * @param dto Announcement payload
+     * @return Number of recipients targeted
      */
     @Transactional
-    public int broadcastSystemNotification(String title, String message) {
-        List<User> activeUsers = userRepo.findAll()
-                .stream()
-                .filter(u -> Boolean.TRUE.equals(u.getIsActive()))
-                .collect(Collectors.toList());
+    public int createTargetedAnnouncement(AnnouncementDTO dto) {
+        String type = dto.getTargetType().toUpperCase();
+        String val  = dto.getTargetValue();
+        String msg  = dto.getMessage();
 
-        for (User user : activeUsers) {
+        List<User> targets;
+
+        if ("ALL".equals(type)) {
+            targets = userRepo.findAll().stream()
+                    .filter(User::getIsActive)
+                    .collect(Collectors.toList());
+        } else if ("ROLE".equals(type)) {
+            Role role = Role.valueOf(val);
+            targets = userRepo.findAll().stream()
+                    .filter(u -> u.getIsActive() && u.getRole() == role)
+                    .collect(Collectors.toList());
+        } else if ("USER".equals(type)) {
+            User user = userRepo.findById(UUID.fromString(val))
+                    .orElseThrow(() -> new NoSuchElementException("Target user not found: " + val));
+            targets = List.of(user);
+        } else {
+            throw new IllegalArgumentException("Invalid target type: " + type);
+        }
+
+        for (User user : targets) {
+            // Respect announcement preference
             NotificationSetting setting = getOrCreateSettings(user.getId());
-            if (Boolean.TRUE.equals(setting.getSystemAlerts())) {
+            if (Boolean.TRUE.equals(setting.getAnnouncementAlerts())) {
                 Notification n = Notification.builder()
                         .recipientId(user.getId())
-                        .type(NotificationType.SYSTEM)
-                        .title(title)
-                        .message(message)
+                        .type(NotificationType.ANNOUNCEMENT)
+                        .title("Announcement")
+                        .message(msg)
+                        .isAnnouncement(true)
                         .build();
                 notificationRepo.save(n);
             }
         }
 
-        log.info("System broadcast '{}' sent to {} users", title, activeUsers.size());
-        return activeUsers.size();
+        log.info("Targeted announcement sent to {} recipients (Type: {})", targets.size(), type);
+        return targets.size();
     }
+
+    /**
+     * Admin-only: sends a notification to every active user in the system.
+     * @deprecated Use {@link #createTargetedAnnouncement} for more flexibility.
+     */
+    @Transactional
+    public int broadcastSystemNotification(String title, String message) {
 
     // ─── Settings ─────────────────────────────────────────────────────────────
 
@@ -220,6 +251,7 @@ public class NotificationService {
                 .message(n.getMessage())
                 .actionUrl(n.getActionUrl())
                 .isRead(n.getIsRead())
+                .isAnnouncement(n.getIsAnnouncement())
                 .createdAt(n.getCreatedAt())
                 .build();
     }

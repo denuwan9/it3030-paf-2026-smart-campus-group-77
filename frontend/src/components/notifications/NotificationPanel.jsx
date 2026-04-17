@@ -76,9 +76,11 @@ const NotificationItem = ({ notification, onMarkRead, onDelete }) => {
       transition={{ duration: 0.2 }}
       className={`relative flex gap-3 p-4 rounded-2xl border transition-all group ${
         isUnread
-          ? 'bg-nexer-brand-primary/[0.03] border-nexer-brand-primary/10'
-          : 'bg-white border-slate-100 hover:border-slate-200'
-      }`}
+          ? notification.isAnnouncement 
+            ? 'bg-purple-500/[0.05] border-purple-500/20 shadow-sm shadow-purple-500/5'
+            : 'bg-nexer-brand-primary/[0.03] border-nexer-brand-primary/10'
+          : 'bg-white/50 border-slate-100 hover:border-slate-200'
+      } backdrop-blur-sm`}
     >
       {/* Unread indicator */}
       {isUnread && (
@@ -267,7 +269,7 @@ const NotificationPanel = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.97 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute right-0 top-[calc(100%+12px)] w-[calc(100vw-32px)] sm:w-[380px] bg-white rounded-3xl shadow-nexer-md border border-slate-100 z-50 overflow-hidden"
+            className="absolute right-0 top-[calc(100%+12px)] w-[calc(100vw-32px)] sm:w-[400px] bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-nexer-lg border border-white/20 z-50 overflow-hidden"
           >
             {/* Panel header */}
             <div className="flex items-center justify-between px-4 sm:px-5 pt-4 sm:pt-5 pb-3 border-b border-slate-50">

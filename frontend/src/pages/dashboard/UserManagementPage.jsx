@@ -19,6 +19,8 @@ import {
 } from 'lucide-react';
 import userService from '../../services/userService';
 import toast from 'react-hot-toast';
+import AnnouncementForm from '../../components/dashboard/AnnouncementForm';
+import { Megaphone } from 'lucide-react';
 
 const Modal = ({ isOpen, onClose, title, children, confirmText, onConfirm, variant = 'primary', isLoading = false }) => {
   if (!isOpen) return null;
@@ -84,6 +86,7 @@ const UserManagementPage = () => {
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showAnnouncementModal, setShowAnnouncementModal] = useState(false);
   
   // Edit Form State
   const [editData, setEditData] = useState({ role: '', password: '' });
@@ -218,6 +221,14 @@ const UserManagementPage = () => {
             >
               <RefreshCw className={`w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform ${loading ? 'animate-spin' : 'group-hover:rotate-180'}`} />
               REFRESH DATA
+            </button>
+            <div className="w-px h-6 bg-slate-200 self-center hidden sm:block mx-1" />
+            <button 
+              onClick={() => setShowAnnouncementModal(true)}
+              className="px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl flex items-center justify-center gap-2 text-slate-500 hover:text-purple-600 transition-all font-black text-[10px] sm:text-xs tracking-widest group active:scale-95"
+            >
+              <Megaphone className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover:scale-110 transition-transform" />
+              SEND ANNOUNCEMENT
             </button>
           </div>
         </div>
@@ -496,6 +507,45 @@ const UserManagementPage = () => {
           </div>
         </div>
       </Modal>
+
+      {/* 4. Targeted Announcement Modal */}
+      {showAnnouncementModal && (
+        <AnimatePresence>
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              className="bg-white rounded-[2.5rem] w-full max-w-lg overflow-hidden shadow-2xl border border-slate-100"
+            >
+              <div className="p-8 sm:p-10">
+                <div className="flex justify-between items-center mb-8">
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-800 tracking-tight uppercase flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600">
+                        <Megaphone className="w-5 h-5" />
+                      </div>
+                      Central Broadcast
+                    </h3>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1 px-1">Transmit Directive to Campus Nodes</p>
+                  </div>
+                  <button onClick={() => setShowAnnouncementModal(false)} className="w-10 h-10 rounded-xl bg-slate-50 text-slate-400 hover:text-slate-600 transition-colors flex items-center justify-center">
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+                
+                <AnnouncementForm 
+                  onSuccess={() => setShowAnnouncementModal(false)}
+                  onCancel={() => setShowAnnouncementModal(false)}
+                />
+              </div>
+            </motion.div>
+          </motion.div>
+        </AnimatePresence>
+      )}
     </div>
   );
 };
