@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronDown, User, Calendar, MapPin, Tag, Shield, Phone, Send } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
   if (!ticket) return null;
@@ -27,23 +28,31 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
 
   const [comments, setComments] = useState(initialComments);
   const [newComment, setNewComment] = useState("");
+  const [assignee, setAssignee] = useState("Ashan Perera");
+  const [activeStatus, setActiveStatus] = useState("");
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editingText, setEditingText] = useState("");
 
   // Reset comments or fetch them when ticket changes
   useEffect(() => {
     setComments(initialComments);
     setNewComment("");
-  }, [ticket?.id]);
+    if (ticket) {
+      setActiveStatus(ticket.status);
+    }
+  }, [ticket]);
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
+    const initials = assignee.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
     const comment = {
       id: Date.now(),
-      user: 'My Self',
-      role: 'USER',
+      user: assignee,
+      role: 'TECHNICIAN',
       time: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }),
       message: newComment,
-      initials: 'MS',
-      isTechnician: false,
+      initials: initials,
+      isTechnician: true,
       isOwn: true // Flag to identify own comments
     };
     setComments([...comments, comment]);
@@ -52,9 +61,34 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
 
   const handleDeleteComment = (id) => {
     setComments(comments.filter(c => c.id !== id));
+    toast.success("Comment deleted");
+  };
+
+  const handleEditComment = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditingText(comment.message);
+  };
+
+  const handleSaveEdit = (id) => {
+    if (!editingText.trim()) return;
+    setComments(comments.map(c => c.id === id ? { ...c, message: editingText } : c));
+    setEditingCommentId(null);
+    setEditingText("");
+    toast.success("Comment updated");
   };
 
   const statuses = ['Open', 'In progress', 'Resolved', 'Closed'];
+
+  const handleAssign = () => {
+    toast.success(`Ticket assigned to ${assignee} successfully`);
+  };
+
+  const handleStatusChange = (newStatus) => {
+    // Generate the UPPER_CASE format that matches backend, e.g. "IN_PROGRESS"
+    const formattedStatus = newStatus.replace(' ', '_').toUpperCase();
+    setActiveStatus(formattedStatus);
+    toast.success(`Ticket status updated to ${newStatus}`);
+  };
 
   return (
     <AnimatePresence>
@@ -97,13 +131,14 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Workflow</p>
                 <div className="flex bg-white p-1.5 rounded-2xl border border-blue-100 gap-1 shadow-sm">
                   {statuses.map((s) => {
-                    const isActive = ticket.status.replace('_', ' ').toLowerCase() === s.toLowerCase();
+                    const isActive = activeStatus && activeStatus.replace('_', ' ').toLowerCase() === s.toLowerCase();
                     return (
                       <button 
                         key={s} 
+                        onClick={() => handleStatusChange(s)}
                         className={`flex-1 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all ${
                           isActive 
-                            ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-300 ring-inset' 
+                            ? 'bg-blue-100 text-blue-700 ring-1 ring-blue-300 ring-inset shadow-sm' 
                             : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
                         }`}
                       >
@@ -131,49 +166,26 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
                 ))}
               </div>
 
-              {/* Attachments */}
-              <div>
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">Attachments</p>
-                <div className="flex gap-3">
-                  {[1, 2].map(i => (
-                    <div key={i} className="w-16 h-16 bg-white border border-blue-100 rounded-xl flex items-center justify-center text-slate-400 hover:text-blue-500 hover:border-blue-300 transition-all cursor-pointer shadow-sm">
-                      <Tag className="w-5 h-5 opacity-50" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Assign Technician */}
               <div className="space-y-4">
                 <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Assign Technician</p>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
-                    <select className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-slate-700 text-xs font-bold outline-none appearance-none focus:ring-2 focus:ring-blue-100 shadow-sm">
+                    <select 
+                      value={assignee}
+                      onChange={(e) => setAssignee(e.target.value)}
+                      className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-slate-700 text-xs font-bold outline-none appearance-none focus:ring-2 focus:ring-blue-100 shadow-sm"
+                    >
                       <option>Ashan Perera</option>
                       <option>Lilantha Siriwardana</option>
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                   </div>
-                  <button className="px-6 py-2.5 bg-blue-600 border border-blue-700 text-white text-xs font-black uppercase rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-sm">
+                  <button 
+                    onClick={handleAssign}
+                    className="px-6 py-2.5 bg-blue-600 border border-blue-700 text-white text-xs font-black uppercase rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-sm"
+                  >
                     Assign
-                  </button>
-                </div>
-              </div>
-
-              {/* Update Status */}
-              <div className="space-y-4 pt-2">
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Update Status</p>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <select className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-slate-700 text-xs font-bold outline-none appearance-none focus:ring-2 focus:ring-blue-100 shadow-sm">
-                      <option>In progress</option>
-                      <option>Resolved</option>
-                      <option>Closed</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  </div>
-                  <button className="px-6 py-2.5 bg-blue-600 border border-blue-700 text-white text-xs font-black uppercase rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-sm">
-                    Update
                   </button>
                 </div>
               </div>
@@ -194,12 +206,28 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket }) => {
                             <span className="text-[9px] font-black text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded tracking-widest">{comment.role}</span>
                             <span className="text-[9px] text-slate-400 ml-auto">{comment.time}</span>
                           </div>
-                          <p className="text-xs text-slate-600 leading-relaxed font-medium">{comment.message}</p>
-                          {(comment.isTechnician || comment.isOwn) && (
-                            <div className="flex items-center gap-2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button className="text-[9px] font-black text-slate-500 hover:text-blue-600 uppercase tracking-widest px-3 py-1 bg-white border border-slate-200 shadow-sm rounded-lg transition-all">Edit</button>
-                              <button onClick={() => handleDeleteComment(comment.id)} className="text-[9px] font-black text-rose-500/80 hover:text-rose-600 uppercase tracking-widest px-3 py-1 bg-white border border-rose-100 shadow-sm rounded-lg transition-all">Delete</button>
+                          {editingCommentId === comment.id ? (
+                            <div className="mt-2 space-y-2">
+                              <textarea 
+                                value={editingText}
+                                onChange={(e) => setEditingText(e.target.value)}
+                                className="w-full bg-white border border-blue-200 shadow-sm rounded-lg p-2 text-xs text-slate-700 outline-none focus:ring-2 focus:ring-blue-100 resize-none h-16"
+                              />
+                              <div className="flex gap-2">
+                                <button onClick={() => handleSaveEdit(comment.id)} className="text-[9px] font-black text-white hover:bg-blue-700 uppercase tracking-widest px-3 py-1 bg-blue-600 rounded-lg transition-all shadow-sm">Save</button>
+                                <button onClick={() => setEditingCommentId(null)} className="text-[9px] font-black text-slate-500 hover:text-slate-700 uppercase tracking-widest px-3 py-1 bg-white border border-slate-200 rounded-lg transition-all shadow-sm">Cancel</button>
+                              </div>
                             </div>
+                          ) : (
+                            <>
+                              <p className="text-xs text-slate-600 leading-relaxed font-medium">{comment.message}</p>
+                              {(comment.isTechnician || comment.isOwn) && (
+                                <div className="flex items-center gap-2 pt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <button onClick={() => handleEditComment(comment)} className="text-[9px] font-black text-slate-500 hover:text-blue-600 uppercase tracking-widest px-3 py-1 bg-white border border-slate-200 shadow-sm rounded-lg transition-all">Edit</button>
+                                  <button onClick={() => handleDeleteComment(comment.id)} className="text-[9px] font-black text-rose-500/80 hover:text-rose-600 uppercase tracking-widest px-3 py-1 bg-white border border-rose-100 shadow-sm rounded-lg transition-all">Delete</button>
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
                       </div>
