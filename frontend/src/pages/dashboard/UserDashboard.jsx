@@ -128,16 +128,16 @@ const UserDashboard = () => {
         
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="space-y-1">
-            <h2 className="text-xl font-black text-nexer-text-header tracking-tight">Recent Activity</h2>
-            <p className="text-slate-400 text-xs font-bold uppercase tracking-widest">History & Status tracking</p>
+            <h2 className="text-lg sm:text-xl font-black text-nexer-text-header tracking-tight">Recent Activity</h2>
+            <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">History & Status tracking</p>
           </div>
-          <button className="text-sm font-black text-nexer-brand-primary hover:underline underline-offset-4 decoration-2">
+          <button className="text-xs sm:text-sm font-black text-nexer-brand-primary hover:underline underline-offset-4 decoration-2 text-left">
             View Statement
           </button>
         </div>
 
-        <div className="table-responsive">
-          <table className="w-full">
+        <div className="w-full overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+          <table className="w-full min-w-[600px]">
             <thead>
               <tr className="border-b border-slate-50">
                 <th className="text-left pb-4 text-[10px] font-black text-slate-300 uppercase tracking-[0.2em]">Transaction / Resource</th>
@@ -153,25 +153,25 @@ const UserDashboard = () => {
                 { name: 'Main Library Room 4', type: 'Study Space', time: 'Mar 22, 11:15 AM', status: 'COMPLETED' },
               ].map((row, i) => (
                 <tr key={i} className="group hover:bg-slate-50/50 transition-colors">
-                  <td className="py-5">
+                  <td className="py-5 pr-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-nexer-bg-surface flex items-center justify-center font-black text-nexer-brand-primary text-xs border border-slate-100 group-hover:bg-white transition-all">
+                      <div className="w-10 h-10 flex-shrink-0 rounded-xl bg-nexer-bg-surface flex items-center justify-center font-black text-nexer-brand-primary text-xs border border-slate-100 group-hover:bg-white transition-all">
                         {row.name.charAt(0)}
                       </div>
-                      <div>
-                        <p className="font-bold text-nexer-text-header text-sm">{row.name}</p>
-                        <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase">{row.type}</p>
+                      <div className="min-w-0">
+                        <p className="font-bold text-nexer-text-header text-sm truncate">{row.name}</p>
+                        <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase truncate">{row.type}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="py-5">
+                  <td className="py-5 pr-4 px-2">
                     <div className="flex items-center gap-2 text-slate-600">
                       <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span className="text-xs font-medium">{row.time}</span>
+                      <span className="text-xs font-medium whitespace-nowrap">{row.time}</span>
                     </div>
                   </td>
-                  <td className="py-5">
-                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border ${
+                  <td className="py-5 pr-4">
+                    <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border whitespace-nowrap ${
                       row.status === 'COMPLETED' 
                         ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
                         : 'bg-amber-50 text-amber-600 border-amber-100'
@@ -181,7 +181,7 @@ const UserDashboard = () => {
                     </div>
                   </td>
                   <td className="py-5 text-right">
-                    <button className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-nexer-brand-primary hover:text-white transition-all group-hover:shadow-sm">
+                    <button className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-nexer-brand-primary hover:text-white transition-all group-hover:shadow-sm ml-auto">
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </td>

@@ -46,6 +46,12 @@ public class UserService {
         if (request.getProfileImageUrl() != null) {
             user.setProfileImageUrl(request.getProfileImageUrl());
         }
+        if (request.getIsEmailPublic() != null) {
+            user.setIsEmailPublic(request.getIsEmailPublic());
+        }
+        if (request.getIsPhonePublic() != null) {
+            user.setIsPhonePublic(request.getIsPhonePublic());
+        }
 
         User savedUser = userRepository.save(user);
         log.info("Profile updated successfully for user: {}. Current Image: {}", email, savedUser.getProfileImageUrl());

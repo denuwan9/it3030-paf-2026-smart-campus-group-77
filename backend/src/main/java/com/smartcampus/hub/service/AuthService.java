@@ -8,6 +8,7 @@ import com.smartcampus.hub.repository.PasswordResetTokenRepository;
 import com.smartcampus.hub.repository.UserRepository;
 import com.smartcampus.hub.security.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Random;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -33,8 +35,10 @@ public class AuthService {
 
     @Transactional
     public void register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists");
+        String email = request.getEmail().toLowerCase();
+        
+        if (userRepository.existsByEmail(email)) {
+            throw new RuntimeException("An account with this institutional email already exists.");
         }
 
         // Domain restriction check (SLIIT specific)
@@ -128,25 +132,42 @@ public class AuthService {
 
     @Transactional
     public void forgotPassword(ForgotPasswordRequest request) {
-        User user = userRepository.findByEmail(request.getEmail().toLowerCase())
-                .orElseThrow(() -> new RuntimeException("No account found with this email"));
+        String email = request.getEmail().toLowerCase();
+        log.info("Received password reset request for email: {}", email);
+        
+        // Silently succeed if email not found — prevents email enumeration attacks.
+        // The controller always returns the same generic message regardless.
+        User user = userRepository.findByEmail(email).orElse(null);
 
-        // Delete existing token if any
-        tokenRepository.deleteByUser(user);
+        if (user == null) {
+            log.warn("Password reset failed: User with email {} not found in database.", email);
+            throw new RuntimeException("No account found with this institutional email address. Please check the spelling or register first.");
+        }
 
-        // Generate new token (UUID)
+        if ("google".equals(user.getProvider())) {
+            log.warn("Password reset attempted for Google user: {}", email);
+            throw new RuntimeException("This account is managed by Google. Please log in using the 'Continue with Google' button.");
+        }
+
+        log.info("Generating reset token for user ID: {}", user.getId());
+
+        // Fetch existing token or create a new one to avoid Hibernate duplicate key constraint on insert-after-delete
+        PasswordResetToken resetToken = tokenRepository.findByUser(user)
+                .orElse(new PasswordResetToken());
+
         String token = UUID.randomUUID().toString();
-        PasswordResetToken resetToken = PasswordResetToken.builder()
-                .token(token)
-                .user(user)
-                .expiryDate(Instant.now().plus(15, ChronoUnit.MINUTES))
-                .build();
+        resetToken.setToken(token);
+        resetToken.setUser(user);
+        resetToken.setExpiryDate(Instant.now().plus(15, ChronoUnit.MINUTES));
 
         tokenRepository.save(resetToken);
+        log.info("Password reset token saved for user: {}. Preparing to send email...", email);
 
         try {
             emailService.sendPasswordResetEmail(user.getEmail(), token);
+            log.info("Password reset email sent successfully to: {}", user.getEmail());
         } catch (Exception e) {
+            log.error("Failed to send password reset email to {}: {}", user.getEmail(), e.getMessage());
             throw new RuntimeException("Failed to send reset email. Please try again later.");
         }
     }

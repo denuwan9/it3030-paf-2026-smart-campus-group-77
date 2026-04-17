@@ -29,23 +29,14 @@ public class DatabaseInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        log.info("Checking database schema for missing privacy columns...");
+        log.info("Database schema synchronization check started...");
         try {
-            // Add is_email_public if missing
-            jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_email_public BOOLEAN DEFAULT FALSE");
-            log.info("Column 'is_email_public' verified/added.");
-
-            // Add is_phone_public if missing
-            jdbcTemplate.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_phone_public BOOLEAN DEFAULT FALSE");
-            log.info("Column 'is_phone_public' verified/added.");
-
-            // Ensure they are NOT NULL (if Hibernate requires it)
-            jdbcTemplate.execute("UPDATE users SET is_email_public = FALSE WHERE is_email_public IS NULL");
-            jdbcTemplate.execute("UPDATE users SET is_phone_public = FALSE WHERE is_phone_public IS NULL");
-            
+            // Manual ALTER TABLE removed to prevent startup hangs/timeouts.
+            // Hibernate's ddl-auto=update now handles these columns via the User entity.
+            log.info("Privacy columns are now managed by Hibernate entity synchronization.");
             log.info("Database schema synchronization completed successfully.");
         } catch (Exception e) {
-            log.warn("Database initialization notice: {}. This is expected if columns already exist or permissions are restricted.", e.getMessage());
+            log.warn("Database initialization notice: {}.", e.getMessage());
         }
 
         seedResources();
