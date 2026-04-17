@@ -25,6 +25,7 @@ import TechnicianDashboard from './pages/dashboard/TechnicianDashboard';
 import UserManagementPage from './pages/dashboard/UserManagementPage';
 import NotificationSettingsPage from './pages/dashboard/NotificationSettingsPage';
 import TicketsPage from './pages/dashboard/TicketsPage';
+import UserTicketsPage from './pages/dashboard/UserTicketsPage';
 
 
 
@@ -133,6 +134,12 @@ function App() {
             <Route path="/dashboard" element={
               <ProtectedRoute allowedRoles={['USER']}>
                 <UserDashboard />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/user/tickets" element={
+              <ProtectedRoute allowedRoles={['USER']}>
+                <UserTicketsPage />
               </ProtectedRoute>
             } />
             

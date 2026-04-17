@@ -32,6 +32,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
     },
     { 
+      label: 'My Tickets', 
+      to: '/user/tickets', 
+      icon: Ticket, 
+      roles: ['ROLE_USER'] 
+    },
+    { 
       label: 'User Management', 
       to: '/admin/users', 
       icon: ShieldCheck, 
