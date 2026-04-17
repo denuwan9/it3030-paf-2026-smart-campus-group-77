@@ -29,6 +29,7 @@ import AdminBookingsPage from './pages/dashboard/AdminBookingsPage';
 import AdminCheckInVerifyPage from './pages/dashboard/AdminCheckInVerifyPage';
 import NotificationSettingsPage from './pages/dashboard/NotificationSettingsPage';
 import TicketsPage from './pages/dashboard/TicketsPage';
+import UserTicketsPage from './pages/dashboard/UserTicketsPage';
 import FacilitiesPage from './pages/dashboard/FacilitiesPage';
 import ManageFacilitiesPage from './pages/dashboard/ManageFacilitiesPage';
 

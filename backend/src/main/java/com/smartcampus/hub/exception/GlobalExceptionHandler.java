@@ -49,12 +49,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Void>> handleDataAccessException(DataAccessException ex) {
         String root = ex.getMostSpecificCause().getMessage();
         log.error("Database error: {}", root);
-        // Surface a clean message: if the table is missing, tell the user clearly
+        
+        // Dynamic suggestion for missing tables
         if (root != null && root.contains("does not exist")) {
+            String scriptName = "notifications_migration.sql";
+            if (root.contains("facilities") || root.contains("resources")) {
+                scriptName = "facilities_migration.sql";
+            }
+            
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
                     .body(ApiResponse.error(
-                            "Database table missing. Please run the notifications_migration.sql script in Supabase. Detail: " + root));
+                            "Database table missing. Please run the " + scriptName + " script in Supabase. Detail: " + root));
         }
+        
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("Database error: " + root));
     }

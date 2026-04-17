@@ -43,7 +43,11 @@ public class BookingService {
         validateResourceIsBookable(resource);
         validateWithinAvailability(resource, request.getStartTime(), request.getEndTime());
 
-        if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > resource.getCapacity()) {
+        // if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > resource.getCapacity()) {
+        //     throw new RuntimeException("Expected attendees exceed resource capacity");
+        // }
+
+        if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > resource.getFacility().getCapacity()) {
             throw new RuntimeException("Expected attendees exceed resource capacity");
         }
 
@@ -83,7 +87,11 @@ public class BookingService {
         validateBookingTimeOrder(request.getStartTime(), request.getEndTime());
         validateWithinAvailability(booking.getResource(), request.getStartTime(), request.getEndTime());
 
-        if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > booking.getResource().getCapacity()) {
+        // if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > booking.getResource().getCapacity()) {
+        //     throw new RuntimeException("Expected attendees exceed resource capacity");
+        // }
+
+        if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > booking.getResource().getFacility().getCapacity()) {
             throw new RuntimeException("Expected attendees exceed resource capacity");
         }
 
@@ -266,7 +274,7 @@ public class BookingService {
     }
 
     private void validateResourceIsBookable(Resource resource) {
-        if (resource.getStatus() != ResourceStatus.ACTIVE) {
+        if (resource.getStatus() != ResourceStatus.AVAILABLE) {
             throw new RuntimeException("Resource is currently out of service");
         }
     }
@@ -274,10 +282,13 @@ public class BookingService {
     private void validateWithinAvailability(Resource resource,
                                             java.time.LocalTime bookingStart,
                                             java.time.LocalTime bookingEnd) {
+        // Disabled: Database schema does not currently support availability windows on Resources/Facilities
+        /*
         if (bookingStart.isBefore(resource.getAvailabilityStart()) || bookingEnd.isAfter(resource.getAvailabilityEnd())) {
             throw new RuntimeException("Booking is outside the resource availability window (" 
                 + resource.getAvailabilityStart() + " to " + resource.getAvailabilityEnd() + ")");
         }
+        */
     }
 
     private void validateDateRange(LocalDate fromDate, LocalDate toDate) {
@@ -366,7 +377,7 @@ public class BookingService {
                 .resourceId(booking.getResource().getId())
                 .resourceName(booking.getResource().getName())
                 .resourceType(booking.getResource().getType())
-                .resourceLocation(booking.getResource().getLocation())
+                .resourceLocation(booking.getResource().getFacility().getLocation())
                 .requestedById(booking.getRequestedBy().getId())
                 .requestedByName(booking.getRequestedBy().getFullName())
                 .requestedByEmail(booking.getRequestedBy().getEmail())

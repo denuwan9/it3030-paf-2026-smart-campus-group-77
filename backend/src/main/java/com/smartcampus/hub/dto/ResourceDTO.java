@@ -21,4 +21,7 @@ public class ResourceDTO {
     private Integer quantity;
     private ResourceStatus status;
     private UUID facilityId;
+    private String facilityName;
+    private String location;
+    private Integer capacity;
 }

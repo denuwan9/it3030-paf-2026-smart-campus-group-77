@@ -3,8 +3,8 @@ import { Search, Calendar, Landmark, Microscope, Users, Settings, BookOpen } fro
 import toast from 'react-hot-toast';
 import bookingService from '../../services/bookingService';
 
-const resourceTypes = ['', 'LECTURE_HALL', 'LAB', 'MEETING_ROOM', 'EQUIPMENT'];
-const resourceStatuses = ['', 'ACTIVE', 'OUT_OF_SERVICE'];
+const resourceTypes = ['', 'EQUIPMENT', 'FURNITURE', 'CONSUMABLE', 'OTHER'];
+const resourceStatuses = ['', 'AVAILABLE', 'MAINTENANCE', 'BROKEN', 'IN_USE'];
 
 const emptyBookingForm = {
   bookingDate: '',
@@ -48,7 +48,7 @@ const ResourcesPage = () => {
     search: '',
     type: '',
     minCapacity: '',
-    status: 'ACTIVE', // Default to ACTIVE based on UI
+    status: 'AVAILABLE', // Default to AVAILABLE based on backend
   });
   const [bookingForm, setBookingForm] = useState(emptyBookingForm);
   const minBookingDate = useMemo(() => getTodayDateString(), []);
@@ -221,7 +221,12 @@ const ResourcesPage = () => {
                 <div className="w-12 h-12 rounded-xl bg-[#6B65FB]/10 flex items-center justify-center">
                   {getResourceIcon(resource.type)}
                 </div>
-                <div className="px-3 py-1 rounded-full border border-rose-200 bg-white text-[10px] font-bold text-rose-500 tracking-wider">
+                <div className={`px-3 py-1 rounded-full border text-[10px] font-bold tracking-wider ${
+                  resource.status === 'AVAILABLE' ? 'border-emerald-200 bg-emerald-50 text-emerald-500' :
+                  resource.status === 'MAINTENANCE' ? 'border-amber-200 bg-amber-50 text-amber-500' :
+                  resource.status === 'BROKEN' ? 'border-rose-200 bg-rose-50 text-rose-500' :
+                  'border-blue-200 bg-blue-50 text-blue-500'
+                }`}>
                   {resource.status}
                 </div>
               </div>
@@ -259,14 +264,14 @@ const ResourcesPage = () => {
 
               <button
                 onClick={() => setSelectedResource(resource)}
-                disabled={resource.status !== 'ACTIVE'}
+                disabled={resource.status !== 'AVAILABLE'}
                 className={`mt-4 w-full py-3 rounded-xl text-sm font-semibold transition-all ${
-                  resource.status !== 'ACTIVE'
+                  resource.status !== 'AVAILABLE'
                     ? 'bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200'
                     : 'bg-[#6B65FB]/5 text-[#6B65FB] hover:bg-[#6B65FB] hover:text-white border border-[#6B65FB]/20'
                 }`}
               >
-                {resource.status !== 'ACTIVE' ? 'Out of Service' : 'Schedule Booking'}
+                {resource.status !== 'AVAILABLE' ? resource.status.replace('_', ' ') : 'Schedule Booking'}
               </button>
             </div>
           ))}

@@ -22,6 +22,16 @@ public class ResourceService {
     private final FacilityRepository facilityRepository;
 
     @Transactional(readOnly = true)
+    public List<ResourceDTO> getAllResources(com.smartcampus.hub.entity.ResourceStatus status, com.smartcampus.hub.entity.ResourceType type, String search) {
+        return resourceRepository.findAllWithFacility().stream()
+                .filter(r -> status == null || r.getStatus() == status)
+                .filter(r -> type == null || r.getType() == type)
+                .filter(r -> search == null || r.getName().toLowerCase().contains(search.toLowerCase()))
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<ResourceDTO> getResourcesByFacilityId(UUID facilityId) {
         if (!facilityRepository.existsById(facilityId)) {
             throw new NoSuchElementException("Facility not found with id: " + facilityId);
@@ -86,15 +96,28 @@ public class ResourceService {
         resourceRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
+    public Resource getResourceEntityById(UUID id) {
+        return resourceRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Resource not found with id: " + id));
+    }
+
     private ResourceDTO mapToDTO(Resource entity) {
-        return ResourceDTO.builder()
+        ResourceDTO.ResourceDTOBuilder builder = ResourceDTO.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .description(entity.getDescription())
                 .type(entity.getType())
                 .quantity(entity.getQuantity())
-                .status(entity.getStatus())
-                .facilityId(entity.getFacility().getId())
-                .build();
+                .status(entity.getStatus());
+
+        if (entity.getFacility() != null) {
+            builder.facilityId(entity.getFacility().getId())
+                    .facilityName(entity.getFacility().getName())
+                    .location(entity.getFacility().getLocation())
+                    .capacity(entity.getFacility().getCapacity());
+        }
+
+        return builder.build();
     }
 }

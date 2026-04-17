@@ -1,8 +1,7 @@
 package com.smartcampus.hub.config;
 
-import com.smartcampus.hub.entity.Resource;
-import com.smartcampus.hub.entity.ResourceStatus;
-import com.smartcampus.hub.entity.ResourceType;
+import com.smartcampus.hub.entity.*;
+import com.smartcampus.hub.repository.FacilityRepository;
 import com.smartcampus.hub.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,12 +9,10 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalTime;
 import java.util.List;
 
 /**
- * Temporary utility to synchronize database schema for new privacy fields.
- * This runs on startup and ensures the required columns exist in Supabase.
+ * Temporary utility to synchronize database schema and seed initial data.
  */
 @Configuration
 @Component
@@ -23,13 +20,13 @@ import java.util.List;
 @Slf4j
 public class DatabaseInitializer implements CommandLineRunner {
 
+    private final FacilityRepository facilityRepository;
     private final ResourceRepository resourceRepository;
 
     @Override
     public void run(String... args) {
         log.info("Database schema synchronization check started...");
         try {
-            // Manual ALTER TABLE removed to prevent startup hangs/timeouts.
             // Hibernate's ddl-auto=update now handles these columns via the User entity.
             log.info("Privacy columns are now managed by Hibernate entity synchronization.");
             log.info("Database schema synchronization completed successfully.");
@@ -37,58 +34,70 @@ public class DatabaseInitializer implements CommandLineRunner {
             log.warn("Database initialization notice: {}.", e.getMessage());
         }
 
-        seedResources();
+        seedData();
     }
 
-    private void seedResources() {
-        if (resourceRepository.count() == 0) {
-            log.info("Seeding initial resources for testing...");
-            Resource r1 = Resource.builder()
+    private void seedData() {
+        if (facilityRepository.count() == 0) {
+            log.info("Seeding initial facilities and resources for testing...");
+
+            // 1. Seed Facilities
+            Facility f1 = Facility.builder()
                     .name("Main Auditorium")
-                    .type(ResourceType.LECTURE_HALL)
-                    .capacity(200)
-                    .location("Building A, 1st Floor")
-                    .availabilityStart(LocalTime.of(8, 0))
-                    .availabilityEnd(LocalTime.of(18, 0))
-                    .status(ResourceStatus.ACTIVE)
-                    .description("Large lecture hall equipped with dual projectors and surround sound.")
+                    .description("Grand auditorium with 500+ seating capacity.")
+                    .location("Administration Block, Floor 1")
+                    .capacity(500)
+                    .status(FacilityStatus.AVAILABLE)
+                    .build();
+
+            Facility f2 = Facility.builder()
+                    .name("Advanced Computing Lab")
+                    .description("Specialized lab for AI and Data Science research.")
+                    .location("Computing Centre, Floor 3")
+                    .capacity(50)
+                    .status(FacilityStatus.AVAILABLE)
+                    .build();
+
+            Facility f3 = Facility.builder()
+                    .name("Executive Meeting Room")
+                    .description("Modern conference room with hybrid meeting support.")
+                    .location("Main Building, Floor 2")
+                    .capacity(15)
+                    .status(FacilityStatus.AVAILABLE)
+                    .build();
+
+            List<Facility> facilities = facilityRepository.saveAll(List.of(f1, f2, f3));
+
+            // 2. Seed Resources into Facilities
+            Resource r1 = Resource.builder()
+                    .name("Panasonic 4K Projector")
+                    .description("High-brightness projector for daylight viewing.")
+                    .type(ResourceType.EQUIPMENT)
+                    .quantity(1)
+                    .status(ResourceStatus.AVAILABLE)
+                    .facility(facilities.get(0))
                     .build();
 
             Resource r2 = Resource.builder()
-                    .name("Software Engineering Lab")
-                    .type(ResourceType.LAB)
-                    .capacity(40)
-                    .location("Computing Centre, Floor 3")
-                    .availabilityStart(LocalTime.of(8, 30))
-                    .availabilityEnd(LocalTime.of(17, 30))
-                    .status(ResourceStatus.ACTIVE)
-                    .description("High-performance workstations configured for heavy software development.")
+                    .name("Dell Precision Workstations")
+                    .description("Workstations with NVIDIA RTX GPUs.")
+                    .type(ResourceType.EQUIPMENT)
+                    .quantity(30)
+                    .status(ResourceStatus.AVAILABLE)
+                    .facility(facilities.get(1))
                     .build();
 
             Resource r3 = Resource.builder()
-                    .name("Executive Meeting Room")
-                    .type(ResourceType.MEETING_ROOM)
-                    .capacity(15)
-                    .location("Administration Block")
-                    .availabilityStart(LocalTime.of(9, 0))
-                    .availabilityEnd(LocalTime.of(17, 0))
-                    .status(ResourceStatus.ACTIVE)
-                    .description("Comfortable meeting room with video-conferencing support.")
-                    .build();
-
-            Resource r4 = Resource.builder()
-                    .name("Sony 4K Projector Pro")
+                    .name("Conference Phone")
+                    .description("High-fidelity audio conference system.")
                     .type(ResourceType.EQUIPMENT)
-                    .capacity(1)
-                    .location("IT Support Desk")
-                    .availabilityStart(LocalTime.of(8, 0))
-                    .availabilityEnd(LocalTime.of(16, 0))
-                    .status(ResourceStatus.ACTIVE)
-                    .description("Portable 4K smart projector for presentations.")
+                    .quantity(1)
+                    .status(ResourceStatus.AVAILABLE)
+                    .facility(facilities.get(2))
                     .build();
 
-            resourceRepository.saveAll(List.of(r1, r2, r3, r4));
-            log.info("Successfully added 4 initial resources.");
+            resourceRepository.saveAll(List.of(r1, r2, r3));
+            log.info("Successfully seeded facilities and resources.");
         }
     }
 }

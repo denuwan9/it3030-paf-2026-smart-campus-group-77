@@ -17,6 +17,15 @@ import java.util.UUID;
 public class ResourceController {
 
     private final ResourceService resourceService;
+    
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<ResourceDTO>>> getAllResources(
+            @RequestParam(required = false) com.smartcampus.hub.entity.ResourceStatus status,
+            @RequestParam(required = false) com.smartcampus.hub.entity.ResourceType type,
+            @RequestParam(required = false) String search) {
+        return ResponseEntity.ok(ApiResponse.success("Resources fetched successfully", 
+                resourceService.getAllResources(status, type, search)));
+    }
 
     @GetMapping("/facility/{facilityId}")
     public ResponseEntity<ApiResponse<List<ResourceDTO>>> getResourcesByFacilityId(@PathVariable UUID facilityId) {
