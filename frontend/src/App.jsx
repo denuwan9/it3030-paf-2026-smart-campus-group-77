@@ -23,6 +23,10 @@ import UserDashboard from './pages/dashboard/UserDashboard';
 import AdminDashboard from './pages/dashboard/AdminDashboard';
 import TechnicianDashboard from './pages/dashboard/TechnicianDashboard';
 import UserManagementPage from './pages/dashboard/UserManagementPage';
+import ResourcesPage from './pages/dashboard/ResourcesPage';
+import BookingsPage from './pages/dashboard/BookingsPage';
+import AdminBookingsPage from './pages/dashboard/AdminBookingsPage';
+import AdminCheckInVerifyPage from './pages/dashboard/AdminCheckInVerifyPage';
 import NotificationSettingsPage from './pages/dashboard/NotificationSettingsPage';
 import TicketsPage from './pages/dashboard/TicketsPage';
 
@@ -126,6 +130,7 @@ function App() {
           
           <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
+          <Route path="/admin/bookings/check-in" element={<AdminCheckInVerifyPage />} />
 
           {/* Role-Specific Protected Dashboard Routes */}
           <Route element={<DashboardLayout />}>
@@ -146,6 +151,24 @@ function App() {
             <Route path="/admin/users" element={
               <ProtectedRoute allowedRoles={['ADMIN']}>
                 <UserManagementPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/bookings" element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminBookingsPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/resources" element={
+              <ProtectedRoute allowedRoles={['USER']}>
+                <ResourcesPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/bookings" element={
+              <ProtectedRoute allowedRoles={['USER', 'ADMIN']}>
+                <BookingsPage />
               </ProtectedRoute>
             } />
 

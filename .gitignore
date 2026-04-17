@@ -1,0 +1,17 @@
+# Maven
+backend/target/
+backend/*.log
+
+# Node
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/build_error.txt
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
