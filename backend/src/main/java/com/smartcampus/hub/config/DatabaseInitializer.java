@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalTime;
@@ -23,6 +24,7 @@ import java.util.List;
 @Slf4j
 public class DatabaseInitializer implements CommandLineRunner {
 
+    private final JdbcTemplate jdbcTemplate;
     private final ResourceRepository resourceRepository;
 
     @Override
