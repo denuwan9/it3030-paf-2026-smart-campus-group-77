@@ -42,14 +42,14 @@ const UserTicketsPage = () => {
   };
 
   return (
-    <div className="h-[calc(100vh-80px)] -m-8 bg-[#111111] text-white flex overflow-hidden">
+    <div className="h-[calc(100vh-80px)] -m-8 bg-blue-50 text-slate-800 flex overflow-hidden">
       {/* Mini Sidebar */}
-      <aside className="w-64 border-r border-[#222222] bg-[#1a1a1a] flex flex-col p-4 z-10">
+      <aside className="w-64 border-r border-slate-200 bg-white flex flex-col p-4 z-10">
         <nav className="space-y-1">
           <button
             onClick={() => setActiveTab('list')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-              activeTab === 'list' ? 'bg-[#2a2a2a] text-white' : 'text-slate-400 hover:bg-[#222] hover:text-white'
+              activeTab === 'list' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <List className="w-4 h-4" />
@@ -58,7 +58,7 @@ const UserTicketsPage = () => {
           <button
             onClick={() => setActiveTab('new')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-              activeTab === 'new' ? 'bg-[#2a2a2a] text-white' : 'text-slate-400 hover:bg-[#222] hover:text-white'
+              activeTab === 'new' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <PlusCircle className="w-4 h-4" />
@@ -67,7 +67,7 @@ const UserTicketsPage = () => {
           <button
             onClick={() => setActiveTab('notifications')}
             className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-              activeTab === 'notifications' ? 'bg-[#2a2a2a] text-white' : 'text-slate-400 hover:bg-[#222] hover:text-white'
+              activeTab === 'notifications' ? 'bg-blue-50 text-blue-600' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'
             }`}
           >
             <Bell className="w-4 h-4" />
@@ -81,86 +81,86 @@ const UserTicketsPage = () => {
         <div className="max-w-3xl mx-auto">
           {activeTab === 'new' && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <div className="bg-[#1a1a1a] rounded-xl border border-[#2a2a2a] p-8">
-                <h2 className="text-xl font-semibold mb-6">Report new incident</h2>
+              <div className="bg-white rounded-xl border border-slate-200 p-8 shadow-sm">
+                <h2 className="text-xl font-semibold mb-6 text-slate-800">Report new incident</h2>
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-300">Resource / location</label>
+                      <label className="text-sm font-medium text-slate-700">Resource / location</label>
                       <input
                         type="text"
                         required
                         placeholder="e.g. Lab A-201, Projector #"
-                        className="w-full bg-[#222222] border border-[#333] rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-white focus:outline-none transition-colors"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors"
                       />
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-300">Category</label>
+                      <label className="text-sm font-medium text-slate-700">Category</label>
                       <div className="relative">
-                        <select className="w-full bg-[#222222] border border-[#333] rounded-lg px-4 py-2.5 text-sm text-white focus:border-white focus:outline-none appearance-none transition-colors">
+                        <select className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none appearance-none transition-colors">
                           <option>Electrical</option>
                           <option>Plumbing</option>
                           <option>Network</option>
                           <option>Equipment</option>
                           <option>Safety</option>
                         </select>
-                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-300">Title</label>
+                    <label className="text-sm font-medium text-slate-700">Title</label>
                     <input
                       type="text"
                       required
                       placeholder="Brief summary of the issue"
-                      className="w-full bg-[#222222] border border-[#333] rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-white focus:outline-none transition-colors"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-300">Description</label>
+                    <label className="text-sm font-medium text-slate-700">Description</label>
                     <textarea
                       rows="4"
                       required
                       placeholder="Describe the problem in detail..."
-                      className="w-full bg-[#222222] border border-[#333] rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-white focus:outline-none resize-none transition-colors"
+                      className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none resize-none transition-colors"
                     ></textarea>
                   </div>
 
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-300">Priority</label>
+                      <label className="text-sm font-medium text-slate-700">Priority</label>
                       <div className="relative">
-                        <select className="w-full bg-[#222222] border border-[#333] rounded-lg px-4 py-2.5 text-sm text-white focus:border-white focus:outline-none appearance-none transition-colors">
+                        <select className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none appearance-none transition-colors">
                           <option>Medium</option>
                           <option>High</option>
                           <option>Low</option>
                         </select>
-                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-300">Preferred contact</label>
+                      <label className="text-sm font-medium text-slate-700">Preferred contact</label>
                       <input
                         type="text"
                         required
                         placeholder="Phone or email"
-                        className="w-full bg-[#222222] border border-[#333] rounded-lg px-4 py-2.5 text-sm text-white placeholder:text-slate-500 focus:border-white focus:outline-none transition-colors"
+                        className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors"
                       />
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-300">Attachments (max 3 images)</label>
-                    <div className="border border-dashed border-[#444] hover:border-[#666] bg-[#222] rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors">
-                      <p className="text-sm text-slate-400">Click to upload or drag images here</p>
+                    <label className="text-sm font-medium text-slate-700">Attachments (max 3 images)</label>
+                    <div className="border border-dashed border-slate-300 hover:border-blue-400 bg-slate-50 rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-colors">
+                      <p className="text-sm text-slate-500">Click to upload or drag images here</p>
                     </div>
                   </div>
 
                   <div className="pt-4">
-                    <button type="submit" className="px-6 py-2.5 bg-[#333] hover:bg-[#444] text-white text-sm font-medium rounded-lg transition-colors border border-[#555]">
+                    <button type="submit" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
                       Submit ticket
                     </button>
                   </div>
@@ -172,8 +172,8 @@ const UserTicketsPage = () => {
           {activeTab === 'list' && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-semibold">My Tickets</h2>
-                <span className="text-sm text-slate-400 px-3 py-1 bg-[#1a1a1a] border border-[#333] rounded-full">{tickets.length} total</span>
+                <h2 className="text-xl font-semibold text-slate-800">My Tickets</h2>
+                <span className="text-sm text-slate-600 px-3 py-1 bg-white border border-slate-200 shadow-sm rounded-full">{tickets.length} total</span>
               </div>
               <div className="space-y-4">
                 {tickets.map((ticket, i) => (
@@ -190,7 +190,7 @@ const UserTicketsPage = () => {
                   </motion.div>
                 ))}
                 {tickets.length === 0 && (
-                  <div className="text-center py-12 text-slate-500 bg-[#1a1a1a] rounded-xl border border-[#2a2a2a]">
+                  <div className="text-center py-12 text-slate-500 bg-white rounded-xl border border-slate-200">
                     No tickets found.
                   </div>
                 )}
@@ -200,8 +200,8 @@ const UserTicketsPage = () => {
 
           {activeTab === 'notifications' && (
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-              <h2 className="text-xl font-semibold mb-6">Notifications</h2>
-              <div className="text-slate-500 text-center py-12 bg-[#1a1a1a] rounded-xl border border-[#2a2a2a]">
+              <h2 className="text-xl font-semibold mb-6 text-slate-800">Notifications</h2>
+              <div className="text-slate-500 text-center py-12 bg-white rounded-xl border border-slate-200">
                 No new notifications.
               </div>
             </motion.div>
