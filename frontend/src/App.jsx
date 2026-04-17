@@ -8,6 +8,7 @@ import { Toaster } from 'react-hot-toast';
 
 // Layouts
 import DashboardLayout from './layouts/DashboardLayout';
+import { NotificationProvider } from './context/NotificationContext';
 
 // Pages
 import LoginPage from './pages/LoginPage';
@@ -91,7 +92,7 @@ function App() {
             iconTheme: {
               primary: '#10b981',
               secondary: '#ffffff',
-            },
+              },
           },
           error: {
             iconTheme: {
@@ -102,131 +103,132 @@ function App() {
         }}
       />
       <div className="min-h-screen bg-nexer-bg-base text-nexer-text-body font-sans selection:bg-nexer-brand-primary/10">
-
-        <Routes>
-          {/* Authentication Routes (Public only, redirected if already logged in) */}
-          <Route path="/login" element={
-            <PublicRoute>
-              <LoginPage />
-            </PublicRoute>
-          } />
-          <Route path="/register" element={
-            <PublicRoute>
-              <RegisterPage />
-            </PublicRoute>
-          } />
-          <Route path="/otp" element={
-            <PublicRoute>
-              <OtpPage />
-            </PublicRoute>
-          } />
-          <Route path="/forgot-password" element={
-            <PublicRoute>
-              <ForgotPasswordPage />
-            </PublicRoute>
-          } />
-          <Route path="/reset-password" element={
-            <PublicRoute>
-              <ResetPasswordPage />
-            </PublicRoute>
-          } />
-          
-          <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
-          <Route path="/unauthorized" element={<Unauthorized />} />
-          <Route path="/admin/bookings/check-in" element={<AdminCheckInVerifyPage />} />
-
-          {/* Role-Specific Protected Dashboard Routes */}
-          <Route element={<DashboardLayout />}>
-            {/* User Access ONLY */}
-            <Route path="/dashboard" element={
-              <ProtectedRoute allowedRoles={['USER']}>
-                <UserDashboard />
-              </ProtectedRoute>
+        <NotificationProvider>
+          <Routes>
+            {/* Authentication Routes (Public only, redirected if already logged in) */}
+            <Route path="/login" element={
+              <PublicRoute>
+                <LoginPage />
+              </PublicRoute>
+            } />
+            <Route path="/register" element={
+              <PublicRoute>
+                <RegisterPage />
+              </PublicRoute>
+            } />
+            <Route path="/otp" element={
+              <PublicRoute>
+                <OtpPage />
+              </PublicRoute>
+            } />
+            <Route path="/forgot-password" element={
+              <PublicRoute>
+                <ForgotPasswordPage />
+              </PublicRoute>
+            } />
+            <Route path="/reset-password" element={
+              <PublicRoute>
+                <ResetPasswordPage />
+              </PublicRoute>
             } />
             
-            <Route path="/user/tickets" element={
-              <ProtectedRoute allowedRoles={['USER']}>
-                <UserTicketsPage />
-              </ProtectedRoute>
-            } />
-            
-            {/* Admin Access ONLY */}
-            <Route path="/admin" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } />
+            <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+            <Route path="/admin/bookings/check-in" element={<AdminCheckInVerifyPage />} />
 
-            <Route path="/admin/users" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <UserManagementPage />
-              </ProtectedRoute>
-            } />
+            {/* Role-Specific Protected Dashboard Routes */}
+            <Route element={<DashboardLayout />}>
+              {/* User Access ONLY */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute allowedRoles={['USER']}>
+                  <UserDashboard />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/user/tickets" element={
+                <ProtectedRoute allowedRoles={['USER']}>
+                  <UserTicketsPage />
+                </ProtectedRoute>
+              } />
+              
+              {/* Admin Access ONLY */}
+              <Route path="/admin" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } />
 
-            <Route path="/admin/bookings" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <AdminBookingsPage />
-              </ProtectedRoute>
-            } />
+              <Route path="/admin/users" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <UserManagementPage />
+                </ProtectedRoute>
+              } />
 
-            <Route path="/resources" element={
-              <ProtectedRoute allowedRoles={['USER']}>
-                <ResourcesPage />
-              </ProtectedRoute>
-            } />
+              <Route path="/admin/bookings" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <AdminBookingsPage />
+                </ProtectedRoute>
+              } />
 
-            <Route path="/bookings" element={
-              <ProtectedRoute allowedRoles={['USER', 'ADMIN']}>
-                <BookingsPage />
-              </ProtectedRoute>
-            } />
+              <Route path="/resources" element={
+                <ProtectedRoute allowedRoles={['USER']}>
+                  <ResourcesPage />
+                </ProtectedRoute>
+              } />
 
-            {/* Technician Access ONLY */}
-            <Route path="/technician" element={
-              <ProtectedRoute allowedRoles={['TECHNICIAN']}>
-                <TechnicianDashboard />
-              </ProtectedRoute>
-            } />
+              <Route path="/bookings" element={
+                <ProtectedRoute allowedRoles={['USER', 'ADMIN']}>
+                  <BookingsPage />
+                </ProtectedRoute>
+              } />
 
-            {/* Incident Tickets Module */}
-            <Route path="/tickets" element={
-              <ProtectedRoute allowedRoles={['ADMIN', 'TECHNICIAN']}>
-                <TicketsPage />
-              </ProtectedRoute>
-            } />
+              {/* Technician Access ONLY */}
+              <Route path="/technician" element={
+                <ProtectedRoute allowedRoles={['TECHNICIAN']}>
+                  <TechnicianDashboard />
+                </ProtectedRoute>
+              } />
 
-            {/* Universal User Profile (Accessed by all logged-in roles) */}
-            <Route path="/profile" element={
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            } />
+              {/* Incident Tickets Module */}
+              <Route path="/tickets" element={
+                <ProtectedRoute allowedRoles={['ADMIN', 'TECHNICIAN']}>
+                  <TicketsPage />
+                </ProtectedRoute>
+              } />
 
-            {/* Facilities Module (Member 1) */}
-            <Route path="/facilities" element={
-              <ProtectedRoute allowedRoles={['USER', 'ADMIN', 'TECHNICIAN']}>
-                <FacilitiesPage />
-              </ProtectedRoute>
-            } />
+              {/* Universal User Profile (Accessed by all logged-in roles) */}
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
 
-            <Route path="/admin/facilities" element={
-              <ProtectedRoute allowedRoles={['ADMIN']}>
-                <ManageFacilitiesPage />
-              </ProtectedRoute>
-            } />
+              {/* Facilities Module (Member 1) */}
+              <Route path="/facilities" element={
+                <ProtectedRoute allowedRoles={['USER', 'ADMIN', 'TECHNICIAN']}>
+                  <FacilitiesPage />
+                </ProtectedRoute>
+              } />
 
-            {/* Notification Settings (all logged-in roles) */}
-            <Route path="/notifications/settings" element={
-              <ProtectedRoute>
-                <NotificationSettingsPage />
-              </ProtectedRoute>
-            } />
-          </Route>
+              <Route path="/admin/facilities" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <ManageFacilitiesPage />
+                </ProtectedRoute>
+              } />
 
-          {/* Global Redirects */}
-          <Route path="/" element={<RoleBasedRedirect />} />
-          <Route path="*" element={<RoleBasedRedirect />} />
-        </Routes>
+              {/* Notification Settings (all logged-in roles) */}
+              <Route path="/notifications/settings" element={
+                <ProtectedRoute>
+                  <NotificationSettingsPage />
+                </ProtectedRoute>
+              } />
+            </Route>
+
+            {/* Global Redirects */}
+            <Route path="/" element={<RoleBasedRedirect />} />
+            <Route path="*" element={<RoleBasedRedirect />} />
+          </Routes>
+        </NotificationProvider>
       </div>
     </Router>
   );

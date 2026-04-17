@@ -49,6 +49,10 @@ public class NotificationSetting {
     @Builder.Default
     private Boolean announcementAlerts = true;
 
+    @Column(name = "security_alerts", nullable = false)
+    @Builder.Default
+    private Boolean securityAlerts = true;
+
     @Column(name = "sound_enabled", nullable = false)
     @Builder.Default
     private Boolean soundEnabled = true;

@@ -21,13 +21,6 @@ public class SystemAlertService {
     private final NotificationService notificationService;
 
     /**
-     * Internal helper to create a system notification.
-     */
-    private void createSystemNotification(UUID recipientId, String title, String message, String actionUrl) {
-        notificationService.createNotification(recipientId, NotificationType.SYSTEM, title, message, actionUrl);
-    }
-
-    /**
      * Generate an alert for security events like login or password change.
      */
     @Transactional
@@ -37,7 +30,7 @@ public class SystemAlertService {
         String title = "Security Alert";
         String message = String.format("A security event (%s) was detected on your account. If this was not you, please contact support immediately.", action);
         
-        createSystemNotification(user.getId(), title, message, "/profile/security");
+        createNotification(user.getId(), NotificationType.SECURITY, title, message, "/profile/security");
     }
 
     /**
@@ -51,7 +44,14 @@ public class SystemAlertService {
         String message = String.format("Resource '%s' is now OUT_OF_SERVICE for maintenance. Any active or pending bookings for this resource may be affected.", resourceName);
         
         for (UUID userId : userIds) {
-            createSystemNotification(userId, title, message, "/bookings");
+            createNotification(userId, NotificationType.SYSTEM, title, message, "/bookings");
         }
+    }
+
+    /**
+     * Internal helper to create a notification.
+     */
+    private void createNotification(UUID recipientId, NotificationType type, String title, String message, String actionUrl) {
+        notificationService.createNotification(recipientId, type, title, message, actionUrl);
     }
 }

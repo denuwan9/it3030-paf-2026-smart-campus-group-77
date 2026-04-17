@@ -18,6 +18,7 @@ import {
 import notificationService from '../../services/notificationService';
 import toast from 'react-hot-toast';
 import { playNotificationSound } from '../../assets/sounds';
+import { useNotifications } from '../../context/NotificationContext';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -47,6 +48,12 @@ const TYPE_CONFIG = {
     color: 'text-indigo-600',
     bg: 'bg-indigo-50',
     label: 'System',
+  },
+  SECURITY: {
+    icon: Shield,
+    color: 'text-red-600',
+    bg: 'bg-red-50',
+    label: 'Security',
   },
 };
 
@@ -150,11 +157,11 @@ NotificationItem.displayName = 'NotificationItem';
 // ─── Main Panel Component ─────────────────────────────────────────────────────
 
 const NotificationPanel = () => {
+  const { settings } = useNotifications();
   const [isOpen, setIsOpen]                 = useState(false);
   const [notifications, setNotifications]   = useState([]);
   const [unreadCount, setUnreadCount]       = useState(0);
   const [loading, setLoading]               = useState(false);
-  const [soundEnabled, setSoundEnabled]     = useState(true);
   const panelRef                            = useRef(null);
   const prevCountRef                        = useRef(null);
 
@@ -181,35 +188,23 @@ const NotificationPanel = () => {
     }
   }, []);
 
-  // ── Fetch settings (to check sound preference) ──
-  const fetchSettings = useCallback(async () => {
-    try {
-      const res = await notificationService.getSettings();
-      if (res.success) setSoundEnabled(res.data.soundEnabled ?? true);
-    } catch {
-      // Default to enabled if error
-      setSoundEnabled(true);
-    }
-  }, []);
-
   // ── Poll unread count every 30 s ──
   useEffect(() => {
     fetchUnreadCount();
-    fetchSettings();
     const interval = setInterval(fetchUnreadCount, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [fetchUnreadCount, fetchSettings]);
+  }, [fetchUnreadCount]);
 
   // ── Play sound when unread count increases ──
   useEffect(() => {
     if (prevCountRef.current !== null && unreadCount > prevCountRef.current) {
-      if (soundEnabled) {
+      if (settings?.soundEnabled) {
         console.log("Triggering notification sound. Count incremented from", prevCountRef.current, "to", unreadCount);
         playNotificationSound(0.5);
       }
     }
     prevCountRef.current = unreadCount;
-  }, [unreadCount, soundEnabled]);
+  }, [unreadCount, settings?.soundEnabled]);
 
   // ── Load notifications when panel opens ──
   useEffect(() => {
