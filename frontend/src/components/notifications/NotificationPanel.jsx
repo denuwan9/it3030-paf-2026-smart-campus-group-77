@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import notificationService from '../../services/notificationService';
 import toast from 'react-hot-toast';
+import { NOTIFICATION_SOUND } from '../../assets/sounds';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -140,7 +141,9 @@ const NotificationPanel = () => {
   const [notifications, setNotifications]   = useState([]);
   const [unreadCount, setUnreadCount]       = useState(0);
   const [loading, setLoading]               = useState(false);
+  const [soundEnabled, setSoundEnabled]     = useState(true);
   const panelRef                            = useRef(null);
+  const prevCountRef                        = useRef(null);
 
   // ── Fetch unread count (for badge, polled) ──
   const fetchUnreadCount = useCallback(async () => {
@@ -165,12 +168,39 @@ const NotificationPanel = () => {
     }
   }, []);
 
+  // ── Fetch settings (to check sound preference) ──
+  const fetchSettings = useCallback(async () => {
+    try {
+      const res = await notificationService.getSettings();
+      if (res.success) setSoundEnabled(res.data.soundEnabled ?? true);
+    } catch {
+      // Default to enabled if error
+      setSoundEnabled(true);
+    }
+  }, []);
+
   // ── Poll unread count every 30 s ──
   useEffect(() => {
     fetchUnreadCount();
+    fetchSettings();
     const interval = setInterval(fetchUnreadCount, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [fetchUnreadCount]);
+  }, [fetchUnreadCount, fetchSettings]);
+
+  // ── Play sound when unread count increases ──
+  useEffect(() => {
+    if (prevCountRef.current !== null && unreadCount > prevCountRef.current) {
+      if (soundEnabled) {
+        console.log("Triggering notification sound. Count incremented from", prevCountRef.current, "to", unreadCount);
+        const audio = new Audio(NOTIFICATION_SOUND);
+        audio.volume = 0.5;
+        audio.play().catch(err => {
+          console.warn("Notification sound blocked by browser policy (autoplay). Interaction required.", err);
+        });
+      }
+    }
+    prevCountRef.current = unreadCount;
+  }, [unreadCount, soundEnabled]);
 
   // ── Load notifications when panel opens ──
   useEffect(() => {

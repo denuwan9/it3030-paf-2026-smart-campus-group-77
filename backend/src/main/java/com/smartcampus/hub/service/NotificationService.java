@@ -222,6 +222,7 @@ public class NotificationService {
         if (dto.getTicketAlerts()        != null) setting.setTicketAlerts(dto.getTicketAlerts());
         if (dto.getSystemAlerts()        != null) setting.setSystemAlerts(dto.getSystemAlerts());
         if (dto.getAnnouncementAlerts()  != null) setting.setAnnouncementAlerts(dto.getAnnouncementAlerts());
+        if (dto.getSoundEnabled()         != null) setting.setSoundEnabled(dto.getSoundEnabled());
 
         return toSettingDTO(settingRepo.save(setting));
     }
@@ -268,6 +269,7 @@ public class NotificationService {
         dto.setTicketAlerts(s.getTicketAlerts());
         dto.setSystemAlerts(s.getSystemAlerts());
         dto.setAnnouncementAlerts(s.getAnnouncementAlerts());
+        dto.setSoundEnabled(s.getSoundEnabled());
         return dto;
     }
 }
