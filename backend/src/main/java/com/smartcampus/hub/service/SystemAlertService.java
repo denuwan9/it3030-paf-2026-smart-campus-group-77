@@ -1,9 +1,7 @@
 package com.smartcampus.hub.service;
 
-import com.smartcampus.hub.entity.Notification;
 import com.smartcampus.hub.entity.NotificationType;
 import com.smartcampus.hub.entity.User;
-import com.smartcampus.hub.repository.NotificationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,24 +18,13 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SystemAlertService {
 
-    private final NotificationRepository notificationRepository;
+    private final NotificationService notificationService;
 
     /**
      * Internal helper to create a system notification.
      */
     private void createSystemNotification(UUID recipientId, String title, String message, String actionUrl) {
-        Notification notification = Notification.builder()
-                .recipientId(recipientId)
-                .type(NotificationType.SYSTEM)
-                .title(title)
-                .message(message)
-                .actionUrl(actionUrl)
-                .isRead(false)
-                .isAnnouncement(false) // System alerts are targeted, not global broadcasts
-                .isArchived(false)
-                .build();
-        
-        notificationRepository.save(notification);
+        notificationService.createNotification(recipientId, NotificationType.SYSTEM, title, message, actionUrl);
     }
 
     /**
