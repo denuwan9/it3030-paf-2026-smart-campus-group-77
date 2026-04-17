@@ -24,4 +24,5 @@ public class NotificationSettingDTO {
     private Boolean ticketAlerts;
     private Boolean systemAlerts;
     private Boolean announcementAlerts;
+    private Boolean soundEnabled;
 }

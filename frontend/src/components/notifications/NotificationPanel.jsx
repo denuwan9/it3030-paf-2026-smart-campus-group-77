@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, forwardRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -12,10 +12,12 @@ import {
   Ticket,
   Megaphone,
   Shield,
+  Wrench,
   Loader2,
 } from 'lucide-react';
 import notificationService from '../../services/notificationService';
 import toast from 'react-hot-toast';
+import { playNotificationSound } from '../../assets/sounds';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -42,8 +44,8 @@ const TYPE_CONFIG = {
   },
   SYSTEM: {
     icon: Shield,
-    color: 'text-nexer-brand-primary',
-    bg: 'bg-nexer-brand-primary/10',
+    color: 'text-indigo-600',
+    bg: 'bg-indigo-50',
     label: 'System',
   },
 };
@@ -62,13 +64,23 @@ function relativeTime(isoString) {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const NotificationItem = ({ notification, onMarkRead, onDelete }) => {
+const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete }, ref) => {
   const config = TYPE_CONFIG[notification.type] || TYPE_CONFIG.SYSTEM;
-  const Icon = config.icon;
+  
+  // Dynamic icon for System Alerts (Security vs Maintenance)
+  let Icon = config.icon;
+  if (notification.type === 'SYSTEM') {
+    if (notification.title?.toLowerCase().includes('maintenance') || 
+        notification.message?.toLowerCase().includes('maintenance')) {
+      Icon = Wrench;
+    }
+  }
+
   const isUnread = !notification.isRead;
 
   return (
     <motion.div
+      ref={ref}
       layout
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
@@ -76,9 +88,11 @@ const NotificationItem = ({ notification, onMarkRead, onDelete }) => {
       transition={{ duration: 0.2 }}
       className={`relative flex gap-3 p-4 rounded-2xl border transition-all group ${
         isUnread
-          ? 'bg-nexer-brand-primary/[0.03] border-nexer-brand-primary/10'
-          : 'bg-white border-slate-100 hover:border-slate-200'
-      }`}
+          ? notification.isAnnouncement 
+            ? 'bg-purple-500/[0.05] border-purple-500/20 shadow-sm shadow-purple-500/5'
+            : 'bg-nexer-brand-primary/[0.03] border-nexer-brand-primary/10'
+          : 'bg-white/50 border-slate-100 hover:border-slate-200'
+      } backdrop-blur-sm`}
     >
       {/* Unread indicator */}
       {isUnread && (
@@ -129,7 +143,9 @@ const NotificationItem = ({ notification, onMarkRead, onDelete }) => {
       </div>
     </motion.div>
   );
-};
+});
+
+NotificationItem.displayName = 'NotificationItem';
 
 // ─── Main Panel Component ─────────────────────────────────────────────────────
 
@@ -138,7 +154,9 @@ const NotificationPanel = () => {
   const [notifications, setNotifications]   = useState([]);
   const [unreadCount, setUnreadCount]       = useState(0);
   const [loading, setLoading]               = useState(false);
+  const [soundEnabled, setSoundEnabled]     = useState(true);
   const panelRef                            = useRef(null);
+  const prevCountRef                        = useRef(null);
 
   // ── Fetch unread count (for badge, polled) ──
   const fetchUnreadCount = useCallback(async () => {
@@ -163,12 +181,35 @@ const NotificationPanel = () => {
     }
   }, []);
 
+  // ── Fetch settings (to check sound preference) ──
+  const fetchSettings = useCallback(async () => {
+    try {
+      const res = await notificationService.getSettings();
+      if (res.success) setSoundEnabled(res.data.soundEnabled ?? true);
+    } catch {
+      // Default to enabled if error
+      setSoundEnabled(true);
+    }
+  }, []);
+
   // ── Poll unread count every 30 s ──
   useEffect(() => {
     fetchUnreadCount();
+    fetchSettings();
     const interval = setInterval(fetchUnreadCount, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [fetchUnreadCount]);
+  }, [fetchUnreadCount, fetchSettings]);
+
+  // ── Play sound when unread count increases ──
+  useEffect(() => {
+    if (prevCountRef.current !== null && unreadCount > prevCountRef.current) {
+      if (soundEnabled) {
+        console.log("Triggering notification sound. Count incremented from", prevCountRef.current, "to", unreadCount);
+        playNotificationSound(0.5);
+      }
+    }
+    prevCountRef.current = unreadCount;
+  }, [unreadCount, soundEnabled]);
 
   // ── Load notifications when panel opens ──
   useEffect(() => {
@@ -267,7 +308,7 @@ const NotificationPanel = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 8, scale: 0.97 }}
             transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="absolute right-0 top-[calc(100%+12px)] w-[calc(100vw-32px)] sm:w-[380px] bg-white rounded-3xl shadow-nexer-md border border-slate-100 z-50 overflow-hidden"
+            className="absolute right-0 top-[calc(100%+12px)] w-[calc(100vw-32px)] sm:w-[400px] bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-nexer-lg border border-white/20 z-50 overflow-hidden"
           >
             {/* Panel header */}
             <div className="flex items-center justify-between px-4 sm:px-5 pt-4 sm:pt-5 pb-3 border-b border-slate-50">
@@ -333,7 +374,7 @@ const NotificationPanel = () => {
                     />
                   ))}
                 </AnimatePresence>
-              )}
+              ) }
             </div>
 
             {/* Panel footer */}
