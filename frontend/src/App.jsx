@@ -25,6 +25,8 @@ import TechnicianDashboard from './pages/dashboard/TechnicianDashboard';
 import UserManagementPage from './pages/dashboard/UserManagementPage';
 import NotificationSettingsPage from './pages/dashboard/NotificationSettingsPage';
 import TicketsPage from './pages/dashboard/TicketsPage';
+import FacilitiesPage from './pages/dashboard/FacilitiesPage';
+import ManageFacilitiesPage from './pages/dashboard/ManageFacilitiesPage';
 
 
 
@@ -167,6 +169,19 @@ function App() {
             <Route path="/profile" element={
               <ProtectedRoute>
                 <ProfilePage />
+              </ProtectedRoute>
+            } />
+
+            {/* Facilities Module (Member 1) */}
+            <Route path="/facilities" element={
+              <ProtectedRoute allowedRoles={['USER', 'ADMIN', 'TECHNICIAN']}>
+                <FacilitiesPage />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/admin/facilities" element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <ManageFacilitiesPage />
               </ProtectedRoute>
             } />
 
