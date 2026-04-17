@@ -9,26 +9,34 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
   const initialComments = [
     {
       id: 1,
-      user: 'Kavindu Silva',
+      user: 'Lakmal',
       role: 'USER',
       time: 'Apr 7, 9:12 AM',
       message: 'Tried the remote and direct button — no response at all.',
-      initials: 'KS'
+      initials: 'L'
     },
     {
       id: 2,
-      user: 'Ashan Perera',
+      user: 'Chanith',
+      role: 'USER',
+      time: 'Apr 7, 10:45 AM',
+      message: 'It seems there is a power issue, checked the main switch too.',
+      initials: 'C'
+    },
+    {
+      id: 3,
+      user: 'Dhananji',
       role: 'TECHNICIAN',
       time: 'Apr 8, 11:00 AM',
       message: 'Checked fuse — blown. Replacement ordered, ETA 2 days.',
-      initials: 'AP',
+      initials: 'D',
       isTechnician: true
     }
   ];
 
   const [comments, setComments] = useState(initialComments);
   const [newComment, setNewComment] = useState("");
-  const [assignee, setAssignee] = useState("Ashan Perera");
+  const [assignee, setAssignee] = useState("Dhananji");
   const [activeStatus, setActiveStatus] = useState("");
   const [editingCommentId, setEditingCommentId] = useState(null);
   const [editingText, setEditingText] = useState("");
@@ -195,7 +203,7 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
                   { key: 'priority', label: 'Priority', value: isEditMode ? editData.priority : (editData.priority || ticket.priority), icon: Shield, type: 'select', opts: ['HIGH', 'MEDIUM', 'LOW'] },
                   { key: 'created', label: 'Created', value: '2026-04-07', icon: Calendar, type: 'readonly' },
                   { key: 'contact', label: 'Contact', value: isEditMode ? editData.contact : editData.contact, icon: Phone, type: 'text' },
-                  { key: 'assignee', label: 'Assignee', value: 'Ashan Perera', icon: User, type: 'readonly' },
+                  { key: 'assignee', label: 'Assignee', value: 'Dhananji', icon: User, type: 'readonly' },
                 ].map((item) => (
                   <div key={item.key} className="bg-white border border-blue-100 p-3 rounded-xl transition-all hover:border-blue-200 shadow-sm">
                     <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">{item.label}</p>
@@ -231,7 +239,7 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
                       onChange={(e) => setAssignee(e.target.value)}
                       className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-slate-700 text-xs font-bold outline-none appearance-none focus:ring-2 focus:ring-blue-100 shadow-sm"
                     >
-                      <option>Ashan Perera</option>
+                      <option>Dhananji</option>
                       <option>Lilantha Siriwardana</option>
                     </select>
                     <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />

@@ -117,10 +117,6 @@ const UserTicketsPage = () => {
                 <p className="text-indigo-100 text-sm mt-1">Manage your facility and equipment tickets with ease</p>
               </div>
             </div>
-            <button className="bg-white text-indigo-600 hover:bg-slate-50 transition-colors px-4 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 whitespace-nowrap shadow-sm">
-              <Plus className="w-4 h-4" />
-              New Ticket
-            </button>
           </div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
