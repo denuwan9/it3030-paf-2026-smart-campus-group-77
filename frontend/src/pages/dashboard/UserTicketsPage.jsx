@@ -37,6 +37,7 @@ const UserTicketsPage = () => {
   const [formData, setFormData] = useState({
     location: '', category: 'Electrical', title: '', description: '', priority: 'Medium', contact: ''
   });
+  const [errors, setErrors] = useState({});
   const [attachments, setAttachments] = useState([]);
 
   const handleFileChange = (e) => {
@@ -54,15 +55,36 @@ const UserTicketsPage = () => {
     setAttachments(attachments.filter((_, i) => i !== index));
   };
 
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.location.trim()) newErrors.location = 'Resource / location is required';
+    if (!formData.title.trim()) {
+      newErrors.title = 'Title is required';
+    } else if (formData.title.trim().length < 5) {
+      newErrors.title = 'Title must be at least 5 characters';
+    }
+    if (!formData.description.trim()) {
+      newErrors.description = 'Description is required';
+    } else if (formData.description.trim().length < 10) {
+      newErrors.description = 'Description must be at least 10 characters';
+    }
+    if (!formData.contact.trim()) newErrors.contact = 'Contact details are required';
+    
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+    
     const newTicket = {
       id: `TKT-${Math.floor(Math.random() * 900) + 100}`,
       title: formData.title,
       location: formData.location,
       reporter: { name: 'My Self' },
       category: formData.category,
-      attachmentsCount: 0,
+      attachmentsCount: attachments.length,
       commentsCount: 0,
       status: 'OPEN',
       priority: formData.priority.toUpperCase()
@@ -71,6 +93,7 @@ const UserTicketsPage = () => {
     toast.success('Ticket submitted successfully');
     setFormData({ location: '', category: 'Electrical', title: '', description: '', priority: 'Medium', contact: '' });
     setAttachments([]);
+    setErrors({});
     setActiveTab('list');
   };
 
@@ -108,18 +131,22 @@ const UserTicketsPage = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Resource / location</label>
+                      <label className="text-sm font-medium text-slate-700">Resource / location *</label>
                       <input
                         type="text"
                         required
                         value={formData.location}
-                        onChange={(e) => setFormData({...formData, location: e.target.value})}
+                        onChange={(e) => {
+                          setFormData({...formData, location: e.target.value});
+                          if(errors.location) setErrors({...errors, location: null});
+                        }}
                         placeholder="e.g. Lab A-201, Projector #"
-                        className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors"
+                        className={`w-full bg-slate-50 border ${errors.location ? 'border-red-400 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'} rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-1 focus:outline-none transition-colors`}
                       />
+                      {errors.location && <p className="text-red-500 text-xs mt-1">{errors.location}</p>}
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Category</label>
+                      <label className="text-sm font-medium text-slate-700">Category *</label>
                       <div className="relative">
                         <select 
                           value={formData.category}
@@ -138,32 +165,40 @@ const UserTicketsPage = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Title</label>
+                    <label className="text-sm font-medium text-slate-700">Title *</label>
                     <input
                       type="text"
                       required
                       value={formData.title}
-                      onChange={(e) => setFormData({...formData, title: e.target.value})}
+                      onChange={(e) => {
+                        setFormData({...formData, title: e.target.value});
+                        if(errors.title) setErrors({...errors, title: null});
+                      }}
                       placeholder="Brief summary of the issue"
-                      className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors"
+                      className={`w-full bg-slate-50 border ${errors.title ? 'border-red-400 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'} rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-1 focus:outline-none transition-colors`}
                     />
+                    {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">Description</label>
+                    <label className="text-sm font-medium text-slate-700">Description *</label>
                     <textarea
                       rows="4"
                       required
                       value={formData.description}
-                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      onChange={(e) => {
+                        setFormData({...formData, description: e.target.value});
+                        if(errors.description) setErrors({...errors, description: null});
+                      }}
                       placeholder="Describe the problem in detail..."
-                      className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none resize-none transition-colors"
+                      className={`w-full bg-slate-50 border ${errors.description ? 'border-red-400 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'} rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-1 focus:outline-none resize-none transition-colors`}
                     ></textarea>
+                    {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
                   </div>
 
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Priority</label>
+                      <label className="text-sm font-medium text-slate-700">Priority *</label>
                       <div className="relative">
                         <select 
                           value={formData.priority}
@@ -178,15 +213,19 @@ const UserTicketsPage = () => {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-slate-700">Preferred contact</label>
+                      <label className="text-sm font-medium text-slate-700">Preferred contact *</label>
                       <input
                         type="text"
                         required
                         value={formData.contact}
-                        onChange={(e) => setFormData({...formData, contact: e.target.value})}
+                        onChange={(e) => {
+                          setFormData({...formData, contact: e.target.value});
+                          if(errors.contact) setErrors({...errors, contact: null});
+                        }}
                         placeholder="Phone or email"
-                        className="w-full bg-slate-50 border border-slate-300 rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none transition-colors"
+                        className={`w-full bg-slate-50 border ${errors.contact ? 'border-red-400 focus:ring-red-500' : 'border-slate-300 focus:ring-blue-500'} rounded-lg px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:ring-1 focus:outline-none transition-colors`}
                       />
+                      {errors.contact && <p className="text-red-500 text-xs mt-1">{errors.contact}</p>}
                     </div>
                   </div>
 
