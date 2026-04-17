@@ -1,22 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Building2,
-  Search,
-  Filter,
   MapPin,
   Users,
   Package,
-  ChevronDown,
   X,
   Loader2,
-  Wifi,
-  WifiOff,
   ArrowRight,
   Eye,
   LayoutGrid,
   List,
-  Sparkles,
 } from 'lucide-react';
 import facilityService from '../../services/facilityService';
 import resourceService from '../../services/resourceService';
@@ -35,15 +29,26 @@ const resourceStatusColors = {
   BROKEN: 'text-rose-600 bg-rose-50 border-rose-100',
 };
 
+const getFacilityType = (facility) => facility?.type || facility?.facilityType || facility?.category || '';
+
 const FacilitiesPage = () => {
   const [facilities, setFacilities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [typeFilter, setTypeFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState('AVAILABLE');
+  const [minCapacityFilter, setMinCapacityFilter] = useState('');
   const [selectedFacility, setSelectedFacility] = useState(null);
   const [facilityResources, setFacilityResources] = useState([]);
   const [loadingResources, setLoadingResources] = useState(false);
   const [viewMode, setViewMode] = useState('grid');
+
+  const facilityTypes = useMemo(() => {
+    const allTypes = facilities
+      .map((facility) => getFacilityType(facility))
+      .filter(Boolean);
+    return [...new Set(allTypes)];
+  }, [facilities]);
 
   useEffect(() => {
     fetchFacilities();
@@ -76,60 +81,88 @@ const FacilitiesPage = () => {
   };
 
   const filtered = facilities.filter((f) => {
+    const facilityType = getFacilityType(f);
+    const minCapacity = minCapacityFilter === '' ? null : Number(minCapacityFilter);
+    const facilityCapacity = Number(f.capacity);
     const matchesSearch =
       f.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       f.location?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'ALL' || f.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    const matchesType = !typeFilter || facilityType === typeFilter;
+    const matchesStatus = !statusFilter || f.status === statusFilter;
+    const matchesMinCapacity = minCapacity === null || (!Number.isNaN(facilityCapacity) && facilityCapacity >= minCapacity);
+    return matchesSearch && matchesType && matchesStatus && matchesMinCapacity;
   });
 
   return (
     <div className="space-y-8 pb-20">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-600/20">
-              <Building2 className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-black text-nexer-text-header tracking-tight">
-                Facilities Catalogue
-              </h1>
-              <p className="text-slate-500 text-sm font-medium mt-0.5">
-                Browse all campus buildings, labs, and rooms
-              </p>
-            </div>
-          </div>
+      <div className="bg-[#6B65FB] rounded-2xl p-6 sm:p-8 flex items-center gap-6 shadow-sm">
+        <div className="hidden sm:flex bg-white/20 p-4 rounded-2xl shadow-inner">
+          <Building2 className="w-10 h-10 text-white" />
+        </div>
+        <div className="text-white">
+          <h1 className="text-3xl font-bold tracking-tight">Facilities Catalogue</h1>
+          <p className="text-indigo-100 font-medium mt-1">Browse all campus buildings, labs, and rooms</p>
         </div>
       </div>
 
       {/* Search & Filters */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-          <input
-            type="text"
-            placeholder="Search facilities by name or location..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all shadow-nexer-sm"
-          />
+      <div className="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="space-y-1.5 flex flex-col">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Search Facilities</label>
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Enter facility name..."
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#6B65FB]/20 focus:border-[#6B65FB] transition-all"
+            />
+          </div>
+
+          <div className="space-y-1.5 flex flex-col">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Facility Type</label>
+            <select
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#6B65FB]/20 focus:border-[#6B65FB] transition-all appearance-none"
+            >
+              <option value="">All Types</option>
+              {facilityTypes.map((type) => (
+                <option key={type} value={type}>
+                  {String(type).replaceAll('_', ' ')}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5 flex flex-col">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Status</label>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#6B65FB]/20 focus:border-[#6B65FB] transition-all appearance-none"
+            >
+              <option value="">All Status</option>
+              <option value="AVAILABLE">AVAILABLE</option>
+              <option value="MAINTENANCE">MAINTENANCE</option>
+              <option value="CLOSED">CLOSED</option>
+            </select>
+          </div>
+
+          <div className="space-y-1.5 flex flex-col">
+            <label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Min Capacity</label>
+            <input
+              type="number"
+              min="0"
+              value={minCapacityFilter}
+              onChange={(e) => setMinCapacityFilter(e.target.value)}
+              placeholder="0"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-[#6B65FB]/20 focus:border-[#6B65FB] transition-all"
+            />
+          </div>
         </div>
-        <div className="relative">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="appearance-none w-full sm:w-44 pl-4 pr-10 py-2.5 bg-white border border-slate-100 rounded-xl text-sm font-bold outline-none focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all shadow-nexer-sm cursor-pointer text-slate-700"
-          >
-            <option value="ALL">All Status</option>
-            <option value="AVAILABLE">Available</option>
-            <option value="MAINTENANCE">Maintenance</option>
-            <option value="CLOSED">Closed</option>
-          </select>
-          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-        </div>
-        <div className="flex items-center bg-slate-50 p-1 rounded-xl border border-slate-100 self-start">
+        <div className="mt-4 flex items-center bg-slate-50 p-1 rounded-xl border border-slate-200 w-fit">
           <button
             onClick={() => setViewMode('grid')}
             className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600' : 'text-slate-400 hover:text-slate-600'}`}
@@ -164,7 +197,7 @@ const FacilitiesPage = () => {
           </div>
           <h3 className="text-lg font-bold text-slate-700">No Facilities Found</h3>
           <p className="text-sm text-slate-400 mt-1 max-w-sm mx-auto">
-            {searchTerm || statusFilter !== 'ALL'
+            {searchTerm || typeFilter || statusFilter || minCapacityFilter
               ? 'Try adjusting your search or filters.'
               : 'No facilities have been added to the system yet.'}
           </p>
