@@ -3,6 +3,7 @@ package com.smartcampus.hub.exception;
 import com.smartcampus.hub.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -56,6 +57,25 @@ public class GlobalExceptionHandler {
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("Database error: " + root));
+    }
+
+    /** Unique constraint violations (e.g. duplicate email) */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
+        String message = ex.getMostSpecificCause().getMessage();
+        log.warn("Database integrity violation: {}", message);
+        
+        if (message != null && (message.contains("duplicate key") || message.contains("unique constraint"))) {
+            if (message.contains("users") && message.contains("email")) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(ApiResponse.error("An account with this institutional email already exists."));
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(ApiResponse.error("Duplicate data error: This record already exists in our system."));
+        }
+        
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error("Database integrity error. Please check your data."));
     }
 
     /** Permission denied */

@@ -24,28 +24,38 @@ public class EmailService {
     private String frontendUrl;
 
     public void sendEmail(String to, String subject, String body) {
-        log.info("Sending simple email to: {} with subject: {}", to, subject);
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(fromEmail);
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(body);
-        mailSender.send(message);
-        log.info("Simple email sent successfully to: {}", to);
+        log.info("Attempting to send simple email from: {} to: {} with subject: {}", fromEmail, to, subject);
+        try {
+            SimpleMailMessage message = new SimpleMailMessage();
+            message.setFrom(fromEmail);
+            message.setTo(to);
+            message.setSubject(subject);
+            message.setText(body);
+            mailSender.send(message);
+            log.info("Simple email sent successfully to: {}", to);
+        } catch (Exception e) {
+            log.error("Failed to send simple email to {}: {}", to, e.getMessage());
+            throw e;
+        }
     }
 
     public void sendHtmlEmail(String to, String subject, String htmlBody) throws MessagingException {
-        log.info("Preparing HTML email for: {} with subject: {}", to, subject);
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-        
-        helper.setFrom(fromEmail);
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(htmlBody, true);
-        
-        mailSender.send(message);
-        log.info("HTML email sent successfully to: {}", to);
+        log.info("Attempting to send HTML email from: {} to: {} with subject: {}", fromEmail, to, subject);
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true);
+            
+            mailSender.send(message);
+            log.info("HTML email sent successfully to: {}", to);
+        } catch (Exception e) {
+            log.error("Failed to send HTML email to {}: {}", to, e.getMessage());
+            throw e;
+        }
     }
 
     public void sendOtpEmail(String to, String otp) {
