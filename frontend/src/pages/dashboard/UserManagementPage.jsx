@@ -20,7 +20,8 @@ import {
 import userService from '../../services/userService';
 import toast from 'react-hot-toast';
 import AnnouncementForm from '../../components/dashboard/AnnouncementForm';
-import { Megaphone } from 'lucide-react';
+import { Megaphone, FileDown } from 'lucide-react';
+import { generateUserReport } from '../../utils/reportGenerator';
 
 const Modal = ({ isOpen, onClose, title, children, confirmText, onConfirm, variant = 'primary', isLoading = false }) => {
   if (!isOpen) return null;
@@ -80,6 +81,7 @@ const UserManagementPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isUpdating, setIsUpdating] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   
   // Modal States
   const [selectedUser, setSelectedUser] = useState(null);
@@ -177,6 +179,23 @@ const UserManagementPage = () => {
   };
 
 
+  const handleDownloadReport = async () => {
+    try {
+      setIsDownloading(true);
+      toast.loading('Synthesizing system report...', { id: 'report-download' });
+      
+      // We pass the entire users list as requested (all users)
+      generateUserReport(users);
+      
+      toast.success('System report downloaded successfully.', { id: 'report-download' });
+    } catch (error) {
+      toast.error('Report synthesis failed. Check system logs.', { id: 'report-download' });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+
   const filteredUsers = users.filter(user => 
     user.fullName.toLowerCase().includes(searchQuery.toLowerCase()) || 
     user.email.toLowerCase().includes(searchQuery.toLowerCase())
@@ -209,7 +228,6 @@ const UserManagementPage = () => {
               </p>
             </div>
           </div>
-          
           <div className="flex flex-col sm:flex-row bg-slate-50 rounded-2xl p-1.5 border border-slate-200 w-full sm:w-auto">
             <button className="px-4 sm:px-6 py-2 sm:py-2.5 bg-indigo-600 rounded-xl flex items-center justify-center gap-2 text-white font-black text-[10px] sm:text-xs tracking-widest shadow-lg shadow-indigo-500/20 active:scale-95 transition-all">
               <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
@@ -249,6 +267,19 @@ const UserManagementPage = () => {
         </div>
         
         <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+          <button 
+            onClick={handleDownloadReport}
+            disabled={isDownloading || loading}
+            className="flex items-center gap-2 px-6 py-3 bg-emerald-50 text-emerald-600 rounded-2xl border border-emerald-100 font-bold text-xs hover:bg-emerald-100 transition-all active:scale-95 disabled:opacity-50 shadow-sm"
+          >
+            {isDownloading ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <FileDown className="w-4 h-4" />
+            )}
+            {isDownloading ? 'PREPARING PDF...' : 'DOWNLOAD REPORT'}
+          </button>
+
           <div className="relative w-full sm:w-64 md:w-80 group">
             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-indigo-500 transition-colors" />
             <input 
