@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { PlusCircle, List, Upload, ChevronDown } from 'lucide-react';
+import { PlusCircle, List, Upload, ChevronDown, Ticket, Plus } from 'lucide-react';
 import TicketItemCard from '../../components/tickets/TicketItemCard';
 import TicketDetailsSidebar from '../../components/tickets/TicketDetailsSidebar';
 import toast from 'react-hot-toast';
@@ -23,35 +23,68 @@ const UserTicketsPage = () => {
   }, []);
 
   const [tickets, setTickets] = useState(() => {
-    const saved = localStorage.getItem('userTickets');
+    const saved = localStorage.getItem('adminTickets');
     if (saved) return JSON.parse(saved);
     return [
     {
       id: 'TKT-001',
       title: 'Projector not turning on',
       location: 'Lecture Hall 2A',
-      reporter: { name: 'My Self' },
+      reporter: { name: 'Ashan Perera' },
       category: 'Equipment',
-      attachmentsCount: 1,
+      attachmentsCount: 2,
       commentsCount: 2,
       status: 'IN_PROGRESS',
       priority: 'HIGH'
     },
     {
+      id: 'TKT-002',
+      title: 'Water leak near server room door',
+      location: 'Server Room, Block C',
+      reporter: { name: 'Unassigned' },
+      category: 'Plumbing',
+      attachmentsCount: 3,
+      commentsCount: 1,
+      status: 'OPEN',
+      priority: 'HIGH'
+    },
+    {
+      id: 'TKT-003',
+      title: 'Air conditioning noise — Lab 5',
+      location: 'Computer Lab 5, Block B',
+      reporter: { name: 'Unassigned' },
+      category: 'Electrical',
+      attachmentsCount: 0,
+      commentsCount: 0,
+      status: 'OPEN',
+      priority: 'MEDIUM'
+    },
+    {
       id: 'TKT-004',
       title: 'Network port not working — Room 302',
       location: 'Room 302, Block A',
-      reporter: { name: 'My Self' },
+      reporter: { name: 'Nilufar Rashidova' },
       category: 'Network',
-      attachmentsCount: 0,
+      attachmentsCount: 1,
       commentsCount: 1,
       status: 'RESOLVED',
       priority: 'LOW'
+    },
+    {
+      id: 'TKT-005',
+      title: 'Fire extinguisher mount broken',
+      location: 'Corridor 1, Block D',
+      reporter: { name: 'Dev Krishnamurthy' },
+      category: 'Safety',
+      attachmentsCount: 2,
+      commentsCount: 2,
+      status: 'CLOSED',
+      priority: 'HIGH'
     }
   ]});
 
   useEffect(() => {
-    localStorage.setItem('userTickets', JSON.stringify(tickets));
+    localStorage.setItem('adminTickets', JSON.stringify(tickets));
   }, [tickets]);
 
   const handleDeleteTicket = (id) => {
@@ -72,16 +105,27 @@ const UserTicketsPage = () => {
   return (
     <div className="h-[calc(100vh-80px)] -m-8 bg-blue-50 text-slate-800 flex flex-col overflow-y-auto">
       <main className="flex-1 p-8">
-        <div className="max-w-3xl mx-auto">
-          {/* List Header */}
-          <div className="flex flex-col gap-1 mb-6 mt-4">
-            <h2 className="text-xl font-semibold text-slate-800">My Tickets</h2>
-            <p className="text-sm text-slate-500">View and manage the status of your reported incidents.</p>
+        <div className="max-w-4xl mx-auto">
+          {/* Banner Header */}
+          <div className="bg-indigo-500 rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="bg-white/20 p-3 rounded-xl">
+                <Ticket className="w-8 h-8 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-wide">Maintenance & Incident Ticketing</h2>
+                <p className="text-indigo-100 text-sm mt-1">Manage your facility and equipment tickets with ease</p>
+              </div>
+            </div>
+            <button className="bg-white text-indigo-600 hover:bg-slate-50 transition-colors px-4 py-2.5 rounded-xl font-medium text-sm flex items-center gap-2 whitespace-nowrap shadow-sm">
+              <Plus className="w-4 h-4" />
+              New Ticket
+            </button>
           </div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-sm text-slate-600 px-3 py-1 bg-white border border-slate-200 shadow-sm rounded-full">{tickets.length} total tickets</span>
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-sm font-medium text-slate-600 px-3 py-1 bg-white border border-slate-200 shadow-sm rounded-full">{tickets.length} total tickets</span>
             </div>
               <div className="space-y-4">
                 {tickets.map((ticket, i) => (
