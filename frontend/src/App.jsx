@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import PublicRoute from './components/PublicRoute';
 import { Toaster } from 'react-hot-toast';
 
 
@@ -30,13 +31,15 @@ import NotificationSettingsPage from './pages/dashboard/NotificationSettingsPage
 
 // Role-based entry point / redirector
 const RoleBasedRedirect = () => {
-  const { user, loading } = useAuth();
+  const { user, token, loading } = useAuth();
 
   if (loading) return null;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!token || !user) return <Navigate to="/login" replace />;
 
-  if (user.role === 'ROLE_ADMIN') return <Navigate to="/admin" replace />;
-  if (user.role === 'ROLE_TECHNICIAN') return <Navigate to="/technician" replace />;
+  const normalizedRole = user.role?.startsWith('ROLE_') ? user.role : `ROLE_${user.role}`;
+
+  if (normalizedRole === 'ROLE_ADMIN') return <Navigate to="/admin" replace />;
+  if (normalizedRole === 'ROLE_TECHNICIAN') return <Navigate to="/technician" replace />;
   return <Navigate to="/dashboard" replace />;
 };
 
@@ -93,12 +96,33 @@ function App() {
       <div className="min-h-screen bg-nexer-bg-base text-nexer-text-body font-sans selection:bg-nexer-brand-primary/10">
 
         <Routes>
-          {/* Public Routes */}
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="/otp" element={<OtpPage />} />
-          <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-          <Route path="/reset-password" element={<ResetPasswordPage />} />
+          {/* Authentication Routes (Public only, redirected if already logged in) */}
+          <Route path="/login" element={
+            <PublicRoute>
+              <LoginPage />
+            </PublicRoute>
+          } />
+          <Route path="/register" element={
+            <PublicRoute>
+              <RegisterPage />
+            </PublicRoute>
+          } />
+          <Route path="/otp" element={
+            <PublicRoute>
+              <OtpPage />
+            </PublicRoute>
+          } />
+          <Route path="/forgot-password" element={
+            <PublicRoute>
+              <ForgotPasswordPage />
+            </PublicRoute>
+          } />
+          <Route path="/reset-password" element={
+            <PublicRoute>
+              <ResetPasswordPage />
+            </PublicRoute>
+          } />
+          
           <Route path="/oauth2/callback" element={<OAuthCallbackPage />} />
           <Route path="/unauthorized" element={<Unauthorized />} />
 
