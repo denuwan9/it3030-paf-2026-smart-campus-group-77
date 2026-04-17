@@ -10,7 +10,10 @@ import toast from 'react-hot-toast';
 const TicketsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
-  const [tickets] = useState([
+  const [isEditingSidebar, setIsEditingSidebar] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('ALL');
+  const [priorityFilter, setPriorityFilter] = useState('ALL');
+  const [tickets, setTickets] = useState([
     {
       id: 'TKT-001',
       title: 'Projector not turning on',
@@ -69,22 +72,35 @@ const TicketsPage = () => {
   ]);
 
   const stats = [
-    { label: 'Total tickets', value: 5 },
-    { label: 'Open', value: 2, colorClass: 'text-blue-500' },
-    { label: 'In progress', value: 1, colorClass: 'text-amber-500' },
-    { label: 'Resolved', value: 1, colorClass: 'text-emerald-500' },
+    { label: 'Total tickets', value: tickets.length },
+    { label: 'Open', value: tickets.filter(t => t.status === 'OPEN').length, colorClass: 'text-blue-500' },
+    { label: 'In progress', value: tickets.filter(t => t.status === 'IN_PROGRESS').length, colorClass: 'text-amber-500' },
+    { label: 'Resolved/Closed', value: tickets.filter(t => ['RESOLVED', 'CLOSED'].includes(t.status)).length, colorClass: 'text-emerald-500' },
   ];
 
+  const filteredTickets = tickets.filter(ticket => {
+    return (statusFilter === 'ALL' || ticket.status === statusFilter) &&
+           (priorityFilter === 'ALL' || ticket.priority === priorityFilter);
+  });
+
+  const handleDeleteTicket = (id) => {
+    setTickets(tickets.filter(t => t.id !== id));
+    toast.success('Ticket deleted successfully');
+    if (selectedTicket?.id === id) {
+      setSelectedTicket(null);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#0a0a0a] -m-8 p-8">
+    <div className="min-h-screen bg-blue-50 -m-8 p-8">
       <div className="max-w-6xl mx-auto space-y-8">
         
         {/* Header & Filters */}
         <section>
           <TicketFilters 
             onSearch={() => {}} 
-            onFilterStatus={() => {}} 
-            onFilterPriority={() => {}} 
+            onFilterStatus={setStatusFilter} 
+            onFilterPriority={setPriorityFilter} 
             onNewTicket={() => setIsModalOpen(true)} 
           />
         </section>
@@ -105,12 +121,12 @@ const TicketsPage = () => {
 
         {/* List Header */}
         <div className="flex items-center gap-2 pt-4">
-          <span className="text-white text-lg font-bold">5 tickets</span>
+          <span className="text-slate-800 text-lg font-bold">{filteredTickets.length} tickets</span>
         </div>
 
         {/* Ticket List */}
         <section className="space-y-4">
-          {tickets.map((ticket, i) => (
+          {filteredTickets.map((ticket, i) => (
             <motion.div
               key={ticket.id}
               initial={{ opacity: 0, x: -20 }}
@@ -119,7 +135,16 @@ const TicketsPage = () => {
             >
               <TicketItemCard 
                 {...ticket} 
-                onClick={() => setSelectedTicket(ticket)}
+                theme="light"
+                onClick={() => {
+                  setSelectedTicket(ticket);
+                  setIsEditingSidebar(false);
+                }}
+                onEdit={() => {
+                  setSelectedTicket(ticket);
+                  setIsEditingSidebar(true);
+                }}
+                onDelete={handleDeleteTicket}
               />
             </motion.div>
           ))}
@@ -129,16 +154,30 @@ const TicketsPage = () => {
       <NewTicketModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)}
-        onSubmit={() => {
-          toast.success('Ticket submitted successfully (Demo)');
+        onSubmit={(newTicketData) => {
+          const newTicket = {
+            id: `TKT-${Math.floor(Math.random() * 900) + 100}`,
+            reporter: { name: 'Admin User' },
+            status: 'OPEN',
+            commentsCount: 0,
+            priority: newTicketData.priority.toUpperCase(),
+            ...newTicketData
+          };
+          setTickets([newTicket, ...tickets]);
+          toast.success('Ticket submitted successfully');
           setIsModalOpen(false);
         }}
       />
 
       <TicketDetailsSidebar 
         isOpen={!!selectedTicket}
-        onClose={() => setSelectedTicket(null)}
+        onClose={() => {
+          setSelectedTicket(null);
+          setIsEditingSidebar(false);
+        }}
         ticket={selectedTicket}
+        isEditMode={isEditingSidebar}
+        setIsEditMode={setIsEditingSidebar}
       />
     </div>
   );

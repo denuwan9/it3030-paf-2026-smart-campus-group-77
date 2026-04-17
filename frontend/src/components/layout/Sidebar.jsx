@@ -12,7 +12,8 @@ import {
   ShieldCheck, 
   Building2,
   User, 
-  LogOut 
+  LogOut,
+  Calendar
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {
@@ -25,12 +26,25 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     navigate('/login');
   };
 
+  const roleHomePath = {
+    ROLE_ADMIN: '/admin',
+    ROLE_TECHNICIAN: '/technician',
+    ROLE_USER: '/dashboard',
+  };
+  const overviewPath = roleHomePath[user?.role] || '/dashboard';
+
   const navigation = [
     { 
       label: 'Overview', 
-      to: '/dashboard', 
+      to: overviewPath, 
       icon: LayoutDashboard, 
       roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
+    },
+    { 
+      label: 'My Tickets', 
+      to: '/user/tickets', 
+      icon: Ticket, 
+      roles: ['ROLE_USER'] 
     },
     { 
       label: 'User Management', 
@@ -55,6 +69,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       to: '/resources', 
       icon: Package, 
       roles: ['ROLE_USER', 'ROLE_ADMIN'] 
+    },
+    {
+      label: 'Bookings',
+      to: user?.role === 'ROLE_ADMIN' ? '/admin/bookings' : '/bookings',
+      icon: Calendar,
+      roles: ['ROLE_USER', 'ROLE_ADMIN']
     },
     { 
       label: 'Incident Tickets', 

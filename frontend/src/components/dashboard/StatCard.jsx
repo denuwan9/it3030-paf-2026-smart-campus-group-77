@@ -6,29 +6,28 @@ const StatCard = ({ label, value, icon: Icon, colorClass, trend, delay = 0 }) =>
     initial={{ opacity: 0, scale: 0.95 }}
     animate={{ opacity: 1, scale: 1 }}
     transition={{ delay }}
-    whileHover={{ y: -4, shadow: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)" }}
-    className="bg-white border border-slate-100 p-5 sm:p-6 rounded-[1.8rem] sm:rounded-[2rem] shadow-nexer-sm overflow-hidden relative group transition-all"
+    whileHover={{ y: -6, scale: 1.02 }}
+    className="bg-white border border-slate-100 p-5 sm:p-7 rounded-[2rem] sm:rounded-[2.5rem] shadow-nexer-md hover:shadow-nexer-lg overflow-hidden relative group transition-all duration-300"
   >
     {/* Subtle Glow Background */}
-    <div className={`absolute top-0 right-0 w-32 h-32 -mr-12 -mt-12 rounded-full blur-3xl opacity-5 transition-opacity group-hover:opacity-10 ${colorClass}`} />
+    <div className={`absolute top-0 right-0 w-32 h-32 -mr-12 -mt-12 rounded-full blur-3xl opacity-5 group-hover:opacity-10 transition-opacity ${colorClass}`} />
     
-    <div className="flex items-center justify-between mb-4 sm:mb-6">
-      <div className={`p-2.5 sm:p-3.5 rounded-xl sm:rounded-2xl ${colorClass.replace('bg-', 'bg-opacity-5 ')} border border-slate-50 shadow-sm transition-colors group-hover:shadow-md`}>
-        <Icon className={`w-5 h-5 sm:w-6 sm:h-6 ${colorClass.replace('bg-', 'text-')}`} />
+    <div className="flex items-center justify-between mb-5 sm:mb-8">
+      <div className={`p-3 sm:p-4 rounded-[1.2rem] sm:rounded-2xl ${colorClass.replace('bg-', 'bg-opacity-10 ')} border border-slate-50 shadow-sm transition-all group-hover:shadow-md`}>
+        <Icon className={`w-5 h-5 sm:w-6 h-6 ${colorClass.replace('bg-', 'text-')}`} />
       </div>
       {trend && (
-        <div className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full text-[9px] sm:text-[11px] font-black tracking-tight ${trend > 0 ? 'bg-emerald-500/10 text-emerald-600' : 'bg-rose-500/10 text-rose-600'}`}>
-          <span className="w-1 sm:w-1.5 h-1 sm:h-1.5 rounded-full bg-current animate-pulse" />
-          {trend > 0 ? '+' : ''}{trend}%
+        <div className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase ${trend > 0 ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}`}>
+          <span className={`w-1.5 h-1.5 rounded-full bg-current ${trend > 0 ? 'animate-pulse' : ''}`} />
+          {trend > 0 ? 'UP' : 'DOWN'} {Math.abs(trend)}%
         </div>
       )}
     </div>
     
-    <div className="space-y-0.5 sm:space-y-1">
-      <p className="text-[9px] sm:text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-slate-500 transition-colors">{label}</p>
-      <div className="flex items-baseline gap-2">
-        <h3 className="text-xl sm:text-3xl font-black text-nexer-text-header tracking-tight group-hover:text-nexer-brand-primary transition-colors">{value}</h3>
-        {/* Simplified subtext could go here */}
+    <div className="space-y-1 relative z-10">
+      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 group-hover:text-slate-500 transition-colors leading-none">{label}</p>
+      <div className="flex items-baseline gap-2 pt-1">
+        <h3 className="text-2xl sm:text-4xl font-black text-nexer-text-header tracking-tight group-hover:text-nexer-brand-primary transition-colors">{value}</h3>
       </div>
     </div>
   </motion.div>

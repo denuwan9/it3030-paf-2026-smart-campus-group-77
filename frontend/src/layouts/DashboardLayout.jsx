@@ -5,7 +5,6 @@ import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/layout/Sidebar';
 import { 
   Menu, 
-  Search,
   ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -43,14 +42,6 @@ const DashboardLayout = () => {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-4 md:gap-6">
-            <div className="hidden md:flex items-center gap-3 bg-slate-100 border border-slate-200 rounded-2xl px-4 py-2.5 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all group shadow-inner">
-              <Search className="w-4 h-4 text-slate-400 group-focus-within:text-blue-500" />
-              <input 
-                type="text" 
-                placeholder="Search modules..." 
-                className="bg-transparent border-none outline-none text-sm text-slate-700 placeholder:text-slate-400 w-32 xl:w-72 font-medium"
-              />
-            </div>
             
             <NotificationPanel />
 

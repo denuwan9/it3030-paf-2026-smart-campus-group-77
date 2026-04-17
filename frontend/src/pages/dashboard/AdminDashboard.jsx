@@ -19,17 +19,17 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-10">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">Operations Overview</h1>
-          <p className="text-slate-400 text-xs sm:text-sm mt-1">Real-time metrics and campus-wide management.</p>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-nexer-text-header">Operations Overview</h1>
+          <p className="text-nexer-text-muted text-xs sm:text-sm mt-1 font-medium">Real-time metrics and campus-wide management.</p>
         </div>
         <div className="flex items-center gap-3">
-          <button className="px-4 py-2 bg-slate-800 text-slate-200 text-sm font-semibold rounded-lg hover:bg-slate-700 transition-colors">
+          <button className="px-5 py-2.5 bg-white border border-slate-200 text-nexer-text-header text-sm font-bold rounded-xl hover:bg-slate-50 transition-all active:scale-95 shadow-nexer-sm">
             Generate Report
           </button>
-          <button className="px-4 py-2 bg-primary-600 text-white text-sm font-semibold rounded-lg hover:bg-primary-500 shadow-lg shadow-primary-500/20 transition-all">
+          <button className="px-5 py-2.5 bg-nexer-brand-primary text-white text-sm font-bold rounded-xl hover:bg-opacity-90 shadow-nexer-lg shadow-nexer-brand-primary/20 transition-all active:scale-95">
             Add Resource
           </button>
         </div>
@@ -50,43 +50,43 @@ const AdminDashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Recent Activity Table */}
-        <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-6 border-b border-slate-800 flex justify-between items-center">
-            <h2 className="text-lg font-bold text-slate-100 flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-primary-500" />
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-nexer-md">
+          <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+            <h2 className="text-lg font-black text-nexer-text-header flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-nexer-brand-primary" />
               Recent Activity
             </h2>
-            <button className="text-xs text-primary-400 hover:text-primary-300 font-semibold group flex items-center gap-1">
+            <button className="text-xs text-nexer-brand-primary hover:text-opacity-80 font-black tracking-wider uppercase group flex items-center gap-1">
               View All <ArrowUpRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
             </button>
           </div>
           <div className="table-responsive">
             <table className="w-full">
               <thead>
-                <tr className="bg-slate-800/30">
-                  <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">User</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Activity</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Time</th>
-                  <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                <tr className="bg-slate-50/50">
+                  <th className="text-left px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">User</th>
+                  <th className="text-left px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Activity</th>
+                  <th className="text-left px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Time</th>
+                  <th className="text-left px-6 py-4 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800">
+              <tbody className="divide-y divide-slate-100">
                 {recentActivities.map((row) => (
-                  <tr key={row.id} className="hover:bg-slate-800/20 transition-colors group">
-                    <td className="px-6 py-4">
+                  <tr key={row.id} className="hover:bg-slate-50/50 transition-colors group">
+                    <td className="px-6 py-5">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-[10px] font-bold text-slate-400 border border-slate-700">
+                        <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xs font-black text-slate-500 border border-slate-200 shadow-sm overflow-hidden">
                           {row.user.split(' ').map(n => n[0]).join('')}
                         </div>
-                        <span className="text-sm font-medium text-slate-200">{row.user}</span>
+                        <span className="text-sm font-bold text-nexer-text-header">{row.user}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-slate-300">{row.action}</p>
-                      <p className="text-xs text-slate-500 tracking-tight mt-0.5">{row.target}</p>
+                    <td className="px-6 py-5">
+                      <p className="text-sm font-bold text-nexer-text-header">{row.action}</p>
+                      <p className="text-xs text-nexer-text-muted font-medium mt-0.5">{row.target}</p>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-500">{row.time}</td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-5 text-sm text-slate-500 font-medium">{row.time}</td>
+                    <td className="px-6 py-5">
                       <StatusBadge status={row.status} />
                     </td>
                   </tr>
@@ -98,29 +98,33 @@ const AdminDashboard = () => {
 
         {/* Quick Actions / System Health */}
         <div className="space-y-6">
-          <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-sm">
-            <h2 className="text-lg font-bold text-slate-100 mb-4">System Tasks</h2>
-            <div className="space-y-4">
+          <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-nexer-md">
+            <h2 className="text-lg font-black text-nexer-text-header mb-6">System Health</h2>
+            <div className="space-y-6">
               {[
-                { label: 'Database Backup', progress: 85, status: 'Processing' },
-                { label: 'Security Scan', progress: 100, status: 'Completed' },
-                { label: 'Token Cleanup', progress: 30, status: 'In Queue' },
+                { label: 'Database Sync', progress: 85, status: 'Active' },
+                { label: 'Cloud Storage', progress: 100, status: 'Healthy' },
+                { label: 'API Gateway', progress: 30, status: 'Under Load' },
               ].map((task, i) => (
                 <div key={i}>
-                  <div className="flex justify-between text-xs mb-1.5">
-                    <span className="text-slate-300 font-medium">{task.label}</span>
-                    <span className="text-slate-500">{task.status}</span>
+                  <div className="flex justify-between text-xs mb-2">
+                    <span className="text-nexer-text-header font-black uppercase tracking-wider">{task.label}</span>
+                    <span className={`font-bold ${task.status === 'Healthy' ? 'text-emerald-600' : 'text-slate-400'}`}>{task.status}</span>
                   </div>
-                  <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
                     <motion.div 
                       initial={{ width: 0 }}
                       animate={{ width: `${task.progress}%` }}
-                      className="h-full bg-primary-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"
+                      className="h-full bg-nexer-brand-primary rounded-full"
                     />
                   </div>
                 </div>
               ))}
             </div>
+            
+            <button className="w-full mt-8 py-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-500 uppercase tracking-widest hover:bg-slate-100 transition-colors shadow-sm active:scale-[0.98]">
+              Run System Diagnostics
+            </button>
           </div>
         </div>
       </div>
