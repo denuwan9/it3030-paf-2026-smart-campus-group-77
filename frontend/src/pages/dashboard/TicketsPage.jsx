@@ -4,10 +4,12 @@ import TicketStatCard from '../../components/tickets/TicketStatCard';
 import TicketFilters from '../../components/tickets/TicketFilters';
 import TicketItemCard from '../../components/tickets/TicketItemCard';
 import NewTicketModal from '../../components/tickets/NewTicketModal';
+import TicketDetailsSidebar from '../../components/tickets/TicketDetailsSidebar';
 import toast from 'react-hot-toast';
 
 const TicketsPage = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
   const [tickets] = useState([
     {
       id: 'TKT-001',
@@ -115,7 +117,10 @@ const TicketsPage = () => {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 + (i * 0.1) }}
             >
-              <TicketItemCard {...ticket} />
+              <TicketItemCard 
+                {...ticket} 
+                onClick={() => setSelectedTicket(ticket)}
+              />
             </motion.div>
           ))}
         </section>
@@ -128,6 +133,12 @@ const TicketsPage = () => {
           toast.success('Ticket submitted successfully (Demo)');
           setIsModalOpen(false);
         }}
+      />
+
+      <TicketDetailsSidebar 
+        isOpen={!!selectedTicket}
+        onClose={() => setSelectedTicket(null)}
+        ticket={selectedTicket}
       />
     </div>
   );

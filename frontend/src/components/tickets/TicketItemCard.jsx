@@ -1,11 +1,14 @@
 import React from 'react';
 import TicketBadge from './TicketBadge';
 
-const TicketItemCard = ({ id, title, location, reporter, category, attachmentsCount, commentsCount, status, priority }) => {
+const TicketItemCard = ({ id, title, location, reporter, category, attachmentsCount, commentsCount, status, priority, onClick }) => {
   const initials = reporter?.name?.split(' ').map(n => n[0]).join('') || 'UN';
 
   return (
-    <div className="bg-[#171717] border border-white/5 p-6 rounded-2xl shadow-sm transition-all hover:bg-[#1c1c1c] group cursor-pointer">
+    <div 
+      onClick={onClick}
+      className="bg-[#171717] border border-white/5 p-6 rounded-2xl shadow-sm transition-all hover:bg-[#1c1c1c] group cursor-pointer"
+    >
       <div className="flex justify-between items-start mb-4">
         <div>
           <h3 className="text-white text-lg font-bold group-hover:text-amber-400/90 transition-colors uppercase tracking-tight">{title}</h3>
