@@ -32,6 +32,7 @@ public class AuthService {
     private final JwtUtils jwtUtils;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
+    private final SystemAlertService systemAlertService;
 
     @Transactional
     public void register(RegisterRequest request) {
@@ -73,6 +74,9 @@ public class AuthService {
         }
 
         String jwt = jwtUtils.generateToken(user);
+
+        // Security Trigger: Notify user of new login
+        systemAlertService.sendSecurityAlert(user, "New Login Session");
 
         return AuthResponse.builder()
                 .token(jwt)
@@ -185,6 +189,9 @@ public class AuthService {
         User user = resetToken.getUser();
         user.setPasswordHash(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+
+        // Security Trigger: Notify user of password change
+        systemAlertService.sendSecurityAlert(user, "Password Reset");
 
     // Cleanup: remove token after successful reset
         tokenRepository.delete(resetToken);

@@ -32,7 +32,7 @@ const TechnicianDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Active Ticket List */}
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-sm font-bold text-slate-500 uppercase tracking-widest px-1">Current Queue</h2>
+          <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Current Queue</h2>
           {tickets.map((ticket, i) => (
             <motion.div
               key={ticket.id}
@@ -45,13 +45,13 @@ const TechnicianDashboard = () => {
                 <div className={`p-3 rounded-xl ${
                   ticket.status === 'IN_PROGRESS' ? 'bg-amber-50 text-amber-600 border border-amber-100' : 'bg-blue-50 text-blue-600 border border-blue-100'
                 }`}>
-                  <Ticket className="w-6 h-6" />
+                  <Ticket className="w-7 h-7" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono text-slate-500 font-bold">{ticket.id}</span>
-                    <span className={`w-1.5 h-1.5 rounded-full ${
-                      ticket.priority === 'HIGH' ? 'bg-red-500' : ticket.priority === 'MEDIUM' ? 'bg-amber-500' : 'bg-emerald-500'
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase">{ticket.id}</span>
+                    <span className={`w-2 h-2 rounded-full ${
+                      ticket.priority === 'HIGH' ? 'bg-rose-500 animate-pulse' : ticket.priority === 'MEDIUM' ? 'bg-amber-500' : 'bg-emerald-500'
                     }`} />
                   </div>
                   <h3 className="text-lg font-bold text-slate-800 mt-0.5 group-hover:text-blue-600 transition-colors uppercase tracking-tight">
