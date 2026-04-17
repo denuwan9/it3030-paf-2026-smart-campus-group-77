@@ -1,13 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { PlusCircle, List, Bell, Upload, ChevronDown } from 'lucide-react';
+import { PlusCircle, List, Upload, ChevronDown } from 'lucide-react';
 import TicketItemCard from '../../components/tickets/TicketItemCard';
 import TicketDetailsSidebar from '../../components/tickets/TicketDetailsSidebar';
 import toast from 'react-hot-toast';
 
 const UserTicketsPage = () => {
-  const [activeTab, setActiveTab] = useState('new');
+  const [activeTab, setActiveTab] = useState('list');
   const [selectedTicket, setSelectedTicket] = useState(null);
+
+  useEffect(() => {
+    // Simulate a technician adding/updating a ticket after a short delay
+    const timer = setTimeout(() => {
+      toast((t) => (
+        <div className="flex flex-col gap-1">
+          <span className="font-semibold text-slate-800 text-sm">New Update</span>
+          <span className="text-xs text-slate-500">A Technician has recently updated your ticket (TKT-001).</span>
+        </div>
+      ), { duration: 6000, icon: '🔔' });
+    }, 6000);
+    return () => clearTimeout(timer);
+  }, []);
 
   const [tickets, setTickets] = useState([
     {
