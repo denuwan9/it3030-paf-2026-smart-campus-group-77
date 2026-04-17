@@ -14,7 +14,7 @@ import {
 import notificationService from '../../services/notificationService';
 import toast from 'react-hot-toast';
 import { useAuth } from '../../context/AuthContext';
-import { NOTIFICATION_SOUND } from '../../assets/sounds';
+import { playNotificationSound } from '../../assets/sounds';
 
 // ─── Toggle Row ───────────────────────────────────────────────────────────────
 
@@ -114,12 +114,13 @@ const NotificationSettingsPage = () => {
   };
 
   const playTestSound = () => {
-    const audio = new Audio(NOTIFICATION_SOUND);
-    audio.volume = 0.5;
-    audio.play().catch(err => {
-      console.error("Manual playback failed:", err);
-      toast.error("Browser blocked audio. Please try clicking the button again.");
-    });
+    try {
+      playNotificationSound(0.5);
+      toast.success("Sound triggered successfully!");
+    } catch (err) {
+      console.error("Audio playback error:", err);
+      toast.error("Failed to play sound.");
+    }
   };
 
   const TOGGLES = [

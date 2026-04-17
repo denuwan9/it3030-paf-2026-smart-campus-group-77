@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import notificationService from '../../services/notificationService';
 import toast from 'react-hot-toast';
-import { NOTIFICATION_SOUND } from '../../assets/sounds';
+import { playNotificationSound } from '../../assets/sounds';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -192,11 +192,7 @@ const NotificationPanel = () => {
     if (prevCountRef.current !== null && unreadCount > prevCountRef.current) {
       if (soundEnabled) {
         console.log("Triggering notification sound. Count incremented from", prevCountRef.current, "to", unreadCount);
-        const audio = new Audio(NOTIFICATION_SOUND);
-        audio.volume = 0.5;
-        audio.play().catch(err => {
-          console.warn("Notification sound blocked by browser policy (autoplay). Interaction required.", err);
-        });
+        playNotificationSound(0.5);
       }
     }
     prevCountRef.current = unreadCount;
