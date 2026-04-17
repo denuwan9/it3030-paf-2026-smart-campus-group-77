@@ -4,9 +4,6 @@ import { Outlet, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Sidebar from '../components/layout/Sidebar';
 import { 
-  LayoutDashboard, 
-  User, 
-  LogOut, 
   Menu, 
   Search,
   ChevronRight
@@ -17,53 +14,6 @@ const DashboardLayout = () => {
   const { user } = useAuth();
   const location = useLocation();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-
-  const roleHomePath = {
-    ROLE_ADMIN: '/admin',
-    ROLE_TECHNICIAN: '/technician',
-    ROLE_USER: '/dashboard',
-  };
-  const overviewPath = roleHomePath[user?.role] || '/dashboard';
-
-  const navigation = [
-    { 
-      label: 'Overview', 
-      to: overviewPath,
-      icon: LayoutDashboard, 
-      roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
-    },
-    { 
-      label: 'Resources', 
-      to: '/resources', 
-      icon: Package, 
-      roles: ['ROLE_USER'] 
-    },
-    {
-      label: 'Bookings',
-      to: user?.role === 'ROLE_ADMIN' ? '/admin/bookings' : '/bookings',
-      icon: Calendar,
-      roles: ['ROLE_USER', 'ROLE_ADMIN']
-    },
-    { 
-      label: 'Incident Tickets', 
-      to: '/tickets', 
-      icon: Ticket, 
-      roles: ['ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
-    },
-    { 
-      label: 'Command Center', 
-      to: '/admin/users', 
-      icon: ShieldCheck, 
-      roles: ['ROLE_ADMIN'] 
-    },
-  ];
-
-  const filteredNav = navigation.filter(item => item.roles.includes(user?.role));
-
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
-  };
 
   return (
     <div className="h-screen w-full bg-slate-50 flex overflow-hidden font-sans selection:bg-blue-500/10">
