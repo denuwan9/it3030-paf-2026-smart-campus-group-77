@@ -6,14 +6,13 @@ import {
   Ticket,
   Megaphone,
   Shield,
-  Mail,
   Loader2,
   Save,
   Volume2,
 } from 'lucide-react';
 import notificationService from '../../services/notificationService';
 import toast from 'react-hot-toast';
-import { useAuth } from '../../context/AuthContext';
+
 import { playNotificationSound } from '../../assets/sounds';
 
 // ─── Toggle Row ───────────────────────────────────────────────────────────────
@@ -59,7 +58,7 @@ const ToggleRow = ({ icon: Icon, iconColor, iconBg, label, description, checked,
 // ─── Main Page ────────────────────────────────────────────────────────────────
 
 const NotificationSettingsPage = () => {
-  const { user } = useAuth();
+
   const [settings, setSettings] = useState(null);
   const [loading, setLoading]   = useState(true);
   const [saving, setSaving]     = useState(false);
@@ -71,7 +70,7 @@ const NotificationSettingsPage = () => {
         setSettings(res.data);
       } else {
         // Use defaults so the page still renders; user can still toggle and save
-        setSettings({ emailEnabled: true, bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true, soundEnabled: true });
+        setSettings({ bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true, soundEnabled: true });
         toast.error(res.message || 'Could not load notification settings');
       }
     } catch (error) {
@@ -79,7 +78,7 @@ const NotificationSettingsPage = () => {
       const msg = error?.response?.data?.message || error?.message || 'Could not load notification settings';
       toast.error(msg);
       // Use defaults so the page still renders
-      setSettings({ emailEnabled: true, bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true, soundEnabled: true });
+      setSettings({ bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true, soundEnabled: true });
     } finally {
       setLoading(false);
     }
@@ -195,26 +194,6 @@ const NotificationSettingsPage = () => {
         </div>
       </motion.div>
 
-      {/* Email section */}
-      <motion.section
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.05 }}
-        className="space-y-3"
-      >
-        <h2 className="text-xs font-black text-slate-400 uppercase tracking-[0.18em] px-1">
-          Delivery Channel
-        </h2>
-        <ToggleRow
-          icon={Mail}
-          iconColor="text-slate-500"
-          iconBg="bg-slate-100"
-          label="Email Notifications"
-          description={`Send email copies of alerts to ${user?.email}`}
-          checked={settings?.emailEnabled ?? true}
-          onChange={handleToggle('emailEnabled')}
-        />
-      </motion.section>
 
       {/* Alert categories section */}
       <motion.section
