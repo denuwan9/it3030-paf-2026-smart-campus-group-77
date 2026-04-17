@@ -23,11 +23,11 @@ public class ResourceController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ResourceResponse>>> getResources(
-            @RequestParam(required = false) ResourceType type,
-            @RequestParam(required = false) Integer minCapacity,
-            @RequestParam(required = false) String location,
-            @RequestParam(required = false) ResourceStatus status,
-            @RequestParam(required = false) String search
+            @RequestParam(name = "type", required = false) ResourceType type,
+            @RequestParam(name = "minCapacity", required = false) Integer minCapacity,
+            @RequestParam(name = "location", required = false) String location,
+            @RequestParam(name = "status", required = false) ResourceStatus status,
+            @RequestParam(name = "search", required = false) String search
     ) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Resources fetched successfully",

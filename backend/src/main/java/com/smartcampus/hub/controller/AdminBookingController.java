@@ -28,11 +28,11 @@ public class AdminBookingController {
     @GetMapping
         @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<List<BookingResponse>>> getAllBookings(
-            @RequestParam(required = false) BookingStatus status,
-            @RequestParam(required = false) UUID resourceId,
-            @RequestParam(required = false) UUID requesterId,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+            @RequestParam(name = "status", required = false) BookingStatus status,
+            @RequestParam(name = "resourceId", required = false) UUID resourceId,
+            @RequestParam(name = "requesterId", required = false) UUID requesterId,
+            @RequestParam(name = "fromDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
+            @RequestParam(name = "toDate", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
     ) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Bookings fetched successfully",
@@ -48,7 +48,7 @@ public class AdminBookingController {
     }
 
     @GetMapping("/check-in/lookup")
-    public ResponseEntity<ApiResponse<BookingCheckInResponse>> lookupCheckIn(@RequestParam String token) {
+    public ResponseEntity<ApiResponse<BookingCheckInResponse>> lookupCheckIn(@RequestParam(name = "token") String token) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Check-in token validated",
                 bookingService.previewCheckInByToken(token)
