@@ -1,7 +1,6 @@
 package com.smartcampus.hub.service;
 
-import com.smartcampus.hub.dto.NotificationDTO;
-import com.smartcampus.hub.dto.NotificationSettingDTO;
+import com.smartcampus.hub.dto.*;
 import com.smartcampus.hub.entity.*;
 import com.smartcampus.hub.repository.NotificationRepository;
 import com.smartcampus.hub.repository.NotificationSettingRepository;
@@ -192,6 +191,12 @@ public class NotificationService {
      */
     @Transactional
     public int broadcastSystemNotification(String title, String message) {
+        return createTargetedAnnouncement(AnnouncementDTO.builder()
+                .targetType("ALL")
+                .targetValue("ALL_USERS")
+                .message(message)
+                .build());
+    }
 
     // ─── Settings ─────────────────────────────────────────────────────────────
 

@@ -3,7 +3,6 @@ package com.smartcampus.hub.controller;
 import com.smartcampus.hub.dto.ApiResponse;
 import com.smartcampus.hub.dto.NotificationDTO;
 import com.smartcampus.hub.dto.NotificationSettingDTO;
-import com.smartcampus.hub.entity.User;
 import com.smartcampus.hub.service.NotificationService;
 import com.smartcampus.hub.service.UserService;
 import lombok.RequiredArgsConstructor;
