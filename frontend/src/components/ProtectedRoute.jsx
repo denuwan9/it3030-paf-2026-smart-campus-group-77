@@ -30,7 +30,8 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
     const isAuthorized = normalizedAllowedRoles.includes(normalizedUserRole);
 
     if (!isAuthorized) {
-      // Redirect back to their authorized "home" path instead of an unauthorized page
+      console.warn(`Unauthorized access attempt by ${normalizedUserRole} to route requiring ${normalizedAllowedRoles}`);
+      // Redirect back to their authorized "home" path
       const rolePaths = {
         'ROLE_ADMIN': '/admin',
         'ROLE_TECHNICIAN': '/technician',

@@ -86,6 +86,15 @@ public class User implements UserDetails {
     @Column(name = "profile_image_url")
     private String profileImageUrl;
 
+    // ─── Privacy Fields ───────────────────────────────────────────────────────
+    @Column(name = "is_email_public", nullable = false)
+    @Builder.Default
+    private Boolean isEmailPublic = false;
+
+    @Column(name = "is_phone_public", nullable = false)
+    @Builder.Default
+    private Boolean isPhonePublic = false;
+
     // ─── OTP Fields ───────────────────────────────────────────────────────────
     @JsonIgnore
     @Column(name = "otp_code", length = 10)
