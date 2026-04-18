@@ -256,29 +256,31 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
                 </div>
                )}
 
-              {/* Assign Technician */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Assign Technician</p>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <select 
-                      value={assignee}
-                      onChange={(e) => setAssignee(e.target.value)}
-                      className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-slate-700 text-xs font-bold outline-none appearance-none focus:ring-2 focus:ring-blue-100 shadow-sm"
+              {/* Assign Technician - Only visible to Admin */}
+              {(currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN') && (
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Assign Technician</p>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <select 
+                        value={assignee}
+                        onChange={(e) => setAssignee(e.target.value)}
+                        className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-slate-700 text-xs font-bold outline-none appearance-none focus:ring-2 focus:ring-blue-100 shadow-sm"
+                      >
+                        <option>Dhananji</option>
+                        <option>Lilantha Siriwardana</option>
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    </div>
+                    <button 
+                      onClick={handleAssign}
+                      className="px-6 py-2.5 bg-blue-600 border border-blue-700 text-white text-xs font-black uppercase rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-sm"
                     >
-                      <option>Dhananji</option>
-                      <option>Lilantha Siriwardana</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                      Assign
+                    </button>
                   </div>
-                  <button 
-                    onClick={handleAssign}
-                    className="px-6 py-2.5 bg-blue-600 border border-blue-700 text-white text-xs font-black uppercase rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-sm"
-                  >
-                    Assign
-                  </button>
                 </div>
-              </div>
+              )}
 
               {/* Comments */}
               <div className="space-y-4 pt-4">
