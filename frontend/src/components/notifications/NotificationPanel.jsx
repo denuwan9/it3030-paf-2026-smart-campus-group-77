@@ -74,8 +74,9 @@ function relativeTime(isoString) {
 const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete }, ref) => {
   const baseConfig = TYPE_CONFIG[notification.type] || TYPE_CONFIG.SYSTEM;
   const bookingText = `${notification.title || ''} ${notification.message || ''}`.toLowerCase();
-  const isRejectedBooking = notification.type === 'BOOKING' && bookingText.includes('reject');
-  const config = isRejectedBooking
+  const isNegativeBooking = notification.type === 'BOOKING'
+    && (bookingText.includes('reject') || bookingText.includes('cancel'));
+  const config = isNegativeBooking
     ? { ...baseConfig, color: 'text-rose-600', bg: 'bg-rose-50' }
     : baseConfig;
   
@@ -102,7 +103,7 @@ const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete }, ref
         isUnread
           ? notification.isAnnouncement 
             ? 'bg-purple-500/[0.05] border-purple-500/20 shadow-sm shadow-purple-500/5'
-            : isRejectedBooking
+            : isNegativeBooking
               ? 'bg-rose-500/[0.05] border-rose-500/20 shadow-sm shadow-rose-500/5'
               : 'bg-nexer-brand-primary/[0.03] border-nexer-brand-primary/10'
           : 'bg-white/50 border-slate-100 hover:border-slate-200'
@@ -110,7 +111,7 @@ const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete }, ref
     >
       {/* Unread indicator */}
       {isUnread && (
-        <span className={`absolute top-4 right-4 w-2 h-2 rounded-full ${isRejectedBooking ? 'bg-rose-500' : 'bg-nexer-brand-primary'}`} />
+        <span className={`absolute top-4 right-4 w-2 h-2 rounded-full ${isNegativeBooking ? 'bg-rose-500' : 'bg-nexer-brand-primary'}`} />
       )}
 
       {/* Type icon */}
