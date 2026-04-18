@@ -41,7 +41,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
     },
     { 
-      label: 'My Tickets', 
+      label: 'My Reports', 
       to: '/user/tickets', 
       icon: Ticket, 
       roles: ['ROLE_USER'] 
@@ -71,10 +71,16 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       roles: ['ROLE_USER', 'ROLE_ADMIN']
     },
     { 
-      label: 'Incident Tickets', 
-      to: '/tickets', 
+      label: 'Ops Queue', 
+      to: '/admin/tickets', 
       icon: Ticket, 
-      roles: ['ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
+      roles: ['ROLE_ADMIN'] 
+    },
+    { 
+      label: 'Work Orders', 
+      to: '/technician/tasks', 
+      icon: Ticket, 
+      roles: ['ROLE_TECHNICIAN'] 
     },
   ];
 

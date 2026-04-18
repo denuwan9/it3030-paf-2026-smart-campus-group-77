@@ -33,6 +33,8 @@ public class GlobalExceptionHandler {
             messageBuilder.append(errorMessage).append(". ");
         });
         
+        log.warn("Validation failed for request: {}", errors);
+        
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ApiResponse.validationError(messageBuilder.toString().trim(), errors));
     }
@@ -74,7 +76,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         String message = ex.getMostSpecificCause().getMessage();
-        log.warn("Database integrity violation: {}", message);
+        log.warn("Database integrity violation [{}]: {}", ex.getClass().getSimpleName(), message);
         
         if (message != null && (message.contains("duplicate key") || message.contains("unique constraint"))) {
             if (message.contains("users") && message.contains("email")) {
@@ -92,16 +94,17 @@ public class GlobalExceptionHandler {
     /** Permission denied */
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDeniedException(AccessDeniedException ex) {
+        log.error("Access denied: {}", ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error("You do not have permission to access this resource"));
     }
 
-    /** Catch-all for other runtime exceptions */
+    /** Catch-all for other runtime exceptions (should be 500, not 400) */
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException ex) {
-        log.error("Runtime exception: {}", ex.getMessage(), ex);
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.error(ex.getMessage() != null ? ex.getMessage() : "An error occurred"));
+        log.error("Runtime exception [{}]: {}", ex.getClass().getSimpleName(), ex.getMessage(), ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.error(ex.getMessage() != null ? ex.getMessage() : "An internal server error occurred"));
     }
 
     /** Absolute fallback */

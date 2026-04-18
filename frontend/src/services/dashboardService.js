@@ -14,6 +14,11 @@ const dashboardService = {
   getRecentActivity: async () => {
     const response = await axiosInstance.get('/dashboard/recent-activity');
     return response.data;
+  },
+  
+  getTechnicianStats: async () => {
+    const response = await axiosInstance.get('/dashboard/technician-stats');
+    return response.data;
   }
 };
 

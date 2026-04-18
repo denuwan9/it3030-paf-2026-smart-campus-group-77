@@ -1,25 +1,29 @@
-import axiosInstance from '../api/axiosInstance';
+import axios from '../api/axiosInstance';
+
+const BASE_URL = '/tickets';
 
 const ticketService = {
-  getAllTickets: async () => {
-    const response = await axiosInstance.get('/tickets');
-    return response.data;
-  },
+  // --- User Actions ---
+  createTicket: (data) => axios.post(BASE_URL, data),
+  getMyTickets: () => axios.get(`${BASE_URL}/my`),
+  getTicketDetails: (id) => axios.get(`${BASE_URL}/${id}`),
 
-  getMyTickets: async () => {
-    const response = await axiosInstance.get('/tickets/me');
-    return response.data;
-  },
+  // --- Admin Actions ---
+  getGlobalQueue: () => axios.get(`${BASE_URL}/admin/queue`),
+  assignTechnician: (ticketId, technicianId) => 
+    axios.post(`${BASE_URL}/${ticketId}/assign?technicianId=${technicianId}`),
+  rejectTicket: (ticketId, reason) => 
+    axios.post(`${BASE_URL}/${ticketId}/reject?reason=${reason}`),
 
-  createTicket: async (data) => {
-    const response = await axiosInstance.post('/tickets', data);
-    return response.data;
-  },
+  // --- Technician Actions ---
+  getTechnicianTasks: () => axios.get(`${BASE_URL}/technician/tasks`),
+  updateStatus: (ticketId, status, notes) => 
+    axios.patch(`${BASE_URL}/${ticketId}/status?status=${status}${notes ? `&notes=${notes}` : ''}`),
 
-  updateTicketStatus: async (id, status) => {
-    const response = await axiosInstance.put(`/tickets/${id}/status?status=${status}`);
-    return response.data;
-  }
+  // --- Comment Actions ---
+  getComments: (id) => axios.get(`${BASE_URL}/${id}/comments`),
+  addComment: (id, content) => axios.post(`${BASE_URL}/${id}/comments`, { content }),
+  deleteComment: (commentId) => axios.delete(`${BASE_URL}/comments/${commentId}`),
 };
 
 export default ticketService;
