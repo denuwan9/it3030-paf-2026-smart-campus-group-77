@@ -60,6 +60,10 @@ public class Booking {
     @Column(name = "cancel_reason", columnDefinition = "TEXT")
     private String cancelReason;
 
+    @Column(name = "hidden_by_requester")
+    @Builder.Default
+    private Boolean hiddenByRequester = false;
+
     @Column(name = "check_in_token", length = 120, unique = true)
     private String checkInToken;
 

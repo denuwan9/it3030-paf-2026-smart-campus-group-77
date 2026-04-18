@@ -54,6 +54,7 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
             JOIN FETCH b.requestedBy u
             LEFT JOIN FETCH b.reviewedBy rv
             WHERE u.id = :userId
+              AND COALESCE(b.hiddenByRequester, FALSE) = FALSE
               AND (:status IS NULL OR b.status = :status)
               AND (:fromDate IS NULL OR b.bookingDate >= :fromDate)
               AND (:toDate IS NULL OR b.bookingDate <= :toDate)

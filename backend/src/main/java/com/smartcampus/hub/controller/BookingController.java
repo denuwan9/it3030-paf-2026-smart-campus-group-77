@@ -66,4 +66,10 @@ public class BookingController {
         String reason = request == null ? null : request.getReason();
         return ResponseEntity.ok(ApiResponse.success("Booking cancelled successfully", bookingService.cancelBooking(bookingId, reason)));
     }
+
+    @DeleteMapping("/{bookingId}")
+    public ResponseEntity<ApiResponse<Void>> deleteBookingForCurrentUser(@PathVariable UUID bookingId) {
+        bookingService.deleteBookingForCurrentUser(bookingId);
+        return ResponseEntity.ok(ApiResponse.success("Booking removed from your list", null));
+    }
 }
