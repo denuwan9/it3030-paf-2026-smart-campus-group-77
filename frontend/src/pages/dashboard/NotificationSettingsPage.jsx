@@ -72,7 +72,7 @@ const NotificationSettingsPage = () => {
         setSettings(res.data);
       } else {
         // Use defaults so the page still renders; user can still toggle and save
-        setSettings({ bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true, soundEnabled: true });
+        setSettings({ bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true, securityAlerts: true, soundEnabled: true });
         toast.error(res.message || 'Could not load notification settings');
       }
     } catch (error) {
@@ -80,7 +80,7 @@ const NotificationSettingsPage = () => {
       const msg = error?.response?.data?.message || error?.message || 'Could not load notification settings';
       toast.error(msg);
       // Use defaults so the page still renders
-      setSettings({ bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true, soundEnabled: true });
+      setSettings({ bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true, securityAlerts: true, soundEnabled: true });
     } finally {
       setLoading(false);
     }
