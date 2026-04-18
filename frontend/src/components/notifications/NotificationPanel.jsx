@@ -72,7 +72,12 @@ function relativeTime(isoString) {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete }, ref) => {
-  const config = TYPE_CONFIG[notification.type] || TYPE_CONFIG.SYSTEM;
+  const baseConfig = TYPE_CONFIG[notification.type] || TYPE_CONFIG.SYSTEM;
+  const bookingText = `${notification.title || ''} ${notification.message || ''}`.toLowerCase();
+  const isRejectedBooking = notification.type === 'BOOKING' && bookingText.includes('reject');
+  const config = isRejectedBooking
+    ? { ...baseConfig, color: 'text-rose-600', bg: 'bg-rose-50' }
+    : baseConfig;
   
   // Dynamic icon for System Alerts (Security vs Maintenance)
   let Icon = config.icon;
@@ -97,13 +102,15 @@ const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete }, ref
         isUnread
           ? notification.isAnnouncement 
             ? 'bg-purple-500/[0.05] border-purple-500/20 shadow-sm shadow-purple-500/5'
-            : 'bg-nexer-brand-primary/[0.03] border-nexer-brand-primary/10'
+            : isRejectedBooking
+              ? 'bg-rose-500/[0.05] border-rose-500/20 shadow-sm shadow-rose-500/5'
+              : 'bg-nexer-brand-primary/[0.03] border-nexer-brand-primary/10'
           : 'bg-white/50 border-slate-100 hover:border-slate-200'
       } backdrop-blur-sm`}
     >
       {/* Unread indicator */}
       {isUnread && (
-        <span className="absolute top-4 right-4 w-2 h-2 bg-nexer-brand-primary rounded-full" />
+        <span className={`absolute top-4 right-4 w-2 h-2 rounded-full ${isRejectedBooking ? 'bg-rose-500' : 'bg-nexer-brand-primary'}`} />
       )}
 
       {/* Type icon */}
