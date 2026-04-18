@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { PlusCircle, List, Upload, ChevronDown, Ticket, Plus } from 'lucide-react';
+import NewTicketModal from '../../components/tickets/NewTicketModal';
 import TicketItemCard from '../../components/tickets/TicketItemCard';
 import TicketDetailsSidebar from '../../components/tickets/TicketDetailsSidebar';
+import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const UserTicketsPage = () => {
+  const { user } = useAuth();
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isEditingSidebar, setIsEditingSidebar] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     // Simulate a technician adding/updating a ticket after a short delay
@@ -107,16 +111,23 @@ const UserTicketsPage = () => {
       <main className="flex-1 p-8">
         <div className="max-w-4xl mx-auto">
           {/* Banner Header */}
-          <div className="bg-indigo-500 rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm">
+          <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-sm text-white">
             <div className="flex items-center gap-4">
-              <div className="bg-white/20 p-3 rounded-xl">
-                <Ticket className="w-8 h-8 text-white" />
+              <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm shadow-inner">
+                <Ticket className="w-7 h-7 text-white" />
               </div>
               <div className="flex flex-col">
-                <h2 className="text-xl sm:text-2xl font-bold text-white tracking-wide">Maintenance & Incident Ticketing</h2>
+                <h2 className="text-xl sm:text-2xl font-bold tracking-tight">Maintenance & Incident Ticketing</h2>
                 <p className="text-indigo-100 text-sm mt-1">Manage your facility and equipment tickets with ease</p>
               </div>
             </div>
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="bg-white text-indigo-600 px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-50 transition-colors shadow-sm"
+            >
+              <Plus className="w-4 h-4" />
+              New Ticket
+            </button>
           </div>
 
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
@@ -156,6 +167,24 @@ const UserTicketsPage = () => {
 
         </div>
       </main>
+
+      <NewTicketModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={(newTicketData) => {
+          const newTicket = {
+            id: `TKT-${Math.floor(Math.random() * 900) + 100}`,
+            reporter: { name: user?.name || 'User' },
+            status: 'OPEN',
+            commentsCount: 0,
+            priority: newTicketData.priority.toUpperCase(),
+            ...newTicketData
+          };
+          setTickets([newTicket, ...tickets]);
+          toast.success('Ticket submitted successfully');
+          setIsModalOpen(false);
+        }}
+      />
 
       <TicketDetailsSidebar 
         isOpen={!!selectedTicket}

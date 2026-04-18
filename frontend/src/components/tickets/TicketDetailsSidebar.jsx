@@ -1,40 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronDown, User, Calendar, MapPin, Tag, Shield, Phone, Send, Edit, Check } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMode, onUpdateTicket }) => {
+  const { user: currentUser } = useAuth();
   if (!ticket) return null;
 
-  const initialComments = [
-    {
-      id: 1,
-      user: 'Lakmal',
-      role: 'USER',
-      time: 'Apr 7, 9:12 AM',
-      message: 'Tried the remote and direct button — no response at all.',
-      initials: 'L'
-    },
-    {
-      id: 2,
-      user: 'Chanith',
-      role: 'USER',
-      time: 'Apr 7, 10:45 AM',
-      message: 'It seems there is a power issue, checked the main switch too.',
-      initials: 'C'
-    },
-    {
-      id: 3,
-      user: 'Dhananji',
-      role: 'TECHNICIAN',
-      time: 'Apr 8, 11:00 AM',
-      message: 'Checked fuse — blown. Replacement ordered, ETA 2 days.',
-      initials: 'D',
-      isTechnician: true
-    }
-  ];
-
-  const [comments, setComments] = useState(initialComments);
+  const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [assignee, setAssignee] = useState("Dhananji");
   const [activeStatus, setActiveStatus] = useState("");
@@ -48,8 +22,8 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
   useEffect(() => {
     setNewComment("");
     if (ticket) {
-      // Use comments from ticket if they exist, otherwise use initial demo comments
-      setComments(ticket.comments || initialComments);
+      // Use comments from ticket if they exist
+      setComments(ticket.comments || []);
       setActiveStatus(ticket.status);
       setEditData({
         location: ticket.location || '',
@@ -62,16 +36,25 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
-    const initials = assignee.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    
+    // Determine the name and role based on the current user's role
+    const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
+    const isTechnician = currentUser?.role === 'ROLE_TECHNICIAN' || currentUser?.role === 'TECHNICIAN';
+    
+    const displayUser = isAdmin ? 'Admin' : (isTechnician ? (currentUser?.name || 'Technician') : (currentUser?.name || 'User'));
+    const displayRole = isAdmin ? 'ADMIN' : (isTechnician ? 'TECHNICIAN' : 'USER');
+    
+    const initials = displayUser.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    
     const comment = {
       id: Date.now(),
-      user: assignee,
-      role: 'TECHNICIAN',
+      user: displayUser,
+      role: displayRole,
       time: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }),
       message: newComment,
       initials: initials,
-      isTechnician: true,
-      isOwn: true // Flag to identify own comments
+      isTechnician: isAdmin || isTechnician,
+      isOwn: true 
     };
     const updatedComments = [...comments, comment];
     setComments(updatedComments);
@@ -216,11 +199,11 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
               {/* Grid Info */}
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { key: 'location', label: 'Location', value: isEditMode ? editData.location : (editData.location || ticket.location), icon: MapPin, type: 'text' },
-                  { key: 'category', label: 'Category', value: isEditMode ? editData.category : (editData.category || ticket.category), icon: Tag, type: 'select', opts: ['Electrical', 'Plumbing', 'Network', 'Equipment', 'Safety'] },
-                  { key: 'priority', label: 'Priority', value: isEditMode ? editData.priority : (editData.priority || ticket.priority), icon: Shield, type: 'select', opts: ['HIGH', 'MEDIUM', 'LOW'] },
+                  { key: 'location', label: 'Location', value: editData.location || ticket.location, icon: MapPin, type: 'readonly' },
+                  { key: 'category', label: 'Category', value: editData.category || ticket.category, icon: Tag, type: 'readonly' },
+                  { key: 'priority', label: 'Priority', value: editData.priority || ticket.priority, icon: Shield, type: 'readonly' },
                   { key: 'created', label: 'Created', value: '2026-04-07', icon: Calendar, type: 'readonly' },
-                  { key: 'contact', label: 'Contact', value: isEditMode ? editData.contact : editData.contact, icon: Phone, type: 'text' },
+                  { key: 'contact', label: 'Contact', value: editData.contact || ticket.contact, icon: Phone, type: 'readonly' },
                   { key: 'assignee', label: 'Assignee', value: 'Dhananji', icon: User, type: 'readonly' },
                 ].map((item) => (
                   <div key={item.key} className="bg-white border border-blue-100 p-3 rounded-xl transition-all hover:border-blue-200 shadow-sm">
@@ -247,29 +230,57 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
                 ))}
               </div>
 
-              {/* Assign Technician */}
-              <div className="space-y-4">
-                <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Assign Technician</p>
-                <div className="flex gap-2">
-                  <div className="relative flex-1">
-                    <select 
-                      value={assignee}
-                      onChange={(e) => setAssignee(e.target.value)}
-                      className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-slate-700 text-xs font-bold outline-none appearance-none focus:ring-2 focus:ring-blue-100 shadow-sm"
-                    >
-                      <option>Dhananji</option>
-                      <option>Lilantha Siriwardana</option>
-                    </select>
-                    <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+               {/* Attachments Section */}
+               {ticket.images && ticket.images.length > 0 && (
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Attachments ({ticket.images.length})</p>
+                  <div className="flex flex-wrap gap-3">
+                    {ticket.images.map((img, idx) => (
+                      <div key={idx} className="relative w-24 h-24 rounded-2xl overflow-hidden border border-blue-100 shadow-sm group">
+                        <img 
+                          src={img} 
+                          alt={`Attachment ${idx + 1}`} 
+                          className="w-full h-full object-cover transition-transform group-hover:scale-110" 
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button 
+                            onClick={() => window.open(img, '_blank')}
+                            className="bg-white/20 backdrop-blur-md p-2 rounded-lg text-white hover:bg-white/40 transition-colors"
+                          >
+                            <ChevronDown className="w-4 h-4 -rotate-90" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <button 
-                    onClick={handleAssign}
-                    className="px-6 py-2.5 bg-blue-600 border border-blue-700 text-white text-xs font-black uppercase rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-sm"
-                  >
-                    Assign
-                  </button>
                 </div>
-              </div>
+               )}
+
+              {/* Assign Technician - Only visible to Admin */}
+              {(currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN') && (
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Assign Technician</p>
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <select 
+                        value={assignee}
+                        onChange={(e) => setAssignee(e.target.value)}
+                        className="w-full bg-white border border-blue-200 rounded-xl px-4 py-2.5 text-slate-700 text-xs font-bold outline-none appearance-none focus:ring-2 focus:ring-blue-100 shadow-sm"
+                      >
+                        <option>Dhananji</option>
+                        <option>Lilantha Siriwardana</option>
+                      </select>
+                      <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                    </div>
+                    <button 
+                      onClick={handleAssign}
+                      className="px-6 py-2.5 bg-blue-600 border border-blue-700 text-white text-xs font-black uppercase rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-sm"
+                    >
+                      Assign
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Comments */}
               <div className="space-y-4 pt-4">

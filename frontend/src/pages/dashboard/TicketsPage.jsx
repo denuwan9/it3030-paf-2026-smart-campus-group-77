@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { Ticket, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import TicketStatCard from '../../components/tickets/TicketStatCard';
 import TicketFilters from '../../components/tickets/TicketFilters';
 import TicketItemCard from '../../components/tickets/TicketItemCard';
-import NewTicketModal from '../../components/tickets/NewTicketModal';
 import TicketDetailsSidebar from '../../components/tickets/TicketDetailsSidebar';
 import toast from 'react-hot-toast';
 import ticketService from '../../services/ticketService';
 import { Loader2 } from 'lucide-react';
 
 const TicketsPage = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isEditingSidebar, setIsEditingSidebar] = useState(false);
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -35,10 +34,10 @@ const TicketsPage = () => {
   }, []);
 
   const stats = [
-    { label: 'Total tickets', value: tickets.length },
-    { label: 'Open', value: tickets.filter(t => t.status === 'OPEN').length, colorClass: 'text-blue-500' },
-    { label: 'In progress', value: tickets.filter(t => t.status === 'IN_PROGRESS').length, colorClass: 'text-amber-500' },
-    { label: 'Resolved/Closed', value: tickets.filter(t => ['RESOLVED', 'CLOSED'].includes(t.status)).length, colorClass: 'text-emerald-500' },
+    { label: 'Total tickets', value: tickets.length, colorClass: 'text-indigo-600', icon: Ticket, trend: 12 },
+    { label: 'Open', value: tickets.filter(t => t.status === 'OPEN').length, colorClass: 'text-blue-500', icon: AlertCircle, trend: 5 },
+    { label: 'In progress', value: tickets.filter(t => t.status === 'IN_PROGRESS').length, colorClass: 'text-amber-500', icon: Clock, trend: 8 },
+    { label: 'Resolved/Closed', value: tickets.filter(t => ['RESOLVED', 'CLOSED'].includes(t.status)).length, colorClass: 'text-emerald-500', icon: CheckCircle, trend: 15 },
   ];
 
   const filteredTickets = tickets.filter(ticket => {
@@ -71,7 +70,6 @@ const TicketsPage = () => {
             onSearch={() => {}} 
             onFilterStatus={setStatusFilter} 
             onFilterPriority={setPriorityFilter} 
-            onNewTicket={() => setIsModalOpen(true)} 
           />
         </section>
 
@@ -134,23 +132,6 @@ const TicketsPage = () => {
         </section>
       </div>
 
-      <NewTicketModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={async (newTicketData) => {
-          try {
-            await ticketService.createTicket({
-              ...newTicketData,
-              priority: newTicketData.priority.toUpperCase()
-            });
-            toast.success('Ticket submitted to server');
-            fetchTickets();
-            setIsModalOpen(false);
-          } catch (err) {
-            toast.error('Failed to submit ticket');
-          }
-        }}
-      />
 
       <TicketDetailsSidebar 
         isOpen={!!selectedTicket}
