@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Ticket, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import TicketStatCard from '../../components/tickets/TicketStatCard';
@@ -6,76 +6,32 @@ import TicketFilters from '../../components/tickets/TicketFilters';
 import TicketItemCard from '../../components/tickets/TicketItemCard';
 import TicketDetailsSidebar from '../../components/tickets/TicketDetailsSidebar';
 import toast from 'react-hot-toast';
+import ticketService from '../../services/ticketService';
+import { Loader2 } from 'lucide-react';
 
 const TicketsPage = () => {
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isEditingSidebar, setIsEditingSidebar] = useState(false);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
-  const [tickets, setTickets] = useState(() => {
-    const saved = localStorage.getItem('adminTickets');
-    if (saved) return JSON.parse(saved);
-    return [
-    {
-      id: 'TKT-001',
-      title: 'Projector not turning on',
-      location: 'Lecture Hall 2A',
-      reporter: { name: 'Ashan Perera' },
-      category: 'Equipment',
-      attachmentsCount: 2,
-      commentsCount: 2,
-      status: 'IN_PROGRESS',
-      priority: 'HIGH'
-    },
-    {
-      id: 'TKT-002',
-      title: 'Water leak near server room door',
-      location: 'Server Room, Block C',
-      reporter: { name: 'Unassigned' },
-      category: 'Plumbing',
-      attachmentsCount: 3,
-      commentsCount: 1,
-      status: 'OPEN',
-      priority: 'HIGH'
-    },
-    {
-      id: 'TKT-003',
-      title: 'Air conditioning noise — Lab 5',
-      location: 'Computer Lab 5, Block B',
-      reporter: { name: 'Unassigned' },
-      category: 'Electrical',
-      attachmentsCount: 0,
-      commentsCount: 0,
-      status: 'OPEN',
-      priority: 'MEDIUM'
-    },
-    {
-      id: 'TKT-004',
-      title: 'Network port not working — Room 302',
-      location: 'Room 302, Block A',
-      reporter: { name: 'Nilufar Rashidova' },
-      category: 'Network',
-      attachmentsCount: 1,
-      commentsCount: 1,
-      status: 'RESOLVED',
-      priority: 'LOW'
-    },
-    {
-      id: 'TKT-005',
-      title: 'Fire extinguisher mount broken',
-      location: 'Corridor 1, Block D',
-      reporter: { name: 'Dev Krishnamurthy' },
-      category: 'Safety',
-      attachmentsCount: 2,
-      commentsCount: 2,
-      status: 'CLOSED',
-      priority: 'HIGH'
-    }
-  ]});
+  const [tickets, setTickets] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
-    localStorage.setItem('adminTickets', JSON.stringify(tickets));
-  }, [tickets]);
+  const fetchTickets = async () => {
+    try {
+      setLoading(true);
+      const res = await ticketService.getAllTickets();
+      setTickets(res.data);
+    } catch (err) {
+      toast.error('Failed to fetch tickets');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTickets();
+  }, []);
 
   const stats = [
     { label: 'Total tickets', value: tickets.length, colorClass: 'text-indigo-600', icon: Ticket, trend: 12 },
@@ -138,28 +94,41 @@ const TicketsPage = () => {
 
         {/* Ticket List */}
         <section className="space-y-4">
-          {filteredTickets.map((ticket, i) => (
-            <motion.div
-              key={ticket.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2 + (i * 0.1) }}
-            >
-              <TicketItemCard 
-                {...ticket} 
-                theme="light"
-                onClick={() => {
-                  setSelectedTicket(ticket);
-                  setIsEditingSidebar(true);
-                }}
-                onEdit={() => {
-                  setSelectedTicket(ticket);
-                  setIsEditingSidebar(true);
-                }}
-                onDelete={handleDeleteTicket}
-              />
-            </motion.div>
-          ))}
+          {loading ? (
+            <div className="flex flex-col items-center justify-center py-20 bg-white/50 rounded-3xl border-2 border-dashed border-blue-200">
+              <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-4" />
+              <p className="text-blue-900/60 font-bold uppercase tracking-widest text-xs">Synchronizing with server...</p>
+            </div>
+          ) : filteredTickets.length === 0 ? (
+            <div className="text-center py-20 bg-white/50 rounded-3xl border-2 border-dashed border-blue-200">
+               <p className="text-blue-900/60 font-black uppercase tracking-widest">No tickets found</p>
+            </div>
+          ) : (
+            filteredTickets.map((ticket, i) => (
+              <motion.div
+                key={ticket.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 + (i * 0.1) }}
+              >
+                <TicketItemCard 
+                  {...ticket} 
+                  id={ticket.id.toString().substring(0, 8).toUpperCase()}
+                  reporter={{ name: ticket.reporterName }}
+                  theme="light"
+                  onClick={() => {
+                    setSelectedTicket(ticket);
+                    setIsEditingSidebar(true);
+                  }}
+                  onEdit={() => {
+                    setSelectedTicket(ticket);
+                    setIsEditingSidebar(true);
+                  }}
+                  onDelete={handleDeleteTicket}
+                />
+              </motion.div>
+            ))
+          )}
         </section>
       </div>
 
@@ -173,7 +142,17 @@ const TicketsPage = () => {
         ticket={selectedTicket}
         isEditMode={isEditingSidebar}
         setIsEditMode={setIsEditingSidebar}
-        onUpdateTicket={handleUpdateTicketProps}
+        onUpdateTicket={async (id, updatedFields) => {
+          if (updatedFields.status) {
+            try {
+              await ticketService.updateTicketStatus(selectedTicket.id, updatedFields.status);
+              toast.success('Status updated on server');
+              fetchTickets();
+            } catch (err) {
+              toast.error('Failed to update status');
+            }
+          }
+        }}
       />
     </div>
   );

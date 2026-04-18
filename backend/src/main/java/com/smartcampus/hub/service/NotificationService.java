@@ -117,11 +117,24 @@ public class NotificationService {
                                               String title,
                                               String message,
                                               String actionUrl) {
+        return createNotification(recipientId, type, title, message, actionUrl, false);
+    }
+
+    /**
+     * Advanced version of createNotification that allows setting the announcement flag.
+     */
+    @Transactional
+    public NotificationDTO createNotification(UUID recipientId,
+                                              NotificationType type,
+                                              String title,
+                                              String message,
+                                              String actionUrl,
+                                              boolean isAnnouncement) {
         // Respect the user's category preferences
         NotificationSetting setting = getOrCreateSettings(recipientId);
         if (!isCategoryEnabled(setting, type)) {
-            log.debug("Notification suppressed for user {} — category {} disabled", recipientId, type);
-            return null; // silently suppressed per user preference
+            log.info("Notification suppressed for user {} — category {} is disabled in settings", recipientId, type);
+            return null; 
         }
 
         Notification n = Notification.builder()
@@ -130,8 +143,10 @@ public class NotificationService {
                 .title(title)
                 .message(message)
                 .actionUrl(actionUrl)
+                .isAnnouncement(isAnnouncement)
                 .build();
 
+        log.debug("Saving notification (Type: {}) for user {}", type, recipientId);
         return toDTO(notificationRepo.save(n));
     }
 
@@ -168,18 +183,14 @@ public class NotificationService {
         }
 
         for (User user : targets) {
-            // Respect announcement preference
-            NotificationSetting setting = getOrCreateSettings(user.getId());
-            if (Boolean.TRUE.equals(setting.getAnnouncementAlerts())) {
-                Notification n = Notification.builder()
-                        .recipientId(user.getId())
-                        .type(NotificationType.ANNOUNCEMENT)
-                        .title("Announcement")
-                        .message(msg)
-                        .isAnnouncement(true)
-                        .build();
-                notificationRepo.save(n);
-            }
+            createNotification(
+                    user.getId(),
+                    NotificationType.ANNOUNCEMENT,
+                    "Announcement",
+                    msg,
+                    null,
+                    true
+            );
         }
 
         log.info("Targeted announcement sent to {} recipients (Type: {})", targets.size(), type);
