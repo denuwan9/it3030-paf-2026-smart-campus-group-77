@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Ticket, Clock, CheckCircle, AlertCircle } from 'lucide-react';
 import TicketStatCard from '../../components/tickets/TicketStatCard';
 import TicketFilters from '../../components/tickets/TicketFilters';
 import TicketItemCard from '../../components/tickets/TicketItemCard';
@@ -77,10 +78,10 @@ const TicketsPage = () => {
   }, [tickets]);
 
   const stats = [
-    { label: 'Total tickets', value: tickets.length },
-    { label: 'Open', value: tickets.filter(t => t.status === 'OPEN').length, colorClass: 'text-blue-400' },
-    { label: 'In progress', value: tickets.filter(t => t.status === 'IN_PROGRESS').length, colorClass: 'text-amber-400' },
-    { label: 'Resolved/Closed', value: tickets.filter(t => ['RESOLVED', 'CLOSED'].includes(t.status)).length, colorClass: 'text-emerald-400' },
+    { label: 'Total tickets', value: tickets.length, colorClass: 'text-indigo-600', icon: Ticket, trend: 12 },
+    { label: 'Open', value: tickets.filter(t => t.status === 'OPEN').length, colorClass: 'text-blue-500', icon: AlertCircle, trend: 5 },
+    { label: 'In progress', value: tickets.filter(t => t.status === 'IN_PROGRESS').length, colorClass: 'text-amber-500', icon: Clock, trend: 8 },
+    { label: 'Resolved/Closed', value: tickets.filter(t => ['RESOLVED', 'CLOSED'].includes(t.status)).length, colorClass: 'text-emerald-500', icon: CheckCircle, trend: 15 },
   ];
 
   const filteredTickets = tickets.filter(ticket => {
