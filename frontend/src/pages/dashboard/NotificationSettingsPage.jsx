@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import notificationService from '../../services/notificationService';
 import toast from 'react-hot-toast';
+import { useNotifications } from '../../context/NotificationContext';
 
 import { playNotificationSound } from '../../assets/sounds';
 
@@ -59,6 +60,7 @@ const ToggleRow = ({ icon: Icon, iconColor, iconBg, label, description, checked,
 
 const NotificationSettingsPage = () => {
 
+  const { refreshSettings } = useNotifications();
   const [settings, setSettings] = useState(null);
   const [loading, setLoading]   = useState(true);
   const [saving, setSaving]     = useState(false);
@@ -99,6 +101,7 @@ const NotificationSettingsPage = () => {
       const res = await notificationService.updateSettings(settings);
       if (res.success) {
         setSettings(res.data);
+        refreshSettings();
         toast.success('Notification preferences saved!');
       } else {
         toast.error(res.message || 'Failed to save settings');
@@ -145,7 +148,15 @@ const NotificationSettingsPage = () => {
       iconColor: 'text-nexer-brand-primary',
       iconBg: 'bg-nexer-brand-primary/10',
       label: 'System Alerts',
-      description: 'Important platform updates, maintenance windows, and security notices',
+      description: 'Platform updates, maintenance windows, and operational notices',
+    },
+    {
+      field: 'securityAlerts',
+      icon: Shield,
+      iconColor: 'text-red-500',
+      iconBg: 'bg-red-50',
+      label: 'Security Alerts',
+      description: 'Important account security notices, login alerts, and password changes',
     },
     {
       field: 'announcementAlerts',

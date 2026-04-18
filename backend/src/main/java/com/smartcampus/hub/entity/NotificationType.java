@@ -7,5 +7,6 @@ public enum NotificationType {
     BOOKING,
     TICKET,
     SYSTEM,
-    ANNOUNCEMENT
+    ANNOUNCEMENT,
+    SECURITY
 }
