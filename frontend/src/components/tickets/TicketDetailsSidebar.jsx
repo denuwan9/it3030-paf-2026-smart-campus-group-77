@@ -180,15 +180,6 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
                 {ticket.title}
               </h2>
               <div className="flex items-center gap-2">
-                {!isEditMode && (
-                  <button 
-                    onClick={() => setIsEditMode?.(true)}
-                    className="w-10 h-10 bg-white hover:bg-blue-100 flex items-center justify-center rounded-xl text-slate-500 hover:text-blue-600 transition-colors border border-blue-200 shadow-sm"
-                    title="Edit Ticket"
-                  >
-                    <Edit className="w-5 h-5" />
-                  </button>
-                )}
                 <button 
                   onClick={onClose}
                   className="w-10 h-10 bg-white hover:bg-rose-50 flex items-center justify-center rounded-xl text-slate-500 hover:text-rose-500 transition-colors border border-blue-200 shadow-sm"
@@ -343,26 +334,24 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
               </div>
 
               {/* Action Buttons */}
-              {isEditMode && (
-                <div className="pt-6 flex flex-col gap-3">
-                  <div className="grid grid-cols-2 gap-3">
-                    <button 
-                      onClick={() => setIsEditMode?.(false)}
-                      className="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-50 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-2"
-                    >
-                      <X className="w-4 h-4" />
-                      Cancel
-                    </button>
-                    <button 
-                      onClick={handleSaveTicket}
-                      className="px-6 py-3 bg-blue-600 text-white font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-blue-700 transition-all active:scale-95 shadow-md flex items-center justify-center gap-2"
-                    >
-                      <Check className="w-4 h-4" />
-                      Save changes
-                    </button>
-                  </div>
+              <div className="pt-6 flex flex-col gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={onClose}
+                    className="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-50 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-2"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleSaveTicket}
+                    className="px-6 py-3 bg-blue-600 text-white font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-blue-700 transition-all active:scale-95 shadow-md flex items-center justify-center gap-2"
+                  >
+                    <Check className="w-4 h-4" />
+                    Save changes
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           </motion.div>
         </>
