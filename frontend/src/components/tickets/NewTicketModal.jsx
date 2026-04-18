@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 
 const NewTicketModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
-    title: '', location: '', category: 'Electrical', description: '', priority: 'Medium', contact: ''
+    title: '', location: '', category: 'Maintenance', description: '', priority: 'Medium', contact: ''
   });
   const [attachments, setAttachments] = useState([]);
 
@@ -109,10 +109,14 @@ const NewTicketModal = ({ isOpen, onClose, onSubmit }) => {
                     onChange={e => setFormData({...formData, category: e.target.value})}
                     className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 text-sm font-semibold outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 appearance-none transition-all shadow-sm"
                    >
+                    <option>Maintenance</option>
+                    <option>IT support</option>
+                    <option>IT equipment</option>
+                    <option>Other</option>
+                    <option>Facility</option>
                     <option>Electrical</option>
                     <option>Plumbing</option>
                     <option>Network</option>
-                    <option>Equipment</option>
                   </select>
                   <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                 </div>

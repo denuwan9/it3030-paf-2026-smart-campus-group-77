@@ -217,7 +217,7 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { key: 'location', label: 'Location', value: isEditMode ? editData.location : (editData.location || ticket.location), icon: MapPin, type: 'text' },
-                  { key: 'category', label: 'Category', value: isEditMode ? editData.category : (editData.category || ticket.category), icon: Tag, type: 'select', opts: ['Electrical', 'Plumbing', 'Network', 'Equipment', 'Safety'] },
+                  { key: 'category', label: 'Category', value: isEditMode ? editData.category : (editData.category || ticket.category), icon: Tag, type: 'select', opts: ['Maintenance', 'IT support', 'IT equipment', 'Other', 'Facility', 'Electrical', 'Plumbing', 'Network'] },
                   { key: 'priority', label: 'Priority', value: isEditMode ? editData.priority : (editData.priority || ticket.priority), icon: Shield, type: 'select', opts: ['HIGH', 'MEDIUM', 'LOW'] },
                   { key: 'created', label: 'Created', value: '2026-04-07', icon: Calendar, type: 'readonly' },
                   { key: 'contact', label: 'Contact', value: isEditMode ? editData.contact : editData.contact, icon: Phone, type: 'text' },
