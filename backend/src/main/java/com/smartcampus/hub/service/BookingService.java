@@ -31,6 +31,7 @@ public class BookingService {
     private final BookingRepository bookingRepository;
     private final ResourceService resourceService;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Value("${app.frontend.url}")
     private String frontendUrl;
@@ -164,7 +165,9 @@ public class BookingService {
             throw new RuntimeException("Decision must be APPROVED or REJECTED");
         }
 
-        if (request.getDecision() == BookingStatus.REJECTED && (request.getReason() == null || request.getReason().isBlank())) {
+        String reviewReason = request.getReason() == null ? null : request.getReason().trim();
+
+        if (request.getDecision() == BookingStatus.REJECTED && (reviewReason == null || reviewReason.isBlank())) {
             throw new RuntimeException("Rejection reason is required");
         }
 
@@ -175,7 +178,7 @@ public class BookingService {
 
         User admin = getCurrentUser();
         booking.setStatus(request.getDecision());
-        booking.setReviewReason(request.getReason());
+        booking.setReviewReason(reviewReason);
         booking.setReviewedBy(admin);
         booking.setReviewedAt(Instant.now());
 
@@ -183,7 +186,10 @@ public class BookingService {
             booking.setCheckInToken(UUID.randomUUID().toString());
         }
 
-        return toResponse(bookingRepository.save(booking));
+        Booking savedBooking = bookingRepository.save(booking);
+        notifyRequesterOnReviewDecision(savedBooking);
+
+        return toResponse(savedBooking);
     }
 
     @Transactional
@@ -276,7 +282,65 @@ public class BookingService {
         booking.setCheckedInAt(null);
         booking.setCheckedInBy(null);
 
-        return toResponse(bookingRepository.save(booking));
+        Booking savedBooking = bookingRepository.save(booking);
+        if (isAdmin && !isOwner) {
+            notifyRequesterOnAdminCancellation(savedBooking, currentUser);
+        }
+
+        return toResponse(savedBooking);
+    }
+
+    private void notifyRequesterOnReviewDecision(Booking booking) {
+        String facilityName = getDisplayBookingResourceName(booking);
+        String bookingWindow = booking.getBookingDate() + " (" + booking.getStartTime() + " - " + booking.getEndTime() + ")";
+
+        String title;
+        String message;
+
+        if (booking.getStatus() == BookingStatus.APPROVED) {
+            title = "Booking Approved";
+            message = "Your booking for " + facilityName + " on " + bookingWindow + " has been approved.";
+        } else if (booking.getStatus() == BookingStatus.REJECTED) {
+            title = "Booking Rejected";
+            String reasonSuffix = (booking.getReviewReason() != null && !booking.getReviewReason().isBlank())
+                    ? " Reason: " + booking.getReviewReason()
+                    : "";
+            message = "Your booking for " + facilityName + " on " + bookingWindow + " has been rejected." + reasonSuffix;
+        } else {
+            return;
+        }
+
+        notificationService.createNotification(
+                booking.getRequestedBy().getId(),
+                NotificationType.BOOKING,
+                title,
+                message,
+                "/bookings"
+        );
+    }
+
+    private void notifyRequesterOnAdminCancellation(Booking booking, User admin) {
+        String facilityName = getDisplayBookingResourceName(booking);
+        String bookingWindow = booking.getBookingDate() + " (" + booking.getStartTime() + " - " + booking.getEndTime() + ")";
+        String reasonSuffix = (booking.getCancelReason() != null && !booking.getCancelReason().isBlank())
+                ? " Reason: " + booking.getCancelReason()
+                : "";
+
+        notificationService.createNotification(
+                booking.getRequestedBy().getId(),
+                NotificationType.BOOKING,
+                "Booking Cancelled",
+                "Your booking for " + facilityName + " on " + bookingWindow + " was cancelled by admin "
+                        + admin.getFullName() + "." + reasonSuffix,
+                "/bookings"
+        );
+    }
+
+    private String getDisplayBookingResourceName(Booking booking) {
+        boolean facilityLevelBooking = ResourceService.isFacilityBookingSlotName(booking.getResource().getName());
+        return facilityLevelBooking
+                ? booking.getResource().getFacility().getName()
+                : booking.getResource().getName();
     }
 
     private void validateBookingTimeOrder(java.time.LocalTime startTime, java.time.LocalTime endTime) {
@@ -384,10 +448,7 @@ public class BookingService {
     }
 
     private BookingResponse toResponse(Booking booking) {
-        boolean facilityLevelBooking = ResourceService.isFacilityBookingSlotName(booking.getResource().getName());
-        String displayResourceName = facilityLevelBooking
-            ? booking.getResource().getFacility().getName()
-            : booking.getResource().getName();
+        String displayResourceName = getDisplayBookingResourceName(booking);
 
         return BookingResponse.builder()
                 .id(booking.getId())
@@ -421,10 +482,7 @@ public class BookingService {
     private BookingCheckInResponse toCheckInResponse(Booking booking) {
         String encodedToken = URLEncoder.encode(booking.getCheckInToken(), StandardCharsets.UTF_8);
         String verificationUrl = frontendUrl + "/admin/bookings/check-in?token=" + encodedToken;
-        boolean facilityLevelBooking = ResourceService.isFacilityBookingSlotName(booking.getResource().getName());
-        String displayResourceName = facilityLevelBooking
-            ? booking.getResource().getFacility().getName()
-            : booking.getResource().getName();
+        String displayResourceName = getDisplayBookingResourceName(booking);
 
         return BookingCheckInResponse.builder()
                 .bookingId(booking.getId())
