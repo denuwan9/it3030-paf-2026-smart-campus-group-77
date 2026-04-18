@@ -8,35 +8,7 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
   const { user: currentUser } = useAuth();
   if (!ticket) return null;
 
-  const initialComments = [
-    {
-      id: 1,
-      user: 'Lakmal',
-      role: 'USER',
-      time: 'Apr 7, 9:12 AM',
-      message: 'Tried the remote and direct button — no response at all.',
-      initials: 'L'
-    },
-    {
-      id: 2,
-      user: 'Chanith',
-      role: 'USER',
-      time: 'Apr 7, 10:45 AM',
-      message: 'It seems there is a power issue, checked the main switch too.',
-      initials: 'C'
-    },
-    {
-      id: 3,
-      user: 'Dhananji',
-      role: 'TECHNICIAN',
-      time: 'Apr 8, 11:00 AM',
-      message: 'Checked fuse — blown. Replacement ordered, ETA 2 days.',
-      initials: 'D',
-      isTechnician: true
-    }
-  ];
-
-  const [comments, setComments] = useState(initialComments);
+  const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [assignee, setAssignee] = useState("Dhananji");
   const [activeStatus, setActiveStatus] = useState("");
@@ -50,8 +22,8 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
   useEffect(() => {
     setNewComment("");
     if (ticket) {
-      // Use comments from ticket if they exist, otherwise use initial demo comments
-      setComments(ticket.comments || initialComments);
+      // Use comments from ticket if they exist
+      setComments(ticket.comments || []);
       setActiveStatus(ticket.status);
       setEditData({
         location: ticket.location || '',
@@ -257,6 +229,32 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
                   </div>
                 ))}
               </div>
+
+               {/* Attachments Section */}
+               {ticket.images && ticket.images.length > 0 && (
+                <div className="space-y-4">
+                  <p className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em]">Attachments ({ticket.images.length})</p>
+                  <div className="flex flex-wrap gap-3">
+                    {ticket.images.map((img, idx) => (
+                      <div key={idx} className="relative w-24 h-24 rounded-2xl overflow-hidden border border-blue-100 shadow-sm group">
+                        <img 
+                          src={img} 
+                          alt={`Attachment ${idx + 1}`} 
+                          className="w-full h-full object-cover transition-transform group-hover:scale-110" 
+                        />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <button 
+                            onClick={() => window.open(img, '_blank')}
+                            className="bg-white/20 backdrop-blur-md p-2 rounded-lg text-white hover:bg-white/40 transition-colors"
+                          >
+                            <ChevronDown className="w-4 h-4 -rotate-90" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+               )}
 
               {/* Assign Technician */}
               <div className="space-y-4">

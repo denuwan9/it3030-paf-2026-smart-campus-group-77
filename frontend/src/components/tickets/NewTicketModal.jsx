@@ -48,7 +48,7 @@ const NewTicketModal = ({ isOpen, onClose, onSubmit }) => {
     setFormData(prev => ({ ...prev, contact: filteredValue }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const contact = formData.contact.trim();
 
     if (!formData.title.trim() || !formData.location.trim() || !formData.description.trim() || !contact) {
@@ -72,8 +72,24 @@ const NewTicketModal = ({ isOpen, onClose, onSubmit }) => {
       }
     }
 
-    onSubmit({ ...formData, attachmentsCount: attachments.length });
-    setFormData({ title: '', location: '', category: 'Electrical', description: '', priority: 'Medium', contact: '' });
+    // Convert attachments to base64 for persistence in mockup
+    const imagePromises = attachments.map(file => {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.readAsDataURL(file);
+      });
+    });
+
+    const images = await Promise.all(imagePromises);
+
+    onSubmit({ 
+      ...formData, 
+      attachmentsCount: attachments.length,
+      images: images // Add the base64 images to the ticket object
+    });
+    
+    setFormData({ title: '', location: '', category: 'Maintenance', description: '', priority: 'Medium', contact: '' });
     setAttachments([]);
   };
 
