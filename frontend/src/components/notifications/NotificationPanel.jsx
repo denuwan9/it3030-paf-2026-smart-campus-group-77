@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, forwardRef } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
 import {
   Bell,
   X,
@@ -57,6 +58,196 @@ const TYPE_CONFIG = {
   },
 };
 
+function getNotificationVisualConfig(notification) {
+  const baseConfig = TYPE_CONFIG[notification?.type] || TYPE_CONFIG.SYSTEM;
+  const bookingText = `${notification?.title || ''} ${notification?.message || ''}`.toLowerCase();
+  const isNegativeBooking = notification?.type === 'BOOKING'
+    && (bookingText.includes('reject') || bookingText.includes('cancel'));
+
+  return {
+    config: isNegativeBooking
+      ? { ...baseConfig, color: 'text-rose-600', bg: 'bg-rose-50' }
+      : baseConfig,
+    isNegativeBooking,
+  };
+}
+
+function getNotificationAccentClass(notification, isNegativeBooking) {
+  if (isNegativeBooking) return 'bg-rose-500';
+
+  switch (notification?.type) {
+    case 'BOOKING':
+      return 'bg-blue-500';
+    case 'TICKET':
+      return 'bg-amber-500';
+    case 'ANNOUNCEMENT':
+      return 'bg-purple-500';
+    case 'SECURITY':
+      return 'bg-red-500';
+    case 'SYSTEM':
+    default:
+      return 'bg-indigo-500';
+  }
+}
+
+function splitTimeRange(timeRange) {
+  if (!timeRange) return { startTime: '', endTime: '' };
+  const [startTime = '', endTime = ''] = timeRange.split('-').map((part) => part.trim());
+  return { startTime, endTime };
+}
+
+function extractBookingDetails(notification) {
+  const title = (notification?.title || '').trim();
+  const message = (notification?.message || '').replace(/\s+/g, ' ').trim();
+  const details = [];
+
+  const addField = (label, value) => {
+    if (value && String(value).trim()) {
+      details.push({ label, value: String(value).trim() });
+    }
+  };
+
+  if (/approved/i.test(title) || /has been approved/i.test(message)) {
+    addField('Status', 'Approved');
+  } else if (/rejected/i.test(title) || /has been rejected/i.test(message)) {
+    addField('Status', 'Rejected');
+  } else if (/updated/i.test(title) || /updated a pending booking request/i.test(message)) {
+    addField('Status', 'Updated Request');
+  } else if (/new booking request/i.test(title) || /requested a booking/i.test(message)) {
+    addField('Status', 'New Request');
+  } else if (/cancel/i.test(title) || /cancel/i.test(message)) {
+    addField('Status', 'Cancelled');
+  }
+
+  const requestedPattern = /^(.+?) requested a booking for (.+?) on (\d{4}-\d{2}-\d{2}) \(([^)]+)\)\.?(?:\s*Purpose:\s*(.+))?$/i;
+  const updatedPattern = /^(.+?) updated a pending booking request for (.+?) on (\d{4}-\d{2}-\d{2}) \(([^)]+)\)\.?(?:\s*Purpose:\s*(.+))?$/i;
+  const userCancelledPattern = /^(.+?) cancelled a booking for (.+?) on (\d{4}-\d{2}-\d{2}) \(([^)]+)\)\.?(?:\s*Reason:\s*(.+))?$/i;
+  const approvedPattern = /^Your booking for (.+?) on (\d{4}-\d{2}-\d{2}) \(([^)]+)\) has been approved\.?$/i;
+  const rejectedPattern = /^Your booking for (.+?) on (\d{4}-\d{2}-\d{2}) \(([^)]+)\) has been rejected\.?\s*(?:Reason:\s*(.+))?$/i;
+  const adminCancelledPattern = /^Your booking for (.+?) on (\d{4}-\d{2}-\d{2}) \(([^)]+)\) was cancelled by admin (.+?)\.?\s*(?:Reason:\s*(.+))?$/i;
+
+  let match = message.match(requestedPattern);
+  if (match) {
+    const [, requestedBy, facility, bookingDate, timeRange, purpose] = match;
+    const { startTime, endTime } = splitTimeRange(timeRange);
+    addField('Requested By', requestedBy);
+    addField('Facility', facility);
+    addField('Booking Date', bookingDate);
+    addField('Start Time', startTime);
+    addField('End Time', endTime);
+    addField('Purpose', purpose);
+    return details;
+  }
+
+  match = message.match(updatedPattern);
+  if (match) {
+    const [, requestedBy, facility, bookingDate, timeRange, purpose] = match;
+    const { startTime, endTime } = splitTimeRange(timeRange);
+    addField('Requested By', requestedBy);
+    addField('Facility', facility);
+    addField('Booking Date', bookingDate);
+    addField('Start Time', startTime);
+    addField('End Time', endTime);
+    addField('Purpose', purpose);
+    return details;
+  }
+
+  match = message.match(userCancelledPattern);
+  if (match) {
+    const [, cancelledBy, facility, bookingDate, timeRange, reason] = match;
+    const { startTime, endTime } = splitTimeRange(timeRange);
+    addField('Cancelled By', cancelledBy);
+    addField('Facility', facility);
+    addField('Booking Date', bookingDate);
+    addField('Start Time', startTime);
+    addField('End Time', endTime);
+    addField('Reason', reason);
+    return details;
+  }
+
+  match = message.match(approvedPattern);
+  if (match) {
+    const [, facility, bookingDate, timeRange] = match;
+    const { startTime, endTime } = splitTimeRange(timeRange);
+    addField('Facility', facility);
+    addField('Booking Date', bookingDate);
+    addField('Start Time', startTime);
+    addField('End Time', endTime);
+    return details;
+  }
+
+  match = message.match(rejectedPattern);
+  if (match) {
+    const [, facility, bookingDate, timeRange, reason] = match;
+    const { startTime, endTime } = splitTimeRange(timeRange);
+    addField('Facility', facility);
+    addField('Booking Date', bookingDate);
+    addField('Start Time', startTime);
+    addField('End Time', endTime);
+    addField('Reason', reason);
+    return details;
+  }
+
+  match = message.match(adminCancelledPattern);
+  if (match) {
+    const [, facility, bookingDate, timeRange, adminName, reason] = match;
+    const { startTime, endTime } = splitTimeRange(timeRange);
+    addField('Cancelled By', adminName);
+    addField('Facility', facility);
+    addField('Booking Date', bookingDate);
+    addField('Start Time', startTime);
+    addField('End Time', endTime);
+    addField('Reason', reason);
+    return details;
+  }
+
+  const facilityMatch = message.match(/for (.+?) on (\d{4}-\d{2}-\d{2}) \(([^)]+)\)/i);
+  if (facilityMatch) {
+    const [, facility, bookingDate, timeRange] = facilityMatch;
+    const { startTime, endTime } = splitTimeRange(timeRange);
+    addField('Facility', facility);
+    addField('Booking Date', bookingDate);
+    addField('Start Time', startTime);
+    addField('End Time', endTime);
+  }
+
+  const purposeMatch = message.match(/Purpose:\s*(.+)$/i);
+  const reasonMatch = message.match(/Reason:\s*(.+)$/i);
+  addField('Purpose', purposeMatch?.[1]);
+  addField('Reason', reasonMatch?.[1]);
+
+  return details;
+}
+
+function extractNotificationDetails(notification) {
+  if (!notification) return [];
+
+  if (notification.type === 'BOOKING') {
+    const bookingDetails = extractBookingDetails(notification);
+    if (bookingDetails.length > 0) {
+      return bookingDetails;
+    }
+  }
+
+  if (!notification.message) {
+    return [{ label: 'Message', value: 'No additional details available.' }];
+  }
+
+  const sentences = notification.message
+    .split(/(?<=\.)\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+
+  if (sentences.length <= 1) {
+    return [{ label: 'Message', value: notification.message }];
+  }
+
+  return sentences.map((sentence, index) => ({
+    label: `Detail ${index + 1}`,
+    value: sentence,
+  }));
+}
+
 function relativeTime(isoString) {
   if (!isoString) return '';
   const diff = Date.now() - new Date(isoString).getTime();
@@ -71,14 +262,8 @@ function relativeTime(isoString) {
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
-const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete }, ref) => {
-  const baseConfig = TYPE_CONFIG[notification.type] || TYPE_CONFIG.SYSTEM;
-  const bookingText = `${notification.title || ''} ${notification.message || ''}`.toLowerCase();
-  const isNegativeBooking = notification.type === 'BOOKING'
-    && (bookingText.includes('reject') || bookingText.includes('cancel'));
-  const config = isNegativeBooking
-    ? { ...baseConfig, color: 'text-rose-600', bg: 'bg-rose-50' }
-    : baseConfig;
+const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete, onOpen }, ref) => {
+  const { config, isNegativeBooking } = getNotificationVisualConfig(notification);
   
   // Dynamic icon for System Alerts (Security vs Maintenance)
   let Icon = config.icon;
@@ -99,6 +284,15 @@ const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete }, ref
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.2 }}
+      role="button"
+      tabIndex={0}
+      onClick={() => onOpen(notification)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          onOpen(notification);
+        }
+      }}
       className={`relative flex gap-3 p-4 rounded-2xl border transition-all group ${
         isUnread
           ? notification.isAnnouncement 
@@ -107,7 +301,7 @@ const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete }, ref
               ? 'bg-rose-500/[0.05] border-rose-500/20 shadow-sm shadow-rose-500/5'
               : 'bg-nexer-brand-primary/[0.03] border-nexer-brand-primary/10'
           : 'bg-white/50 border-slate-100 hover:border-slate-200'
-      } backdrop-blur-sm`}
+      } backdrop-blur-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-nexer-brand-primary/20`}
     >
       {/* Unread indicator */}
       {isUnread && (
@@ -141,7 +335,10 @@ const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete }, ref
       <div className="absolute right-3 bottom-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         {isUnread && (
           <button
-            onClick={() => onMarkRead(notification.id)}
+            onClick={(event) => {
+              event.stopPropagation();
+              onMarkRead(notification.id);
+            }}
             title="Mark as read"
             className="p-1 rounded-lg hover:bg-nexer-brand-primary/10 text-slate-400 hover:text-nexer-brand-primary transition-colors"
           >
@@ -149,7 +346,10 @@ const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete }, ref
           </button>
         )}
         <button
-          onClick={() => onDelete(notification.id)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onDelete(notification.id);
+          }}
           title="Delete"
           className="p-1 rounded-lg hover:bg-red-50 text-slate-400 hover:text-red-500 transition-colors"
         >
@@ -170,8 +370,24 @@ const NotificationPanel = () => {
   const [notifications, setNotifications]   = useState([]);
   const [unreadCount, setUnreadCount]       = useState(0);
   const [loading, setLoading]               = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState(null);
   const panelRef                            = useRef(null);
   const prevCountRef                        = useRef(null);
+
+  const formatDateTime = (isoString) => {
+    if (!isoString) return '';
+    try {
+      return new Date(isoString).toLocaleString(undefined, {
+        year: 'numeric',
+        month: 'short',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return isoString;
+    }
+  };
 
   // ── Fetch unread count (for badge, polled) ──
   const fetchUnreadCount = useCallback(async () => {
@@ -221,14 +437,18 @@ const NotificationPanel = () => {
 
   // ── Close on outside click ──
   useEffect(() => {
+    if (!isOpen || selectedNotification) {
+      return undefined;
+    }
+
     const handleClick = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) {
         setIsOpen(false);
       }
     };
-    if (isOpen) document.addEventListener('mousedown', handleClick);
+    document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
-  }, [isOpen]);
+  }, [isOpen, selectedNotification]);
 
   // ── Actions ──
   const handleMarkRead = async (id) => {
@@ -264,6 +484,44 @@ const NotificationPanel = () => {
       toast.error('Failed to mark all as read');
     }
   };
+
+  const handleOpenNotification = async (notification) => {
+    setSelectedNotification(notification);
+    if (!notification.isRead) {
+      await handleMarkRead(notification.id);
+    }
+  };
+
+  const handleCloseNotificationDetails = () => {
+    setSelectedNotification(null);
+  };
+
+  useEffect(() => {
+    if (!selectedNotification) return undefined;
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape') {
+        setSelectedNotification(null);
+      }
+    };
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    document.addEventListener('keydown', handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleEscape);
+    };
+  }, [selectedNotification]);
+
+  const selectedVisual = selectedNotification
+    ? getNotificationVisualConfig(selectedNotification)
+    : { config: TYPE_CONFIG.SYSTEM, isNegativeBooking: false };
+  const selectedConfig = selectedVisual.config;
+  const selectedAccentClass = getNotificationAccentClass(selectedNotification, selectedVisual.isNegativeBooking);
+  const selectedDetails = extractNotificationDetails(selectedNotification);
+  const SelectedIcon = selectedConfig.icon;
 
   const displayCount = unreadCount > 99 ? '99+' : unreadCount;
 
@@ -374,6 +632,7 @@ const NotificationPanel = () => {
                       notification={n}
                       onMarkRead={handleMarkRead}
                       onDelete={handleDelete}
+                      onOpen={handleOpenNotification}
                     />
                   ))}
                 </AnimatePresence>
@@ -395,6 +654,75 @@ const NotificationPanel = () => {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {typeof document !== 'undefined' && createPortal(
+        <AnimatePresence>
+          {selectedNotification && (
+            <motion.div
+              className="fixed inset-0 z-[120] bg-slate-900/50 backdrop-blur-sm grid place-items-center p-4 sm:p-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={handleCloseNotificationDetails}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 24, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 24, scale: 0.97 }}
+                transition={{ duration: 0.22, ease: 'easeOut' }}
+                className="w-full max-w-xl bg-white rounded-[2rem] shadow-[0_30px_90px_rgba(15,23,42,0.3)] border border-slate-200 overflow-hidden"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className={`h-1.5 w-full ${selectedAccentClass}`} />
+
+                <div className="px-6 sm:px-7 pt-6 pb-4 border-b border-slate-100 flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${selectedConfig.bg}`}>
+                      <SelectedIcon className={`w-5 h-5 ${selectedConfig.color}`} />
+                    </div>
+                    <div className="min-w-0">
+                      <h4 className="text-lg font-black text-nexer-text-header leading-tight">{selectedNotification.title}</h4>
+                      <p className="text-xs text-slate-500 mt-1">{formatDateTime(selectedNotification.createdAt)}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleCloseNotificationDetails}
+                    className="p-2 rounded-xl text-slate-400 hover:bg-slate-100 transition-colors"
+                    title="Close"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                <div className="px-6 sm:px-7 py-5 space-y-4">
+                  <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-md ${selectedConfig.bg} ${selectedConfig.color}`}>
+                    {selectedConfig.label}
+                  </span>
+
+                  <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden divide-y divide-slate-100">
+                    {selectedDetails.map((detail, index) => (
+                      <div key={`${detail.label}-${index}`} className="px-4 sm:px-5 py-3 sm:py-3.5 grid grid-cols-1 sm:grid-cols-[130px_1fr] gap-1.5 sm:gap-4 items-start">
+                        <p className="text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-slate-400">{detail.label}</p>
+                        <p className="text-sm sm:text-[15px] leading-6 text-slate-700 whitespace-pre-wrap break-words">{detail.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="px-6 sm:px-7 py-4 border-t border-slate-100 bg-slate-50/60 flex items-center justify-end">
+                  <button
+                    onClick={handleCloseNotificationDetails}
+                    className="px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-bold hover:bg-slate-100 transition-colors"
+                  >
+                    Close
+                  </button>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 };
