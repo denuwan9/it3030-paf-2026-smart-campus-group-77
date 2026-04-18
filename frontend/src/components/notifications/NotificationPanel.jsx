@@ -61,19 +61,25 @@ const TYPE_CONFIG = {
 function getNotificationVisualConfig(notification) {
   const baseConfig = TYPE_CONFIG[notification?.type] || TYPE_CONFIG.SYSTEM;
   const bookingText = `${notification?.title || ''} ${notification?.message || ''}`.toLowerCase();
+  const isPositiveBooking = notification?.type === 'BOOKING'
+    && bookingText.includes('approve');
   const isNegativeBooking = notification?.type === 'BOOKING'
     && (bookingText.includes('reject') || bookingText.includes('cancel'));
 
   return {
     config: isNegativeBooking
       ? { ...baseConfig, color: 'text-rose-600', bg: 'bg-rose-50' }
+      : isPositiveBooking
+        ? { ...baseConfig, color: 'text-emerald-600', bg: 'bg-emerald-50' }
       : baseConfig,
+    isPositiveBooking,
     isNegativeBooking,
   };
 }
 
-function getNotificationAccentClass(notification, isNegativeBooking) {
+function getNotificationAccentClass(notification, isNegativeBooking, isPositiveBooking) {
   if (isNegativeBooking) return 'bg-rose-500';
+  if (isPositiveBooking) return 'bg-emerald-500';
 
   switch (notification?.type) {
     case 'BOOKING':
@@ -263,7 +269,7 @@ function relativeTime(isoString) {
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
 const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete, onOpen }, ref) => {
-  const { config, isNegativeBooking } = getNotificationVisualConfig(notification);
+  const { config, isNegativeBooking, isPositiveBooking } = getNotificationVisualConfig(notification);
   
   // Dynamic icon for System Alerts (Security vs Maintenance)
   let Icon = config.icon;
@@ -299,13 +305,15 @@ const NotificationItem = forwardRef(({ notification, onMarkRead, onDelete, onOpe
             ? 'bg-purple-500/[0.05] border-purple-500/20 shadow-sm shadow-purple-500/5'
             : isNegativeBooking
               ? 'bg-rose-500/[0.05] border-rose-500/20 shadow-sm shadow-rose-500/5'
+              : isPositiveBooking
+                ? 'bg-emerald-500/[0.05] border-emerald-500/20 shadow-sm shadow-emerald-500/5'
               : 'bg-nexer-brand-primary/[0.03] border-nexer-brand-primary/10'
           : 'bg-white/50 border-slate-100 hover:border-slate-200'
       } backdrop-blur-sm cursor-pointer focus:outline-none focus:ring-2 focus:ring-nexer-brand-primary/20`}
     >
       {/* Unread indicator */}
       {isUnread && (
-        <span className={`absolute top-4 right-4 w-2 h-2 rounded-full ${isNegativeBooking ? 'bg-rose-500' : 'bg-nexer-brand-primary'}`} />
+        <span className={`absolute top-4 right-4 w-2 h-2 rounded-full ${isNegativeBooking ? 'bg-rose-500' : isPositiveBooking ? 'bg-emerald-500' : 'bg-nexer-brand-primary'}`} />
       )}
 
       {/* Type icon */}
@@ -517,9 +525,13 @@ const NotificationPanel = () => {
 
   const selectedVisual = selectedNotification
     ? getNotificationVisualConfig(selectedNotification)
-    : { config: TYPE_CONFIG.SYSTEM, isNegativeBooking: false };
+    : { config: TYPE_CONFIG.SYSTEM, isNegativeBooking: false, isPositiveBooking: false };
   const selectedConfig = selectedVisual.config;
-  const selectedAccentClass = getNotificationAccentClass(selectedNotification, selectedVisual.isNegativeBooking);
+  const selectedAccentClass = getNotificationAccentClass(
+    selectedNotification,
+    selectedVisual.isNegativeBooking,
+    selectedVisual.isPositiveBooking
+  );
   const selectedDetails = extractNotificationDetails(selectedNotification);
   const SelectedIcon = selectedConfig.icon;
 
