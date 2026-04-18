@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronDown, User, Calendar, MapPin, Tag, Shield, Phone, Send, Edit, Check } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMode, onUpdateTicket }) => {
+  const { user: currentUser } = useAuth();
   if (!ticket) return null;
 
   const initialComments = [
@@ -62,16 +64,25 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
 
   const handleAddComment = () => {
     if (!newComment.trim()) return;
-    const initials = assignee.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    
+    // Determine the name and role based on the current user's role
+    const isAdmin = currentUser?.role === 'ROLE_ADMIN' || currentUser?.role === 'ADMIN';
+    const isTechnician = currentUser?.role === 'ROLE_TECHNICIAN' || currentUser?.role === 'TECHNICIAN';
+    
+    const displayUser = isAdmin ? 'Admin' : (isTechnician ? (currentUser?.name || 'Technician') : (currentUser?.name || 'User'));
+    const displayRole = isAdmin ? 'ADMIN' : (isTechnician ? 'TECHNICIAN' : 'USER');
+    
+    const initials = displayUser.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+    
     const comment = {
       id: Date.now(),
-      user: assignee,
-      role: 'TECHNICIAN',
+      user: displayUser,
+      role: displayRole,
       time: new Date().toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }),
       message: newComment,
       initials: initials,
-      isTechnician: true,
-      isOwn: true // Flag to identify own comments
+      isTechnician: isAdmin || isTechnician,
+      isOwn: true 
     };
     const updatedComments = [...comments, comment];
     setComments(updatedComments);
@@ -216,11 +227,11 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
               {/* Grid Info */}
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { key: 'location', label: 'Location', value: isEditMode ? editData.location : (editData.location || ticket.location), icon: MapPin, type: 'text' },
-                  { key: 'category', label: 'Category', value: isEditMode ? editData.category : (editData.category || ticket.category), icon: Tag, type: 'select', opts: ['Maintenance', 'IT support', 'IT equipment', 'Other', 'Facility', 'Electrical', 'Plumbing', 'Network'] },
-                  { key: 'priority', label: 'Priority', value: isEditMode ? editData.priority : (editData.priority || ticket.priority), icon: Shield, type: 'select', opts: ['HIGH', 'MEDIUM', 'LOW'] },
+                  { key: 'location', label: 'Location', value: editData.location || ticket.location, icon: MapPin, type: 'readonly' },
+                  { key: 'category', label: 'Category', value: editData.category || ticket.category, icon: Tag, type: 'readonly' },
+                  { key: 'priority', label: 'Priority', value: editData.priority || ticket.priority, icon: Shield, type: 'readonly' },
                   { key: 'created', label: 'Created', value: '2026-04-07', icon: Calendar, type: 'readonly' },
-                  { key: 'contact', label: 'Contact', value: isEditMode ? editData.contact : editData.contact, icon: Phone, type: 'text' },
+                  { key: 'contact', label: 'Contact', value: editData.contact || ticket.contact, icon: Phone, type: 'readonly' },
                   { key: 'assignee', label: 'Assignee', value: 'Dhananji', icon: User, type: 'readonly' },
                 ].map((item) => (
                   <div key={item.key} className="bg-white border border-blue-100 p-3 rounded-xl transition-all hover:border-blue-200 shadow-sm">

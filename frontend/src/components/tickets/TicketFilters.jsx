@@ -31,14 +31,6 @@ const TicketFilters = ({ onSearch, onFilterStatus, onFilterPriority, onNewTicket
         <option value="LOW">Low</option>
       </select>
 
-      {/* New Ticket Button */}
-      <button 
-        onClick={onNewTicket}
-        className="ml-auto flex items-center gap-2 bg-blue-600 border border-blue-700 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-blue-700 transition-all active:scale-95 shadow-sm"
-      >
-        <Plus className="w-4 h-4" />
-        New ticket
-      </button>
     </div>
   );
 };

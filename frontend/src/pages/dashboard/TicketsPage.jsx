@@ -3,12 +3,10 @@ import { motion } from 'framer-motion';
 import TicketStatCard from '../../components/tickets/TicketStatCard';
 import TicketFilters from '../../components/tickets/TicketFilters';
 import TicketItemCard from '../../components/tickets/TicketItemCard';
-import NewTicketModal from '../../components/tickets/NewTicketModal';
 import TicketDetailsSidebar from '../../components/tickets/TicketDetailsSidebar';
 import toast from 'react-hot-toast';
 
 const TicketsPage = () => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTicket, setSelectedTicket] = useState(null);
   const [isEditingSidebar, setIsEditingSidebar] = useState(false);
   const [statusFilter, setStatusFilter] = useState('ALL');
@@ -115,7 +113,6 @@ const TicketsPage = () => {
             onSearch={() => {}} 
             onFilterStatus={setStatusFilter} 
             onFilterPriority={setPriorityFilter} 
-            onNewTicket={() => setIsModalOpen(true)} 
           />
         </section>
 
@@ -165,23 +162,6 @@ const TicketsPage = () => {
         </section>
       </div>
 
-      <NewTicketModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={(newTicketData) => {
-          const newTicket = {
-            id: `TKT-${Math.floor(Math.random() * 900) + 100}`,
-            reporter: { name: 'Admin User' },
-            status: 'OPEN',
-            commentsCount: 0,
-            priority: newTicketData.priority.toUpperCase(),
-            ...newTicketData
-          };
-          setTickets([newTicket, ...tickets]);
-          toast.success('Ticket submitted successfully');
-          setIsModalOpen(false);
-        }}
-      />
 
       <TicketDetailsSidebar 
         isOpen={!!selectedTicket}
