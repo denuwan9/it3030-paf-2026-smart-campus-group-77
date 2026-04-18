@@ -64,12 +64,6 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       icon: Package, 
       roles: ['ROLE_ADMIN'] 
     },
-    { 
-      label: 'Resources', 
-      to: '/resources', 
-      icon: Package, 
-      roles: ['ROLE_USER'] 
-    },
     {
       label: 'Bookings',
       to: user?.role === 'ROLE_ADMIN' ? '/admin/bookings' : '/bookings',

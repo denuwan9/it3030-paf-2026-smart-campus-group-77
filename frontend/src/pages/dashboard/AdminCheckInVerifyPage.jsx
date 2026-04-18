@@ -184,7 +184,7 @@ const AdminCheckInVerifyPage = () => {
           <div className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-xs uppercase tracking-wider text-slate-400 font-bold">Resource</p>
+                <p className="text-xs uppercase tracking-wider text-slate-400 font-bold">Facility</p>
                 <p className="text-slate-900 font-semibold mt-1">{details.resourceName}</p>
               </div>
               <div>

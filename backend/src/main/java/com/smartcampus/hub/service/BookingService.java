@@ -39,7 +39,7 @@ public class BookingService {
     public BookingResponse createBooking(CreateBookingRequest request) {
         validateBookingTimeOrder(request.getStartTime(), request.getEndTime());
 
-        Resource resource = resourceService.getResourceEntityById(request.getResourceId());
+        Resource resource = resolveResourceForBooking(request);
         validateResourceIsBookable(resource);
         validateWithinAvailability(resource, request.getStartTime(), request.getEndTime());
 
@@ -48,7 +48,7 @@ public class BookingService {
         // }
 
         if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > resource.getFacility().getCapacity()) {
-            throw new RuntimeException("Expected attendees exceed resource capacity");
+            throw new RuntimeException("Expected attendees exceed facility capacity");
         }
 
         ensureNoConflict(resource.getId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(),
@@ -68,6 +68,18 @@ public class BookingService {
                 .build();
 
         return toResponse(bookingRepository.save(booking));
+    }
+
+    private Resource resolveResourceForBooking(CreateBookingRequest request) {
+        if (request.getResourceId() != null) {
+            return resourceService.getResourceEntityById(request.getResourceId());
+        }
+
+        if (request.getFacilityId() != null) {
+            return resourceService.getOrCreateFacilityBookingSlot(request.getFacilityId());
+        }
+
+        throw new RuntimeException("Either resourceId or facilityId is required");
     }
 
     @Transactional
@@ -92,7 +104,7 @@ public class BookingService {
         // }
 
         if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > booking.getResource().getFacility().getCapacity()) {
-            throw new RuntimeException("Expected attendees exceed resource capacity");
+            throw new RuntimeException("Expected attendees exceed facility capacity");
         }
 
         ensureNoConflictExcludingBooking(
@@ -275,7 +287,7 @@ public class BookingService {
 
     private void validateResourceIsBookable(Resource resource) {
         if (resource.getStatus() != ResourceStatus.AVAILABLE) {
-            throw new RuntimeException("Resource is currently out of service");
+            throw new RuntimeException("Facility is currently unavailable for booking");
         }
     }
 
@@ -372,10 +384,15 @@ public class BookingService {
     }
 
     private BookingResponse toResponse(Booking booking) {
+        boolean facilityLevelBooking = ResourceService.isFacilityBookingSlotName(booking.getResource().getName());
+        String displayResourceName = facilityLevelBooking
+            ? booking.getResource().getFacility().getName()
+            : booking.getResource().getName();
+
         return BookingResponse.builder()
                 .id(booking.getId())
                 .resourceId(booking.getResource().getId())
-                .resourceName(booking.getResource().getName())
+            .resourceName(displayResourceName)
                 .resourceType(booking.getResource().getType())
                 .resourceLocation(booking.getResource().getFacility().getLocation())
                 .requestedById(booking.getRequestedBy().getId())
@@ -404,10 +421,14 @@ public class BookingService {
     private BookingCheckInResponse toCheckInResponse(Booking booking) {
         String encodedToken = URLEncoder.encode(booking.getCheckInToken(), StandardCharsets.UTF_8);
         String verificationUrl = frontendUrl + "/admin/bookings/check-in?token=" + encodedToken;
+        boolean facilityLevelBooking = ResourceService.isFacilityBookingSlotName(booking.getResource().getName());
+        String displayResourceName = facilityLevelBooking
+            ? booking.getResource().getFacility().getName()
+            : booking.getResource().getName();
 
         return BookingCheckInResponse.builder()
                 .bookingId(booking.getId())
-                .resourceName(booking.getResource().getName())
+            .resourceName(displayResourceName)
                 .bookingDate(booking.getBookingDate())
                 .startTime(booking.getStartTime())
                 .endTime(booking.getEndTime())

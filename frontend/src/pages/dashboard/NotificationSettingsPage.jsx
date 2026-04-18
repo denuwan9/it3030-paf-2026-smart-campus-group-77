@@ -132,7 +132,7 @@ const NotificationSettingsPage = () => {
       iconColor: 'text-blue-500',
       iconBg: 'bg-blue-50',
       label: 'Booking Alerts',
-      description: 'Get notified when a resource booking is confirmed, cancelled, or updated',
+      description: 'Get notified when a facility booking is confirmed, cancelled, or updated',
     },
     {
       field: 'ticketAlerts',

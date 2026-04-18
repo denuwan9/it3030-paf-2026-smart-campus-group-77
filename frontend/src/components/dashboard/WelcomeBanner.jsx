@@ -35,13 +35,13 @@ const WelcomeBanner = () => {
               {getGreeting()}, <span className="text-emerald-100">{user?.fullName?.split(' ')[0]}!</span>
             </h1>
             <p className="text-emerald-50/80 text-xs sm:text-base font-medium max-w-lg leading-relaxed">
-              Welcome back to your personalized operations hub. Your resource bookings and campus updates are optimized and ready for you today.
+              Welcome back to your personalized operations hub. Your facility bookings and campus updates are optimized and ready for you today.
             </p>
           </div>
           
           <div className="flex flex-wrap gap-2.5 sm:gap-3 pt-2">
             <button className="flex-1 sm:flex-none px-5 sm:px-6 py-2 sm:py-2.5 bg-white text-nexer-brand-primary font-black text-xs sm:text-sm rounded-xl hover:bg-emerald-50 transition-all active:scale-95 shadow-xl shadow-emerald-900/10 flex items-center justify-center gap-2 group/btn">
-              Explore Resources
+              Explore Facilities
               <ArrowUpRight className="w-4 h-4 group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5 transition-transform" />
             </button>
             <button className="flex-1 sm:flex-none px-5 sm:px-6 py-2 sm:py-2.5 bg-white/10 backdrop-blur-md text-white border border-white/20 font-black text-xs sm:text-sm rounded-xl hover:bg-white/20 transition-all active:scale-95">

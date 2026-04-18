@@ -342,7 +342,7 @@ const AdminBookingsPage = () => {
       <table className="w-full text-left text-sm whitespace-nowrap">
         <thead className={`${headerClassName} text-slate-500 font-bold text-[11px] tracking-wider uppercase border-b border-slate-200`}>
           <tr>
-            <th className="px-6 py-4">Resource</th>
+            <th className="px-6 py-4">Facility</th>
             <th className="px-6 py-4">Requested By</th>
             <th className="px-6 py-4">Date & Time</th>
             <th className="px-6 py-4">Purpose</th>
@@ -394,7 +394,7 @@ const AdminBookingsPage = () => {
           <div className="p-4 border-b border-slate-200 flex flex-col flex-wrap sm:flex-row gap-4 items-center justify-between bg-white">
             <input 
               type="text" 
-              placeholder="Search resource, user, or purpose..." 
+              placeholder="Search facility, user, or purpose..." 
               value={filters.search}
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
               className="bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-2.5 w-full sm:w-96 text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 placeholder-slate-400 transition-all font-medium"
@@ -510,7 +510,7 @@ const AdminBookingsPage = () => {
 
               <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="text-xs uppercase tracking-wider text-slate-400 font-bold">Resource</p>
+                  <p className="text-xs uppercase tracking-wider text-slate-400 font-bold">Facility</p>
                   <p className="text-slate-900 font-semibold mt-1">{selectedBooking.resourceName || '-'}</p>
                   <p className="text-slate-500 mt-1">{selectedBooking.resourceLocation || 'Campus Hub'}</p>
                 </div>

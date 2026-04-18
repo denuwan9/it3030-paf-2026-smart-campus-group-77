@@ -372,11 +372,11 @@ const BookingsPage = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold tracking-tight">Booking Management</h1>
-            <p className="text-indigo-100 text-sm mt-1">Manage your facility and equipment bookings with ease</p>
+            <p className="text-indigo-100 text-sm mt-1">Manage your facility bookings with ease</p>
           </div>
         </div>
         <button 
-          onClick={() => navigate('/resources')}
+          onClick={() => navigate('/facilities')}
           className="bg-white text-indigo-600 px-5 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 hover:bg-slate-50 transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
@@ -751,6 +751,7 @@ const BookingsPage = () => {
               ) : qrData ? (
                 <>
                   <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Facility</p>
                     <p className="font-semibold text-slate-900">{qrData.resourceName}</p>
                     <p className="text-slate-600 mt-1">{qrData.bookingDate} | {formatTime(qrData.startTime)} - {formatTime(qrData.endTime)}</p>
                   </div>

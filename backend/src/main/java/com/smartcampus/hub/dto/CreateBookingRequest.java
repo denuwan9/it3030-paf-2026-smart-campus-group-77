@@ -13,8 +13,9 @@ import java.util.UUID;
 @Data
 public class CreateBookingRequest {
 
-    @NotNull(message = "Resource is required")
     private UUID resourceId;
+
+    private UUID facilityId;
 
     @NotNull(message = "Booking date is required")
     @FutureOrPresent(message = "Booking date must be today or later")
