@@ -68,7 +68,10 @@ public class BookingService {
                 .status(BookingStatus.PENDING)
                 .build();
 
-        return toResponse(bookingRepository.save(booking));
+        Booking savedBooking = bookingRepository.save(booking);
+        notifyAdminsOnNewBookingRequest(savedBooking);
+
+        return toResponse(savedBooking);
     }
 
     private Resource resolveResourceForBooking(CreateBookingRequest request) {
@@ -123,7 +126,10 @@ public class BookingService {
         booking.setPurpose(request.getPurpose().trim());
         booking.setExpectedAttendees(request.getExpectedAttendees());
 
-        return toResponse(bookingRepository.save(booking));
+        Booking savedBooking = bookingRepository.save(booking);
+        notifyAdminsOnUpdatedBookingRequest(savedBooking);
+
+        return toResponse(savedBooking);
     }
 
     @Transactional(readOnly = true)
@@ -283,6 +289,10 @@ public class BookingService {
         booking.setCheckedInBy(null);
 
         Booking savedBooking = bookingRepository.save(booking);
+        if (isOwner && currentUser.getRole() != Role.ROLE_ADMIN) {
+            notifyAdminsOnUserCancellation(savedBooking, currentUser);
+        }
+
         if (isAdmin && !isOwner) {
             notifyRequesterOnAdminCancellation(savedBooking, currentUser);
         }
@@ -318,6 +328,89 @@ public class BookingService {
                 "/bookings"
         );
     }
+
+            private void notifyAdminsOnNewBookingRequest(Booking booking) {
+            String facilityName = getDisplayBookingResourceName(booking);
+            String bookingWindow = booking.getBookingDate() + " (" + booking.getStartTime() + " - " + booking.getEndTime() + ")";
+            String purposeSuffix = (booking.getPurpose() != null && !booking.getPurpose().isBlank())
+                ? " Purpose: " + booking.getPurpose()
+                : "";
+
+            String message = booking.getRequestedBy().getFullName()
+                + " requested a booking for "
+                + facilityName
+                + " on "
+                + bookingWindow
+                + "."
+                + purposeSuffix;
+
+            notifyActiveAdmins(
+                "New Booking Request",
+                message,
+                "/admin/bookings",
+                booking.getRequestedBy().getId()
+            );
+            }
+
+            private void notifyAdminsOnUpdatedBookingRequest(Booking booking) {
+            String facilityName = getDisplayBookingResourceName(booking);
+            String bookingWindow = booking.getBookingDate() + " (" + booking.getStartTime() + " - " + booking.getEndTime() + ")";
+            String purposeSuffix = (booking.getPurpose() != null && !booking.getPurpose().isBlank())
+                ? " Purpose: " + booking.getPurpose()
+                : "";
+
+            String message = booking.getRequestedBy().getFullName()
+                + " updated a pending booking request for "
+                + facilityName
+                + " on "
+                + bookingWindow
+                + "."
+                + purposeSuffix;
+
+            notifyActiveAdmins(
+                "Booking Request Updated",
+                message,
+                "/admin/bookings",
+                booking.getRequestedBy().getId()
+            );
+            }
+
+            private void notifyAdminsOnUserCancellation(Booking booking, User cancelledBy) {
+            String facilityName = getDisplayBookingResourceName(booking);
+            String bookingWindow = booking.getBookingDate() + " (" + booking.getStartTime() + " - " + booking.getEndTime() + ")";
+            String reasonSuffix = (booking.getCancelReason() != null && !booking.getCancelReason().isBlank())
+                ? " Reason: " + booking.getCancelReason()
+                : "";
+
+            String message = cancelledBy.getFullName()
+                + " cancelled a booking for "
+                + facilityName
+                + " on "
+                + bookingWindow
+                + "."
+                + reasonSuffix;
+
+            notifyActiveAdmins(
+                "Booking Cancelled by User",
+                message,
+                "/admin/bookings",
+                cancelledBy.getId()
+            );
+            }
+
+            private void notifyActiveAdmins(String title, String message, String actionUrl, UUID excludeUserId) {
+            userRepository.findAll().stream()
+                .filter(user -> user.getRole() == Role.ROLE_ADMIN)
+                .filter(user -> Boolean.TRUE.equals(user.getIsActive()))
+                .filter(user -> excludeUserId == null || !user.getId().equals(excludeUserId))
+                .forEach(admin -> notificationService.createNotification(
+                    admin.getId(),
+                    NotificationType.BOOKING,
+                    title,
+                    message,
+                    actionUrl
+                ));
+            }
 
     private void notifyRequesterOnAdminCancellation(Booking booking, User admin) {
         String facilityName = getDisplayBookingResourceName(booking);
