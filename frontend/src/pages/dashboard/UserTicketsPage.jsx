@@ -136,7 +136,7 @@ const UserTicketsPage = () => {
                       theme="light"
                       onClick={() => {
                         setSelectedTicket(ticket);
-                        setIsEditingSidebar(false);
+                        setIsEditingSidebar(true);
                       }}
                       onEdit={() => {
                         setSelectedTicket(ticket);
