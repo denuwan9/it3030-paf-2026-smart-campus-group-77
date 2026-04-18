@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Calendar, 
@@ -10,11 +10,18 @@ import {
   CheckCircle2, 
   Clock, 
   ShieldAlert,
-  ArrowRight
+  ArrowRight,
+  Loader2
 } from 'lucide-react';
 import WelcomeBanner from '../../components/dashboard/WelcomeBanner';
 import StatCard from '../../components/dashboard/StatCard';
 import ResourceCard from '../../components/dashboard/ResourceCard';
+import dashboardService from '../../services/dashboardService';
+import resourceService from '../../services/resourceService';
+import facilityService from '../../services/facilityService';
+import { formatDistanceToNow } from 'date-fns';
+import { useNavigate } from 'react-router-dom';
+import FacilityCard from '../../components/dashboard/FacilityCard';
 
 // Assets (imported correctly after copy)
 import auditoriumImg from '../../assets/dashboard/auditorium.png';
@@ -22,39 +29,54 @@ import labImg from '../../assets/dashboard/lab.png';
 import seminarImg from '../../assets/dashboard/seminar.png';
 
 const UserDashboard = () => {
+  const [statsData, setStatsData] = useState(null);
+  const [activityData, setActivityData] = useState([]);
+  const [resourcesData, setResourcesData] = useState([]);
+  const [facilitiesData, setFacilitiesData] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [statsRes, activityRes, resourcesRes, facilitiesRes] = await Promise.all([
+          dashboardService.getUserStats(),
+          dashboardService.getRecentActivity(),
+          resourceService.getAllResources(),
+          facilityService.getAllFacilities()
+        ]);
+        setStatsData(statsRes.data);
+        setActivityData(activityRes.data);
+        // Limit to top 3 for dashboard overview
+        setResourcesData((resourcesRes.data || []).slice(0, 3));
+        // Show 4 random facilities for a dynamic dashboard experience
+        const shuffled = (facilitiesRes.data || []).sort(() => 0.5 - Math.random());
+        setFacilitiesData(shuffled.slice(0, 4));
+      } catch (err) {
+        console.error('Failed to fetch user dashboard data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
   const stats = [
-    { label: 'Active Bookings', value: '12', icon: Calendar, colorClass: 'bg-emerald-500', trend: 12 },
-    { label: 'Resource Access', value: '08', icon: CheckCircle2, colorClass: 'bg-blue-500', trend: -2 },
-    { label: 'Incident Reports', value: '00', icon: ShieldAlert, colorClass: 'bg-amber-500', trend: 0 },
-    { label: 'Upcoming Revs', value: '04', icon: Clock, colorClass: 'bg-rose-500', trend: 5 },
+    { label: 'Active Bookings', value: statsData?.activeBookings || '0', icon: Calendar, colorClass: 'bg-emerald-500', trend: 0 },
+    { label: 'Resource Access', value: statsData?.totalResources || '0', icon: CheckCircle2, colorClass: 'bg-blue-500', trend: 0 },
+    { label: 'Incident Reports', value: statsData?.pendingTickets || '0', icon: ShieldAlert, colorClass: 'bg-amber-500', trend: 0 },
+    { label: 'Notifications', value: statsData?.notificationsCount || '0', icon: Clock, colorClass: 'bg-rose-500', trend: 0 },
   ];
 
-  const resources = [
-    { 
-      title: 'Grand Auditorium A', 
-      type: 'Premier Venue', 
-      capacity: 500, 
-      location: 'Central Plaza', 
-      status: 'AVAILABLE', 
-      image: auditoriumImg 
-    },
-    { 
-      title: 'Advanced AI Lab', 
-      type: 'Tech Module', 
-      capacity: 40, 
-      location: 'Innovation Wing', 
-      status: 'AVAILABLE', 
-      image: labImg 
-    },
-    { 
-      title: 'Global Seminar 02', 
-      type: 'Smart Room', 
-      capacity: 60, 
-      location: 'South Block', 
-      status: 'BOOKED', 
-      image: seminarImg 
-    },
-  ];
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="w-8 h-8 animate-spin text-nexer-brand-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-10 pb-20">
@@ -68,11 +90,11 @@ const UserDashboard = () => {
         ))}
       </div>
 
-      {/* 3. Resource Discovery Section */}
+      {/* 3. Facilities Discovery Section */}
       <section className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1">
-            <h2 className="text-2xl font-black text-nexer-text-header tracking-tight">Resource Catalogue</h2>
+            <h2 className="text-2xl font-black text-nexer-text-header tracking-tight">Campus Facilities</h2>
             <p className="text-slate-500 text-sm font-medium">Browse and book premium campus facilities instantly.</p>
           </div>
           
@@ -81,43 +103,42 @@ const UserDashboard = () => {
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input 
                 type="text" 
-                placeholder="Find a module..." 
+                placeholder="Find a facility..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-10 pr-4 py-2.5 bg-white border border-slate-100 rounded-xl text-sm font-medium outline-none focus:ring-4 focus:ring-nexer-brand-primary/5 focus:border-nexer-brand-primary transition-all shadow-nexer-sm"
               />
             </div>
-            <button className="p-2.5 bg-white border border-slate-100 rounded-xl text-slate-400 hover:text-nexer-brand-primary transition-all shadow-nexer-sm hover:translate-y-[-1px]">
-              <Filter className="w-5 h-5" />
+            <button 
+              onClick={() => navigate('/facilities')}
+              className="px-6 py-2.5 bg-nexer-brand-primary text-white text-sm font-black rounded-xl hover:bg-opacity-90 transition-all active:scale-95 shadow-nexer-md shadow-nexer-brand-primary/20 flex items-center gap-2"
+            >
+              See More <Sparkles className="w-4 h-4" />
             </button>
-            <div className="flex items-center bg-slate-50 p-1 rounded-xl border border-slate-100">
-              <button className="p-1.5 bg-white shadow-sm rounded-lg text-nexer-brand-primary">
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-              <button className="p-1.5 text-slate-400 hover:text-slate-600">
-                <List className="w-4 h-4" />
-              </button>
-            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {resources.map((resource, i) => (
-            <ResourceCard key={i} {...resource} delay={0.2 + (i * 0.1)} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {facilitiesData
+            .filter(f => 
+              f.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+              f.location?.toLowerCase().includes(searchQuery.toLowerCase())
+            )
+            .map((facility, i) => (
+            <FacilityCard 
+              key={facility.id} 
+              {...facility}
+              image={facility.imageUrl || (i % 3 === 0 ? auditoriumImg : i % 3 === 1 ? labImg : seminarImg)}
+              delay={0.2 + (i * 0.1)} 
+              onClick={() => navigate(`/facilities?id=${facility.id}`)}
+            />
           ))}
           
-          {/* "Show All" Card */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.5 }}
-            className="group relative rounded-[2rem] border-2 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center p-8 text-center hover:border-nexer-brand-primary/30 hover:bg-nexer-brand-primary/5 transition-all cursor-pointer"
-          >
-            <div className="w-14 h-14 rounded-2xl bg-white shadow-sm flex items-center justify-center mb-4 group-hover:scale-110 group-hover:bg-nexer-brand-primary group-hover:text-white transition-all duration-500">
-              <Sparkles className="w-6 h-6 text-nexer-brand-primary group-hover:text-white transition-all" />
+          {facilitiesData.length === 0 && (
+            <div className="col-span-full py-20 text-center bg-slate-50/50 rounded-[2.5rem] border-2 border-dashed border-slate-100">
+               <p className="text-slate-400 font-black uppercase tracking-widest text-sm">No facilities found in system</p>
             </div>
-            <h3 className="font-black text-nexer-text-header group-hover:text-nexer-brand-primary transition-colors">View All Resources</h3>
-            <p className="text-xs text-slate-400 mt-1 font-medium">Explore over 40+ facilities</p>
-            <ArrowRight className="w-5 h-5 mt-4 text-slate-300 group-hover:text-nexer-brand-primary group-hover:translate-x-1 transition-all" />
-          </motion.div>
+          )}
         </div>
       </section>
 
@@ -131,7 +152,10 @@ const UserDashboard = () => {
             <h2 className="text-lg sm:text-xl font-black text-nexer-text-header tracking-tight">Recent Activity</h2>
             <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">History & Status tracking</p>
           </div>
-          <button className="text-xs sm:text-sm font-black text-nexer-brand-primary hover:underline underline-offset-4 decoration-2 text-left">
+          <button 
+            onClick={() => navigate('/bookings')}
+            className="text-xs sm:text-sm font-black text-nexer-brand-primary hover:underline underline-offset-4 decoration-2 text-left"
+          >
             View Statement
           </button>
         </div>
@@ -147,19 +171,15 @@ const UserDashboard = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {[
-                { name: 'Innovation Lab Hub', type: 'Technology', time: 'Mar 30, 09:30 AM', status: 'PENDING' },
-                { name: 'University Sports Complex', type: 'Facility', time: 'Mar 25, 02:00 PM', status: 'COMPLETED' },
-                { name: 'Main Library Room 4', type: 'Study Space', time: 'Mar 22, 11:15 AM', status: 'COMPLETED' },
-              ].map((row, i) => (
+              {activityData.map((row, i) => (
                 <tr key={i} className="group hover:bg-slate-50/50 transition-colors">
                   <td className="py-5 pr-4">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 flex-shrink-0 rounded-xl bg-nexer-bg-surface flex items-center justify-center font-black text-nexer-brand-primary text-xs border border-slate-100 group-hover:bg-white transition-all">
-                        {row.name.charAt(0)}
+                        {row.title?.charAt(0) || '?'}
                       </div>
                       <div className="min-w-0">
-                        <p className="font-bold text-nexer-text-header text-sm truncate">{row.name}</p>
+                        <p className="font-bold text-nexer-text-header text-sm truncate">{row.title}</p>
                         <p className="text-[10px] text-slate-400 font-bold tracking-widest uppercase truncate">{row.type}</p>
                       </div>
                     </div>
@@ -167,21 +187,26 @@ const UserDashboard = () => {
                   <td className="py-5 pr-4 px-2">
                     <div className="flex items-center gap-2 text-slate-600">
                       <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span className="text-xs font-medium whitespace-nowrap">{row.time}</span>
+                      <span className="text-xs font-medium whitespace-nowrap">
+                        {row.timestamp ? formatDistanceToNow(new Date(row.timestamp), { addSuffix: true }) : '—'}
+                      </span>
                     </div>
                   </td>
                   <td className="py-5 pr-4">
                     <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border whitespace-nowrap ${
-                      row.status === 'COMPLETED' 
+                      row.status === 'APPROVED' || row.status === 'COMPLETED' || row.status === 'RESOLVED'
                         ? 'bg-emerald-50 text-emerald-600 border-emerald-100' 
                         : 'bg-amber-50 text-amber-600 border-amber-100'
                     }`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${row.status === 'COMPLETED' ? 'bg-emerald-500' : 'bg-amber-500'} animate-pulse`} />
+                      <span className={`w-1.5 h-1.5 rounded-full ${row.status === 'APPROVED' || row.status === 'COMPLETED' ? 'bg-emerald-500' : 'bg-amber-500'} animate-pulse`} />
                       {row.status}
                     </div>
                   </td>
                   <td className="py-5 text-right">
-                    <button className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-nexer-brand-primary hover:text-white transition-all group-hover:shadow-sm ml-auto">
+                    <button 
+                      onClick={() => navigate('/bookings')}
+                      className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-400 hover:bg-nexer-brand-primary hover:text-white transition-all group-hover:shadow-sm ml-auto"
+                    >
                       <ArrowRight className="w-4 h-4" />
                     </button>
                   </td>
