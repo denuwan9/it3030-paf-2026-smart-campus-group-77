@@ -48,7 +48,7 @@ public class BookingService {
         // }
 
         if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > resource.getFacility().getCapacity()) {
-            throw new RuntimeException("Expected attendees exceed resource capacity");
+            throw new RuntimeException("Expected attendees exceed facility capacity");
         }
 
         ensureNoConflict(resource.getId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(),
@@ -104,7 +104,7 @@ public class BookingService {
         // }
 
         if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > booking.getResource().getFacility().getCapacity()) {
-            throw new RuntimeException("Expected attendees exceed resource capacity");
+            throw new RuntimeException("Expected attendees exceed facility capacity");
         }
 
         ensureNoConflictExcludingBooking(
@@ -287,7 +287,7 @@ public class BookingService {
 
     private void validateResourceIsBookable(Resource resource) {
         if (resource.getStatus() != ResourceStatus.AVAILABLE) {
-            throw new RuntimeException("Resource is currently out of service");
+            throw new RuntimeException("Facility is currently unavailable for booking");
         }
     }
 

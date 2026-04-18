@@ -35,7 +35,7 @@ const WelcomeBanner = () => {
               {getGreeting()}, <span className="text-emerald-100">{user?.fullName?.split(' ')[0]}!</span>
             </h1>
             <p className="text-emerald-50/80 text-xs sm:text-base font-medium max-w-lg leading-relaxed">
-              Welcome back to your personalized operations hub. Your resource bookings and campus updates are optimized and ready for you today.
+              Welcome back to your personalized operations hub. Your facility bookings and campus updates are optimized and ready for you today.
             </p>
           </div>
           

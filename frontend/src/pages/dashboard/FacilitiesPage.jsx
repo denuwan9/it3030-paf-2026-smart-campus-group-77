@@ -100,7 +100,7 @@ const FacilitiesPage = () => {
     setBookingModalOpen(true);
   };
 
-  const handleBookResourceFromFacility = async (e) => {
+  const handleBookFacility = async (e) => {
     e.preventDefault();
     if (!selectedFacility) return;
 
@@ -338,7 +338,7 @@ const FacilitiesPage = () => {
 
                   <button className="w-full py-3 bg-slate-50 hover:bg-blue-600 text-slate-500 hover:text-white font-bold text-xs rounded-xl transition-all flex items-center justify-center gap-2 border border-slate-100 hover:border-transparent active:scale-95">
                     <Eye className="w-4 h-4" />
-                    View Details & Resources
+                    View Facility Details
                   </button>
                 </div>
               </motion.div>
@@ -491,7 +491,7 @@ const FacilitiesPage = () => {
           <div className="bg-white rounded-[24px] border border-slate-200 w-full max-w-xl p-8 shadow-2xl">
             <div className="flex items-center justify-between gap-4 mb-6">
               <div>
-                <h2 className="text-2xl font-bold text-slate-900">Request Booking</h2>
+                <h2 className="text-2xl font-bold text-slate-900">Request Facility Booking</h2>
                 <p className="text-sm font-medium text-slate-500 mt-1">{selectedFacility.name} • {selectedFacility.location || 'No location set'}</p>
               </div>
               <button
@@ -502,7 +502,7 @@ const FacilitiesPage = () => {
               </button>
             </div>
 
-            <form onSubmit={handleBookResourceFromFacility} className="space-y-4">
+            <form onSubmit={handleBookFacility} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wider pl-1">Booking Date</label>
@@ -566,7 +566,7 @@ const FacilitiesPage = () => {
                 <textarea
                   value={bookingForm.purpose}
                   onChange={(e) => setBookingForm((prev) => ({ ...prev, purpose: e.target.value }))}
-                  placeholder="Provide a brief reason for booking this resource..."
+                  placeholder="Provide a brief reason for booking this facility..."
                   rows={3}
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-medium text-slate-800 outline-none focus:ring-2 focus:ring-[#6B65FB]/20 focus:border-[#6B65FB] transition-all resize-none"
                   required
