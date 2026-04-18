@@ -2,7 +2,7 @@ import React from 'react';
 import { Trash2, Edit } from 'lucide-react';
 import TicketBadge from './TicketBadge';
 
-const TicketItemCard = ({ id, title, location, reporter, category, attachmentsCount, commentsCount, status, priority, onClick, onEdit, onDelete, theme = 'dark' }) => {
+const TicketItemCard = ({ id, title, location, reporter, category, attachmentsCount, commentsCount, status, priority, onClick, onEdit, onDelete, theme = 'light' }) => {
   const initials = reporter?.name?.split(' ').map(n => n[0]).join('') || 'UN';
   const isLight = theme === 'light';
 

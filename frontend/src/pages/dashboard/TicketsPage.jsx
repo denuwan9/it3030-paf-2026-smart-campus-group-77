@@ -78,9 +78,9 @@ const TicketsPage = () => {
 
   const stats = [
     { label: 'Total tickets', value: tickets.length },
-    { label: 'Open', value: tickets.filter(t => t.status === 'OPEN').length, colorClass: 'text-blue-500' },
-    { label: 'In progress', value: tickets.filter(t => t.status === 'IN_PROGRESS').length, colorClass: 'text-amber-500' },
-    { label: 'Resolved/Closed', value: tickets.filter(t => ['RESOLVED', 'CLOSED'].includes(t.status)).length, colorClass: 'text-emerald-500' },
+    { label: 'Open', value: tickets.filter(t => t.status === 'OPEN').length, colorClass: 'text-blue-400' },
+    { label: 'In progress', value: tickets.filter(t => t.status === 'IN_PROGRESS').length, colorClass: 'text-amber-400' },
+    { label: 'Resolved/Closed', value: tickets.filter(t => ['RESOLVED', 'CLOSED'].includes(t.status)).length, colorClass: 'text-emerald-400' },
   ];
 
   const filteredTickets = tickets.filter(ticket => {
