@@ -2,7 +2,9 @@ package com.smartcampus.hub.service;
 
 import com.smartcampus.hub.dto.FacilityDTO;
 import com.smartcampus.hub.entity.Facility;
+import com.smartcampus.hub.repository.BookingRepository;
 import com.smartcampus.hub.repository.FacilityRepository;
+import com.smartcampus.hub.repository.ResourceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +19,8 @@ import java.util.stream.Collectors;
 public class FacilityService {
 
     private final FacilityRepository facilityRepository;
+    private final ResourceRepository resourceRepository;
+    private final BookingRepository bookingRepository;
 
     @Transactional(readOnly = true)
     public List<FacilityDTO> getAllFacilities() {
@@ -64,10 +68,19 @@ public class FacilityService {
 
     @Transactional
     public void deleteFacility(UUID id) {
-        if (!facilityRepository.existsById(id)) {
-            throw new NoSuchElementException("Facility not found with id: " + id);
-        }
-        facilityRepository.deleteById(id);
+        Facility facility = facilityRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Facility not found with id: " + id));
+
+        // Manually delete associated bookings for all resources in this facility
+        // This is necessary because Resource -> Booking doesn't have cascade delete enabled
+        facility.getResources().forEach(resource -> {
+            List<com.smartcampus.hub.entity.Booking> bookings = bookingRepository.findAllBookings(null, resource.getId(), null, null, null);
+            if (!bookings.isEmpty()) {
+                bookingRepository.deleteAll(bookings);
+            }
+        });
+
+        facilityRepository.delete(facility);
     }
 
     private FacilityDTO mapToDTO(Facility entity) {

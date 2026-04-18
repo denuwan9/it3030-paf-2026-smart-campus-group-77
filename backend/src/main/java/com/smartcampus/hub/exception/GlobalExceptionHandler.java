@@ -24,13 +24,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Void>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
+        StringBuilder messageBuilder = new StringBuilder("Validation failed: ");
+        
         ex.getBindingResult().getAllErrors().forEach((error) -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
             errors.put(fieldName, errorMessage);
+            messageBuilder.append(errorMessage).append(". ");
         });
+        
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(ApiResponse.validationError("Validation failed", errors));
+                .body(ApiResponse.validationError(messageBuilder.toString().trim(), errors));
     }
 
     /** Resource not found */

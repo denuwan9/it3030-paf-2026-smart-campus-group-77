@@ -10,6 +10,7 @@ import com.smartcampus.hub.entity.*;
 import com.smartcampus.hub.repository.BookingRepository;
 import com.smartcampus.hub.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +25,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class BookingService {
@@ -38,40 +40,52 @@ public class BookingService {
 
     @Transactional
     public BookingResponse createBooking(CreateBookingRequest request) {
-        validateBookingTimeOrder(request.getStartTime(), request.getEndTime());
+        log.info("Received booking request: ResourceId={}, FacilityId={}, Date={}, Start={}, End={}",
+                request.getResourceId(), request.getFacilityId(), request.getBookingDate(), request.getStartTime(), request.getEndTime());
+        
+        try {
+            validateBookingTimeOrder(request.getStartTime(), request.getEndTime());
 
-        Resource resource = resolveResourceForBooking(request);
-        validateResourceIsBookable(resource);
-        validateWithinAvailability(resource, request.getStartTime(), request.getEndTime());
+            Resource resource = resolveResourceForBooking(request);
+            validateResourceIsBookable(resource);
+            validateWithinAvailability(resource, request.getStartTime(), request.getEndTime());
 
-        // if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > resource.getCapacity()) {
-        //     throw new RuntimeException("Expected attendees exceed resource capacity");
-        // }
+            if (request.getExpectedAttendees() != null) {
+                Integer capacity = resource.getFacility().getCapacity();
+                if (capacity != null && capacity > 0 && request.getExpectedAttendees() > capacity) {
+                    log.warn("Booking rejected: Attendees ({}) exceed facility capacity ({})", request.getExpectedAttendees(), capacity);
+                    throw new RuntimeException("Expected attendees exceed facility capacity (" + capacity + ")");
+                }
+            }
 
-        if (request.getExpectedAttendees() != null && request.getExpectedAttendees() > resource.getFacility().getCapacity()) {
-            throw new RuntimeException("Expected attendees exceed facility capacity");
+            ensureNoConflict(resource.getId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(),
+                    List.of(BookingStatus.PENDING, BookingStatus.APPROVED));
+
+            User requester = getCurrentUser();
+
+            Booking booking = Booking.builder()
+                    .resource(resource)
+                    .requestedBy(requester)
+                    .bookingDate(request.getBookingDate())
+                    .startTime(request.getStartTime())
+                    .endTime(request.getEndTime())
+                    .purpose(request.getPurpose().trim())
+                    .expectedAttendees(request.getExpectedAttendees())
+                    .status(BookingStatus.PENDING)
+                    .build();
+
+            Booking savedBooking = bookingRepository.save(booking);
+            notifyAdminsOnNewBookingRequest(savedBooking);
+
+            log.info("Booking created successfully: ID={}", savedBooking.getId());
+            return toResponse(savedBooking);
+        } catch (RuntimeException e) {
+            log.error("Failed to create booking: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error during booking creation", e);
+            throw new RuntimeException("An unexpected error occurred: " + e.getMessage());
         }
-
-        ensureNoConflict(resource.getId(), request.getBookingDate(), request.getStartTime(), request.getEndTime(),
-                List.of(BookingStatus.PENDING, BookingStatus.APPROVED));
-
-        User requester = getCurrentUser();
-
-        Booking booking = Booking.builder()
-                .resource(resource)
-                .requestedBy(requester)
-                .bookingDate(request.getBookingDate())
-                .startTime(request.getStartTime())
-                .endTime(request.getEndTime())
-                .purpose(request.getPurpose().trim())
-                .expectedAttendees(request.getExpectedAttendees())
-                .status(BookingStatus.PENDING)
-                .build();
-
-        Booking savedBooking = bookingRepository.save(booking);
-        notifyAdminsOnNewBookingRequest(savedBooking);
-
-        return toResponse(savedBooking);
     }
 
     private Resource resolveResourceForBooking(CreateBookingRequest request) {

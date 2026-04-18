@@ -80,8 +80,14 @@ const ManageFacilitiesPage = () => {
 
   const deleteFacility = async (id) => {
     if (!confirm('Delete this facility and all its resources?')) return;
-    try { await facilityService.deleteFacility(id); toast.success('Facility deleted'); fetchFacilities(); if (selectedFacility?.id === id) setSelectedFacility(null); }
-    catch { toast.error('Failed to delete'); }
+    try {
+      await facilityService.deleteFacility(id);
+      toast.success('Facility deleted');
+      fetchFacilities();
+      if (selectedFacility?.id === id) setSelectedFacility(null);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete facility');
+    }
   };
 
   // ── Resource CRUD ──
@@ -103,8 +109,13 @@ const ManageFacilitiesPage = () => {
 
   const deleteResource = async (id) => {
     if (!confirm('Delete this resource?')) return;
-    try { await resourceService.deleteResource(id); toast.success('Resource deleted'); fetchResources(selectedFacility.id); }
-    catch { toast.error('Failed to delete'); }
+    try {
+      await resourceService.deleteResource(id);
+      toast.success('Resource deleted');
+      fetchResources(selectedFacility.id);
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to delete resource');
+    }
   };
 
   const filtered = facilities.filter(f => f.name?.toLowerCase().includes(search.toLowerCase()) || f.location?.toLowerCase().includes(search.toLowerCase()));
