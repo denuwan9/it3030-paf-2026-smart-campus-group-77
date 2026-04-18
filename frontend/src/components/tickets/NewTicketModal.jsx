@@ -26,11 +26,52 @@ const NewTicketModal = ({ isOpen, onClose, onSubmit }) => {
     setAttachments(attachments.filter((_, i) => i !== index));
   };
 
+  const handleContactChange = (e) => {
+    let value = e.target.value;
+    
+    // Prevent any capital letters
+    value = value.toLowerCase();
+
+    // Check if it's potentially a phone number (all digits)
+    const isDigitsOnly = /^\d*$/.test(value);
+
+    if (isDigitsOnly) {
+      if (value.length <= 10) {
+        setFormData(prev => ({ ...prev, contact: value }));
+      }
+      return;
+    }
+
+    // If it's not just digits, it's an email/ID
+    // Filter to allow ONLY lowercase letters, numbers, @, and dots
+    const filteredValue = value.replace(/[^a-z0-9@.]/g, '');
+    setFormData(prev => ({ ...prev, contact: filteredValue }));
+  };
+
   const handleSubmit = () => {
-    if (!formData.title.trim() || !formData.location.trim() || !formData.description.trim() || !formData.contact.trim()) {
+    const contact = formData.contact.trim();
+
+    if (!formData.title.trim() || !formData.location.trim() || !formData.description.trim() || !contact) {
       toast.error('Please fill in all required fields');
       return;
     }
+
+    // Validation Logic
+    const isDigitsOnly = /^\d+$/.test(contact);
+
+    if (isDigitsOnly) {
+      if (contact.length !== 10) {
+        toast.error('Phone number must be exactly 10 digits');
+        return;
+      }
+    } else {
+      // Must contain @ for email-like entries
+      if (!contact.includes('@')) {
+        toast.error('Email contact must contain @');
+        return;
+      }
+    }
+
     onSubmit({ ...formData, attachmentsCount: attachments.length });
     setFormData({ title: '', location: '', category: 'Electrical', description: '', priority: 'Medium', contact: '' });
     setAttachments([]);
@@ -135,7 +176,7 @@ const NewTicketModal = ({ isOpen, onClose, onSubmit }) => {
               <input 
                  type="text" 
                  value={formData.contact}
-                 onChange={e => setFormData({...formData, contact: e.target.value})}
+                 onChange={handleContactChange}
                  placeholder="Phone or email"
                  className="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-2.5 text-slate-800 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all placeholder:text-slate-400 shadow-sm"
               />

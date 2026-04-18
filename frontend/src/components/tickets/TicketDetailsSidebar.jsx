@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronDown, User, Calendar, MapPin, Tag, Shield, Phone, Send, Edit } from 'lucide-react';
+import { X, ChevronDown, User, Calendar, MapPin, Tag, Shield, Phone, Send, Edit, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMode, onUpdateTicket }) => {
@@ -46,9 +46,10 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
 
   // Reset comments or fetch them when ticket changes
   useEffect(() => {
-    setComments(initialComments);
     setNewComment("");
     if (ticket) {
+      // Use comments from ticket if they exist, otherwise use initial demo comments
+      setComments(ticket.comments || initialComments);
       setActiveStatus(ticket.status);
       setEditData({
         location: ticket.location || '',
@@ -75,14 +76,20 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
     const updatedComments = [...comments, comment];
     setComments(updatedComments);
     setNewComment("");
-    onUpdateTicket?.(ticket.id, { commentsCount: updatedComments.length });
+    onUpdateTicket?.(ticket.id, { 
+      comments: updatedComments,
+      commentsCount: updatedComments.length 
+    });
   };
 
   const handleDeleteComment = (id) => {
     const updatedComments = comments.filter(c => c.id !== id);
     setComments(updatedComments);
     toast.success("Comment deleted");
-    onUpdateTicket?.(ticket.id, { commentsCount: updatedComments.length });
+    onUpdateTicket?.(ticket.id, { 
+      comments: updatedComments,
+      commentsCount: updatedComments.length 
+    });
   };
 
   const handleEditComment = (comment) => {
@@ -92,10 +99,15 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
 
   const handleSaveEdit = (id) => {
     if (!editingText.trim()) return;
-    setComments(comments.map(c => c.id === id ? { ...c, message: editingText } : c));
+    const updatedComments = comments.map(c => c.id === id ? { ...c, message: editingText } : c);
+    setComments(updatedComments);
     setEditingCommentId(null);
     setEditingText("");
     toast.success("Comment updated");
+    onUpdateTicket?.(ticket.id, { 
+      comments: updatedComments,
+      commentsCount: updatedComments.length 
+    });
   };
 
   const statuses = ['Open', 'In progress', 'Resolved', 'Closed'];
@@ -112,10 +124,32 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
     onUpdateTicket?.(ticket.id, { status: formattedStatus });
   };
 
+  const handleEditDataChange = (key, value) => {
+    setEditData(prev => ({ ...prev, [key]: value }));
+  };
+
   const handleSaveTicket = () => {
+    // Trim values to ensure they aren't just whitespace
+    const updatedData = {
+      ...editData,
+      location: editData.location.trim(),
+      contact: editData.contact.trim()
+    };
+
+    if (!updatedData.location || !updatedData.contact) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    // 1. Notify parent to update the ticket data
+    onUpdateTicket?.(ticket.id, updatedData);
+    
+    // 2. Exit edit mode and close the sidebar
     setIsEditMode?.(false);
+    onClose?.();
+    
+    // 3. Show success message
     toast.success('Ticket updated successfully');
-    onUpdateTicket?.(ticket.id, { ...editData });
   };
 
   return (
@@ -146,22 +180,6 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
                 {ticket.title}
               </h2>
               <div className="flex items-center gap-2">
-                {isEditMode ? (
-                  <button 
-                    onClick={handleSaveTicket}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase rounded-xl transition-all active:scale-95 shadow-sm"
-                  >
-                    Save
-                  </button>
-                ) : (
-                  <button 
-                    onClick={() => setIsEditMode?.(true)}
-                    className="w-10 h-10 bg-white hover:bg-blue-100 flex items-center justify-center rounded-xl text-slate-500 hover:text-blue-600 transition-colors border border-blue-200 shadow-sm"
-                    title="Edit Ticket"
-                  >
-                    <Edit className="w-5 h-5" />
-                  </button>
-                )}
                 <button 
                   onClick={onClose}
                   className="w-10 h-10 bg-white hover:bg-rose-50 flex items-center justify-center rounded-xl text-slate-500 hover:text-rose-500 transition-colors border border-blue-200 shadow-sm"
@@ -211,7 +229,7 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
                       <input 
                         type="text" 
                         value={item.value} 
-                        onChange={e => setEditData({...editData, [item.key]: e.target.value})}
+                        onChange={e => handleEditDataChange(item.key, e.target.value)}
                         className="w-full text-sm font-bold text-slate-700 bg-slate-50 border border-blue-200 rounded-lg px-2 py-1 outline-none focus:ring-2 focus:ring-blue-100 shadow-sm"
                       />
                     ) : isEditMode && item.type === 'select' ? (
@@ -311,6 +329,26 @@ const TicketDetailsSidebar = ({ isOpen, onClose, ticket, isEditMode, setIsEditMo
                     className="absolute right-3 bottom-3 p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all active:scale-95 shadow-sm group"
                   >
                     <Send className="w-4 h-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-6 flex flex-col gap-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <button 
+                    onClick={onClose}
+                    className="px-6 py-3 bg-white border border-slate-200 text-slate-600 font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-slate-50 transition-all active:scale-95 shadow-sm flex items-center justify-center gap-2"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleSaveTicket}
+                    className="px-6 py-3 bg-blue-600 text-white font-bold text-xs uppercase tracking-widest rounded-2xl hover:bg-blue-700 transition-all active:scale-95 shadow-md flex items-center justify-center gap-2"
+                  >
+                    <Check className="w-4 h-4" />
+                    Save changes
                   </button>
                 </div>
               </div>
