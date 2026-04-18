@@ -399,51 +399,62 @@ const AdminBookingsPage = () => {
               onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
               className="bg-slate-50 border border-slate-200 text-sm rounded-xl px-4 py-2.5 w-full sm:w-96 text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 placeholder-slate-400 transition-all font-medium"
             />
-            <div className="relative w-full sm:w-52" ref={statusDropdownRef}>
+            <div className="flex w-full sm:w-auto items-center gap-3">
+              <div className="relative w-full sm:w-52" ref={statusDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setStatusDropdownOpen((prev) => !prev)}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all flex items-center justify-between"
+                >
+                  <span className="flex items-center gap-2">
+                    <span className={`w-2 h-2 rounded-full ${selectedStatusOption.dotClass}`} />
+                    <span>{selectedStatusOption.label}</span>
+                  </span>
+                  <svg
+                    className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${statusDropdownOpen ? 'rotate-180' : ''}`}
+                    viewBox="0 0 20 20"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </button>
+
+                {statusDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-20 animate-in fade-in slide-in-from-top-1 duration-150">
+                    {statusOptions.map((option) => {
+                      const isSelected = option.value === filters.status;
+                      return (
+                        <button
+                          key={option.value}
+                          type="button"
+                          onClick={() => {
+                            setFilters((prev) => ({ ...prev, status: option.value }));
+                            setStatusDropdownOpen(false);
+                          }}
+                          className={`w-full px-4 py-2.5 text-sm text-left flex items-center gap-2 transition-colors ${
+                            isSelected
+                              ? 'bg-indigo-50 text-indigo-700 font-semibold'
+                              : 'text-slate-700 hover:bg-slate-50 font-medium'
+                          }`}
+                        >
+                          <span className={`w-2 h-2 rounded-full ${option.dotClass}`} />
+                          <span>{option.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
               <button
                 type="button"
-                onClick={() => setStatusDropdownOpen((prev) => !prev)}
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 font-medium transition-all flex items-center justify-between"
+                onClick={loadBookings}
+                disabled={loading}
+                className="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 text-sm font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                <span className="flex items-center gap-2">
-                  <span className={`w-2 h-2 rounded-full ${selectedStatusOption.dotClass}`} />
-                  <span>{selectedStatusOption.label}</span>
-                </span>
-                <svg
-                  className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${statusDropdownOpen ? 'rotate-180' : ''}`}
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                {loading ? 'Refreshing...' : 'Refresh'}
               </button>
-
-              {statusDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden z-20 animate-in fade-in slide-in-from-top-1 duration-150">
-                  {statusOptions.map((option) => {
-                    const isSelected = option.value === filters.status;
-                    return (
-                      <button
-                        key={option.value}
-                        type="button"
-                        onClick={() => {
-                          setFilters((prev) => ({ ...prev, status: option.value }));
-                          setStatusDropdownOpen(false);
-                        }}
-                        className={`w-full px-4 py-2.5 text-sm text-left flex items-center gap-2 transition-colors ${
-                          isSelected
-                            ? 'bg-indigo-50 text-indigo-700 font-semibold'
-                            : 'text-slate-700 hover:bg-slate-50 font-medium'
-                        }`}
-                      >
-                        <span className={`w-2 h-2 rounded-full ${option.dotClass}`} />
-                        <span>{option.label}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
             </div>
           </div>
 

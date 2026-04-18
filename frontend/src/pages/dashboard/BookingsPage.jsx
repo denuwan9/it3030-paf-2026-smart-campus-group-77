@@ -11,6 +11,7 @@ import {
   Pencil,
   Plus,
   QrCode,
+  Trash2,
   X
 } from 'lucide-react';
 import bookingService from '../../services/bookingService';
@@ -341,6 +342,24 @@ const BookingsPage = () => {
     setQrImage('');
   };
 
+  const handleDeleteBooking = async (bookingId) => {
+    const confirmed = window.confirm('Remove this booking from your list? This action only affects your view.');
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setActionLoadingId(bookingId);
+      await bookingService.deleteBookingForUser(bookingId);
+      toast.success('Booking removed from your list');
+      await loadBookings();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to remove booking');
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
   const formatDate = (dateStr) => {
     try {
       return format(parseISO(dateStr), 'eeee, d MMMM yyyy');
@@ -449,6 +468,7 @@ const BookingsPage = () => {
             const canApprove = isAdmin && booking.status === 'PENDING';
             const canCancel = booking.status === 'APPROVED' || booking.status === 'PENDING';
             const canEdit = !isAdmin && booking.status === 'PENDING';
+            const canDelete = !isAdmin && (booking.status === 'REJECTED' || booking.status === 'CANCELLED');
             const isApproved = booking.status === 'APPROVED';
             const actionLoading = actionLoadingId === booking.id;
 
@@ -496,6 +516,17 @@ const BookingsPage = () => {
                       >
                         <MinusCircle className="w-4 h-4 text-rose-500" />
                         Cancel
+                      </button>
+                    )}
+
+                    {canDelete && (
+                      <button
+                        onClick={() => handleDeleteBooking(booking.id)}
+                        disabled={actionLoading}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-bold hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        Delete
                       </button>
                     )}
                     

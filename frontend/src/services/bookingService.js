@@ -17,6 +17,10 @@ const bookingService = {
     return axiosInstance.patch(`/bookings/${bookingId}/cancel`, reason ? { reason } : {});
   },
 
+  deleteBookingForUser: async (bookingId) => {
+    return axiosInstance.delete(`/bookings/${bookingId}`);
+  },
+
   getMyBookings: async (params = {}) => {
     return axiosInstance.get('/bookings/my', { params });
   },

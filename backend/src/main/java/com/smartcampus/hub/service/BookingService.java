@@ -300,6 +300,24 @@ public class BookingService {
         return toResponse(savedBooking);
     }
 
+    @Transactional
+    public void deleteBookingForCurrentUser(UUID bookingId) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));
+
+        User currentUser = getCurrentUser();
+        if (!booking.getRequestedBy().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You are not allowed to remove this booking");
+        }
+
+        if (booking.getStatus() != BookingStatus.REJECTED && booking.getStatus() != BookingStatus.CANCELLED) {
+            throw new RuntimeException("Only rejected or cancelled bookings can be removed");
+        }
+
+        booking.setHiddenByRequester(true);
+        bookingRepository.save(booking);
+    }
+
     private void notifyRequesterOnReviewDecision(Booking booking) {
         String facilityName = getDisplayBookingResourceName(booking);
         String bookingWindow = booking.getBookingDate() + " (" + booking.getStartTime() + " - " + booking.getEndTime() + ")";
