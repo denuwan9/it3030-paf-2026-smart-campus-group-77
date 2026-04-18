@@ -1,7 +1,6 @@
 # ──────────────────────────────────────────────
 #  IDE & Editor
 # ──────────────────────────────────────────────
-.vscode/
 .idea/
 *.iml
 *.iws
@@ -23,8 +22,6 @@ desktop.ini
 # ──────────────────────────────────────────────
 #  Environment & Secrets
 # ──────────────────────────────────────────────
-.env
-.env.*
 !.env.example
 
 # ──────────────────────────────────────────────
@@ -48,3 +45,5 @@ frontend/node_modules/
 frontend/dist/
 frontend/build/
 frontend/.cache/
+config.bat
+node_modules

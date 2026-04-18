@@ -24,6 +24,11 @@ const resourceService = {
   deleteResource: async (id) => {
     const response = await axiosInstance.delete(`/resources/${id}`);
     return response.data;
+  },
+
+  getAllResources: async () => {
+    const response = await axiosInstance.get('/resources');
+    return response.data;
   }
 };
 

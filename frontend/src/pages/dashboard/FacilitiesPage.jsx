@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Building2,
@@ -64,6 +65,19 @@ const FacilitiesPage = () => {
   useEffect(() => {
     fetchFacilities();
   }, []);
+
+  // Handle auto-selection from query params
+  const location = useLocation();
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const facilityId = params.get('id');
+    if (facilityId && facilities.length > 0) {
+      const facility = facilities.find(f => f.id === facilityId);
+      if (facility) {
+        setSelectedFacility(facility);
+      }
+    }
+  }, [location.search, facilities]);
 
   const fetchFacilities = async () => {
     try {
