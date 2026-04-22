@@ -10,7 +10,6 @@ import {
   Trash2,
   Settings,
   Calendar,
-  Ticket,
   Megaphone,
   Shield,
   Wrench,
@@ -32,12 +31,7 @@ const TYPE_CONFIG = {
     bg: 'bg-blue-50',
     label: 'Booking',
   },
-  TICKET: {
-    icon: Ticket,
-    color: 'text-amber-500',
-    bg: 'bg-amber-50',
-    label: 'Ticket',
-  },
+
   ANNOUNCEMENT: {
     icon: Megaphone,
     color: 'text-purple-500',
@@ -84,8 +78,7 @@ function getNotificationAccentClass(notification, isNegativeBooking, isPositiveB
   switch (notification?.type) {
     case 'BOOKING':
       return 'bg-blue-500';
-    case 'TICKET':
-      return 'bg-amber-500';
+
     case 'ANNOUNCEMENT':
       return 'bg-purple-500';
     case 'SECURITY':

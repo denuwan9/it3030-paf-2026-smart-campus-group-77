@@ -66,7 +66,7 @@ const UserDashboard = () => {
   const stats = [
     { label: 'Active Bookings', value: statsData?.activeBookings || '0', icon: Calendar, colorClass: 'bg-emerald-500', trend: 0 },
     { label: 'Resource Access', value: statsData?.totalResources || '0', icon: CheckCircle2, colorClass: 'bg-blue-500', trend: 0 },
-    { label: 'Incident Reports', value: statsData?.pendingTickets || '0', icon: ShieldAlert, colorClass: 'bg-amber-500', trend: 0 },
+
     { label: 'Notifications', value: statsData?.notificationsCount || '0', icon: Clock, colorClass: 'bg-rose-500', trend: 0 },
   ];
 

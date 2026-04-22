@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import StatCard from '../../components/StatCard';
-import { Package, Calendar, Ticket, ArrowUpRight, TrendingUp, Users, Loader2, Building2 } from 'lucide-react';
+import { Package, Calendar, ArrowUpRight, TrendingUp, Users, Loader2, Building2 } from 'lucide-react';
 import StatusBadge from '../../components/StatusBadge';
 import dashboardService from '../../services/dashboardService';
 import { formatDistanceToNow } from 'date-fns';
@@ -34,7 +34,7 @@ const AdminDashboard = () => {
     { label: 'Total Facilities', value: statsData?.totalFacilities || '0', icon: Building2, colorClass: 'bg-indigo-500', trend: 0 },
     { label: 'Total Resources', value: statsData?.totalResources || '0', icon: Package, colorClass: 'bg-blue-500', trend: 0 },
     { label: 'Active Bookings', value: statsData?.activeBookings || '0', icon: Calendar, colorClass: 'bg-amber-500', trend: 0 },
-    { label: 'Pending Tickets', value: statsData?.pendingTickets || '0', icon: Ticket, colorClass: 'bg-rose-500', trend: 0 },
+
     { label: 'Active Users', value: statsData?.activeUsers || '0', icon: Users, colorClass: 'bg-emerald-500', trend: 0 },
   ];
 
@@ -109,7 +109,7 @@ const AdminDashboard = () => {
                         </div>
                       </td>
                       <td className="px-6 py-5">
-                        <p className="text-sm font-bold text-nexer-text-header">{row.type === 'BOOKING' ? 'Requested Booking' : 'Incident Ticket'}</p>
+                        <p className="text-sm font-bold text-nexer-text-header">Campus Activity</p>
                         <p className="text-xs text-nexer-text-muted font-medium mt-0.5">{row.title}</p>
                       </td>
                       <td className="px-6 py-5 text-sm text-slate-500 font-medium">

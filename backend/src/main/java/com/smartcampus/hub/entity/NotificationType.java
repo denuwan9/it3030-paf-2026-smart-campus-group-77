@@ -5,7 +5,7 @@ package com.smartcampus.hub.entity;
  */
 public enum NotificationType {
     BOOKING,
-    TICKET,
+
     SYSTEM,
     ANNOUNCEMENT,
     SECURITY

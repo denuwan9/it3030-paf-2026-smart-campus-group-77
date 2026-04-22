@@ -8,7 +8,6 @@ import {
   X, 
   LayoutDashboard, 
   Package, 
-  Ticket, 
   ShieldCheck, 
   Building2,
   User, 
@@ -40,12 +39,14 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       icon: LayoutDashboard, 
       roles: ['ROLE_USER', 'ROLE_ADMIN', 'ROLE_TECHNICIAN'] 
     },
+
     { 
       label: 'My Reports', 
       to: '/user/tickets', 
       icon: Ticket, 
       roles: ['ROLE_USER'] 
     },
+
     { 
       label: 'User Management', 
       to: '/admin/users', 
@@ -70,6 +71,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       icon: Calendar,
       roles: ['ROLE_USER', 'ROLE_ADMIN']
     },
+
     { 
       label: 'Ops Queue', 
       to: '/admin/tickets', 
@@ -82,6 +84,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       icon: Ticket, 
       roles: ['ROLE_TECHNICIAN'] 
     },
+
   ];
 
   const filteredNav = navigation.filter(item => item.roles.includes(user?.role));

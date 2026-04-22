@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 /**
  * Core service for the Notifications module.
  *
- * <p>Other services (Booking, Ticket, etc.) should call
+ * <p>Other services (Booking, etc.) should call
  * {@link #createNotification} to deliver in-app alerts.
  * Admins can also broadcast system-wide messages via
  * {@link #broadcastSystemNotification}.</p>
@@ -103,7 +103,7 @@ public class NotificationService {
 
     /**
      * Creates a notification for a specific user.
-     * Call this from Booking, Ticket, or any other service to deliver alerts.
+     * Call this from Booking or any other service to deliver alerts.
      *
      * @param recipientId target user UUID
      * @param type        notification category
@@ -231,7 +231,7 @@ public class NotificationService {
 
         if (dto.getEmailEnabled()        != null) setting.setEmailEnabled(dto.getEmailEnabled());
         if (dto.getBookingAlerts()       != null) setting.setBookingAlerts(dto.getBookingAlerts());
-        if (dto.getTicketAlerts()        != null) setting.setTicketAlerts(dto.getTicketAlerts());
+
         if (dto.getSystemAlerts()        != null) setting.setSystemAlerts(dto.getSystemAlerts());
         if (dto.getAnnouncementAlerts()  != null) setting.setAnnouncementAlerts(dto.getAnnouncementAlerts());
         if (dto.getSecurityAlerts()      != null) setting.setSecurityAlerts(dto.getSecurityAlerts());
@@ -255,7 +255,7 @@ public class NotificationService {
     private boolean isCategoryEnabled(NotificationSetting s, NotificationType type) {
         return switch (type) {
             case BOOKING      -> Boolean.TRUE.equals(s.getBookingAlerts());
-            case TICKET       -> Boolean.TRUE.equals(s.getTicketAlerts());
+
             case SYSTEM       -> Boolean.TRUE.equals(s.getSystemAlerts());
             case ANNOUNCEMENT -> Boolean.TRUE.equals(s.getAnnouncementAlerts());
             case SECURITY     -> Boolean.TRUE.equals(s.getSecurityAlerts());
@@ -281,7 +281,7 @@ public class NotificationService {
         NotificationSettingDTO dto = new NotificationSettingDTO();
         dto.setEmailEnabled(s.getEmailEnabled());
         dto.setBookingAlerts(s.getBookingAlerts());
-        dto.setTicketAlerts(s.getTicketAlerts());
+
         dto.setSystemAlerts(s.getSystemAlerts());
         dto.setAnnouncementAlerts(s.getAnnouncementAlerts());
         dto.setSecurityAlerts(s.getSecurityAlerts());

@@ -9,7 +9,7 @@ import java.util.UUID;
 /**
  * Represents a single in-app notification delivered to a specific user.
  * Notifications are created by the service layer whenever a relevant
- * campus event occurs (booking, ticket update, system broadcast, etc.).
+ * campus event occurs (booking, system broadcast, etc.).
  */
 @Entity
 @Table(name = "notifications")
