@@ -5,7 +5,7 @@
 
 -- 1. Notification type enum (matches the Java NotificationType enum)
 DO $$ BEGIN
-    CREATE TYPE notification_type AS ENUM ('BOOKING', 'SYSTEM', 'ANNOUNCEMENT', 'SECURITY');
+    CREATE TYPE notification_type AS ENUM ('BOOKING', 'SYSTEM', 'ANNOUNCEMENT', 'SECURITY', 'TICKET');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS notification_settings (
     user_id              UUID    NOT NULL UNIQUE,
     email_enabled        BOOLEAN NOT NULL DEFAULT TRUE,
     booking_alerts       BOOLEAN NOT NULL DEFAULT TRUE,
+    ticket_alerts        BOOLEAN NOT NULL DEFAULT TRUE,
 
     system_alerts        BOOLEAN NOT NULL DEFAULT TRUE,
     announcement_alerts  BOOLEAN NOT NULL DEFAULT TRUE,

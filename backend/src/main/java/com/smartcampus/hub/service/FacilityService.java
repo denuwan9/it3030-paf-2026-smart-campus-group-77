@@ -21,6 +21,18 @@ public class FacilityService {
     private final FacilityRepository facilityRepository;
     private final ResourceRepository resourceRepository;
     private final BookingRepository bookingRepository;
+    private final CloudinaryService cloudinaryService;
+
+    @Transactional
+    public String uploadFacilityImage(UUID id, org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
+        Facility facility = facilityRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Facility not found with id: " + id));
+        
+        String url = cloudinaryService.uploadImage(file, "facilities");
+        facility.setImageUrl(url);
+        facilityRepository.save(facility);
+        return url;
+    }
 
     @Transactional(readOnly = true)
     public List<FacilityDTO> getAllFacilities() {

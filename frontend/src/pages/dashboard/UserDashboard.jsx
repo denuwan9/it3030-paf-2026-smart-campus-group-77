@@ -11,10 +11,11 @@ import {
   Clock, 
   ShieldAlert,
   ArrowRight,
-  Loader2
+  Loader2,
+  Ticket
 } from 'lucide-react';
 import WelcomeBanner from '../../components/dashboard/WelcomeBanner';
-import StatCard from '../../components/dashboard/StatCard';
+import StatCard from '../../components/StatCard';
 import ResourceCard from '../../components/dashboard/ResourceCard';
 import dashboardService from '../../services/dashboardService';
 import resourceService from '../../services/resourceService';
@@ -64,10 +65,34 @@ const UserDashboard = () => {
   }, []);
 
   const stats = [
-    { label: 'Active Bookings', value: statsData?.activeBookings || '0', icon: Calendar, colorClass: 'bg-emerald-500', trend: 0 },
-    { label: 'Resource Access', value: statsData?.totalResources || '0', icon: CheckCircle2, colorClass: 'bg-blue-500', trend: 0 },
-
-    { label: 'Notifications', value: statsData?.notificationsCount || '0', icon: Clock, colorClass: 'bg-rose-500', trend: 0 },
+    { 
+      label: 'Active Bookings', 
+      value: statsData?.activeBookings || '0', 
+      icon: Calendar, 
+      colorClass: 'bg-emerald-500', 
+      description: 'Your upcoming facility reservations'
+    },
+    { 
+      label: 'Resource Access', 
+      value: statsData?.totalResources || '0', 
+      icon: CheckCircle2, 
+      colorClass: 'bg-blue-500',
+      description: 'Total equipment available to you'
+    },
+    { 
+      label: 'Pending Tickets', 
+      value: statsData?.pendingTickets || '0', 
+      icon: Ticket, 
+      colorClass: 'bg-amber-500',
+      description: 'Active maintenance & support requests'
+    },
+    { 
+      label: 'Notifications', 
+      value: statsData?.notificationsCount || '0', 
+      icon: Clock, 
+      colorClass: 'bg-rose-500',
+      description: 'Unread alerts and system updates'
+    },
   ];
 
   if (loading) {

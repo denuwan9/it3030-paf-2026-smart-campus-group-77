@@ -7,6 +7,7 @@ import lombok.Data;
 @Builder
 public class DashboardStatsDTO {
     private long activeBookings;
+    private long pendingTickets;
 
     private long totalResources;
     private long notificationsCount;

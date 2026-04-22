@@ -46,4 +46,11 @@ public class FacilityController {
         facilityService.deleteFacility(id);
         return ResponseEntity.ok(ApiResponse.success("Facility deleted successfully", null));
     }
+
+    @PostMapping("/{id}/image")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<String>> uploadImage(@PathVariable UUID id, @RequestParam("file") org.springframework.web.multipart.MultipartFile file) throws java.io.IOException {
+        String url = facilityService.uploadFacilityImage(id, file);
+        return ResponseEntity.ok(ApiResponse.success("Image uploaded successfully", url));
+    }
 }

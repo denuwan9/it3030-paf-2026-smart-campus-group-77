@@ -1,14 +1,77 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-import { Ticket, Clock, CheckCircle, AlertCircle, MessageSquare, ChevronRight, Loader2, ClipboardList } from 'lucide-react';
+import { Ticket, Clock, CheckCircle, AlertCircle, MessageSquare, ChevronRight, Loader2, ClipboardList, Shield, Zap } from 'lucide-react';
 
 import StatusBadge from '../../components/StatusBadge';
+import StatCard from '../../components/StatCard';
 import dashboardService from '../../services/dashboardService';
 import ticketService from '../../services/ticketService';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow, parseISO } from 'date-fns';
 import toast from 'react-hot-toast';
+
+// ─── Ticket Card Sub-component ───────────────────────────────────────────────
+
+const TicketCard = ({ ticket, index, onClick }) => {
+  const priorityConfig = {
+    URGENT: { dot: 'bg-rose-500', bg: 'bg-rose-50', text: 'text-rose-600', label: 'Urgent' },
+    HIGH: { dot: 'bg-orange-500', bg: 'bg-orange-50', text: 'text-orange-600', label: 'High' },
+    MEDIUM: { dot: 'bg-amber-500', bg: 'bg-amber-50', text: 'text-amber-600', label: 'Medium' },
+    LOW: { dot: 'bg-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-600', label: 'Low' },
+  };
+
+  const config = priorityConfig[ticket.priority] || priorityConfig.MEDIUM;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1 }}
+      onClick={onClick}
+      className="group relative bg-white border border-slate-200 rounded-[2.5rem] p-6 hover:border-nexer-brand-primary/30 hover:shadow-nexer-lg transition-all cursor-pointer overflow-hidden"
+    >
+      {/* Accent Background Glow */}
+      <div className={`absolute -top-12 -right-12 w-32 h-32 rounded-full blur-3xl opacity-0 group-hover:opacity-20 transition-opacity ${config.bg}`} />
+
+      <div className="flex flex-col h-full justify-between gap-6">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">#{ticket.id.toString().substring(0, 8)}</span>
+              <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full ${config.bg} ${config.text}`}>
+                <div className={`w-1 h-1 rounded-full ${config.dot}`} />
+                <span className="text-[9px] font-black uppercase tracking-wider">{config.label}</span>
+              </div>
+            </div>
+            <h3 className="text-lg font-black text-slate-800 leading-tight group-hover:text-nexer-brand-primary transition-colors line-clamp-1">
+              {ticket.category}
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mt-1 flex items-center gap-1.5">
+              <AlertCircle className="w-3.5 h-3.5" />
+              {ticket.location}
+            </p>
+          </div>
+          <div className="p-3 bg-slate-50 rounded-2xl group-hover:bg-nexer-brand-primary group-hover:text-white transition-all shadow-inner">
+            <Ticket className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-slate-400" />
+              <span className="text-[10px] font-bold text-slate-400">{formatDistanceToNow(parseISO(ticket.createdAt))} ago</span>
+            </div>
+          </div>
+          <StatusBadge status={ticket.status} />
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
+// ─── Main Dashboard Component ──────────────────────────────────────────────────
 
 const TechnicianDashboard = () => {
   const [tasks, setTasks] = useState([]);
@@ -25,7 +88,7 @@ const TechnicianDashboard = () => {
           ticketService.getTechnicianTasks()
         ]);
         setStats(statsRes.data);
-        setTasks(tasksRes.data.data.slice(0, 5)); // Show top 5 recent tasks
+        setTasks(tasksRes.data.data.slice(0, 5));
       } catch (err) {
         toast.error('Failed to sync dashboard data');
       } finally {
@@ -39,133 +102,132 @@ const TechnicianDashboard = () => {
     return (
       <div className="flex flex-col items-center justify-center py-32 gap-4">
         <Loader2 className="w-10 h-10 text-nexer-brand-primary animate-spin" />
-        <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Syncing Dashboard...</p>
+        <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Syncing Operations...</p>
       </div>
     );
   }
 
+  const technicianStats = [
+    { 
+      label: 'Active Queue', 
+      value: stats.activeTasksCount || '0', 
+      icon: Ticket, 
+      colorClass: 'bg-amber-500', 
+      description: 'Tasks currently in progress' 
+    },
+    { 
+      label: 'Resolved Today', 
+      value: stats.resolvedTodayCount || '0', 
+      icon: CheckCircle, 
+      colorClass: 'bg-emerald-500', 
+      description: 'Completed in the last 24h' 
+    },
+    { 
+      label: 'Response Time', 
+      value: stats.avgResponseTime || '—', 
+      icon: Zap, 
+      colorClass: 'bg-blue-500', 
+      description: 'Average ticket pick-up speed' 
+    },
+  ];
+
   return (
-    <div className="space-y-8 min-h-screen">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-nexer-text-header">Mission Overview</h1>
-          <p className="text-nexer-text-muted text-xs sm:text-sm mt-1 font-medium italic">
-            {stats.activeTasksCount > 0 
-              ? `You have ${stats.activeTasksCount} active tasks in your queue.` 
-              : "Your queue is clear. Great work!"}
+    <div className="space-y-10 pb-12">
+      {/* Header & Quick Stats */}
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex-1 flex flex-col justify-center">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 leading-none">Operations Hub</h1>
+          <p className="text-slate-500 text-sm mt-3 font-medium italic max-w-lg">
+            Real-time synchronization for campus maintenance and facility safety reports.
           </p>
+        </div>
+
+        <div className="lg:w-3/5 grid grid-cols-1 sm:grid-cols-3 gap-6">
+          {technicianStats.map((stat, i) => (
+            <StatCard key={i} {...stat} delay={i * 0.1} />
+          ))}
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Active Task List Placeholder */}
-        <div className="lg:col-span-2 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        {/* Main Content: Tasks */}
+        <div className="lg:col-span-8 space-y-6">
           <div className="flex items-center justify-between px-2">
-            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Queue</h2>
-            {tasks.length > 0 && (
-              <button 
-                onClick={() => navigate('/technician/tasks')}
-                className="text-[10px] font-black text-nexer-brand-primary uppercase tracking-widest hover:underline"
-              >
-                View Full Roster
-              </button>
+            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
+              <ClipboardList className="w-4 h-4" />
+              Priority Queue
+            </h2>
+            <button 
+              onClick={() => navigate('/technician/tasks')}
+              className="text-[10px] font-black text-nexer-brand-primary uppercase tracking-widest hover:underline flex items-center gap-1 group"
+            >
+              Full Roster <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {tasks.length === 0 ? (
+              <div className="col-span-full bg-white border border-slate-200 border-dashed rounded-[3rem] py-24 text-center flex flex-col items-center justify-center gap-4">
+                <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center">
+                  <CheckCircle className="w-10 h-10 text-slate-200" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-800">Clear Horizon</h3>
+                  <p className="text-sm text-slate-400 mt-1 font-medium">No active maintenance tasks assigned to your station.</p>
+                </div>
+              </div>
+            ) : (
+              tasks.map((ticket, i) => (
+                <TicketCard 
+                  key={ticket.id} 
+                  ticket={ticket} 
+                  index={i} 
+                  onClick={() => navigate(`/tickets/${ticket.id}`)} 
+                />
+              ))
             )}
           </div>
-          
-          {tasks.length === 0 ? (
-            <div className="bg-white border border-slate-200 border-dashed rounded-[2rem] p-12 text-center flex flex-col items-center gap-4">
-              <ClipboardList className="w-8 h-8 text-slate-300" />
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No assigned tasks found</p>
-            </div>
-          ) : (
-            tasks.map((ticket, i) => (
-              <motion.div
-                key={ticket.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.05 }}
-                className="bg-white border border-slate-200 rounded-[2rem] p-4 sm:p-5 hover:border-nexer-brand-primary/30 hover:shadow-nexer-md transition-all group flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
-              >
-                <div className="flex items-start gap-4">
-                  <div className={`p-3 rounded-2xl ${
-                    ticket.status === 'IN_PROGRESS' 
-                      ? 'bg-amber-50 text-amber-600' 
-                      : 'bg-nexer-brand-primary/10 text-nexer-brand-primary'
-                  }`}>
-                    <Ticket className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase">#{ticket.id.toString().substring(0, 8)}</span>
-                      <span className={`w-1.5 h-1.5 rounded-full ${
-                        ticket.priority === 'URGENT' ? 'bg-rose-500 animate-pulse' : 
-                        ticket.priority === 'HIGH' ? 'bg-rose-500' : 
-                        ticket.priority === 'MEDIUM' ? 'bg-amber-500' : 'bg-emerald-500'
-                      }`} />
-                    </div>
-                    <h3 className="text-base font-black text-nexer-text-header mt-0.5 group-hover:text-nexer-brand-primary transition-colors">
-                      {ticket.category}
-                    </h3>
-                    <div className="flex items-center gap-4 mt-2">
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
-                        <Clock className="w-3 h-3" />
-                        <span>{formatDistanceToNow(parseISO(ticket.createdAt))} ago</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
-                        <AlertCircle className="w-3 h-3" />
-                        <span>{ticket.location}</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-4 sm:pt-0 border-t border-slate-50 sm:border-none">
-                  <StatusBadge status={ticket.status} />
-                  <button 
-                    onClick={() => navigate(`/tickets/${ticket.id}`)}
-                    className="p-3 bg-slate-50 border border-slate-200 shadow-sm rounded-xl text-slate-400 hover:text-white hover:bg-nexer-brand-primary hover:border-nexer-brand-primary transition-all"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </motion.div>
-            ))
-          )}
         </div>
 
-        {/* Quick Stats & Tools */}
-        <div className="space-y-6">
-          <div className="bg-white border border-slate-200 p-8 rounded-[2.5rem] shadow-nexer-md">
-            <h2 className="text-xs font-black text-nexer-text-header uppercase tracking-widest mb-6 border-b border-slate-50 pb-4">Performance Metrics</h2>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="bg-slate-50/50 p-5 rounded-2xl border border-slate-100 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avg Response</p>
-                  <p className="text-xl font-black text-nexer-text-header mt-1">{stats.avgResponseTime}</p>
-                </div>
-                <div className="p-3 bg-white rounded-xl shadow-sm">
-                  <Clock className="w-4 h-4 text-nexer-brand-primary" />
-                </div>
-              </div>
-              <div className="bg-slate-50/50 p-5 rounded-2xl border border-slate-100 flex items-center justify-between">
-                <div>
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Resolved Today</p>
-                  <p className="text-xl font-black text-emerald-600 mt-1">{stats.resolvedTodayCount}</p>
-                </div>
-                <div className="p-3 bg-white rounded-xl shadow-sm">
-                  <CheckCircle className="w-4 h-4 text-emerald-500" />
-                </div>
-              </div>
+        {/* Sidebar: System Info */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-slate-900 p-8 rounded-[3rem] shadow-2xl text-white relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-20">
+              <Shield className="w-24 h-24 rotate-12" />
+            </div>
+            <h3 className="text-xl font-black mb-4 text-white">System Protocol</h3>
+            <p className="text-white/60 text-sm mb-8 leading-relaxed font-medium">
+              Maintain operational transparency. Update ticket statuses in real-time to ensure campus safety metrics remain accurate.
+            </p>
+            <div className="space-y-4">
+              <button className="w-full py-4 bg-white text-slate-900 text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-nexer-brand-primary hover:text-white transition-all shadow-lg active:scale-95">
+                Contact Ops Hub
+              </button>
+              <button 
+                onClick={() => navigate('/facilities')}
+                className="w-full py-4 bg-slate-800 text-white/80 text-xs font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-slate-700 transition-all active:scale-95 border border-white/5"
+              >
+                Facility Registry
+              </button>
             </div>
           </div>
 
-          <div className="bg-slate-900 p-8 rounded-[2.5rem] shadow-xl text-white relative overflow-hidden group">
-            <Ticket className="absolute -bottom-6 -right-6 w-24 h-24 opacity-10 rotate-12 group-hover:scale-110 transition-transform text-nexer-brand-primary" />
-            <h3 className="text-lg font-black mb-3 text-white">Ops Support</h3>
-            <p className="text-white/60 text-xs mb-6 leading-relaxed">Need technical guidance or encountering safety hazards? Contact the operations hub immediately.</p>
-            <button className="w-full py-3.5 bg-white text-slate-900 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-nexer-brand-primary hover:text-white transition-all shadow-lg active:scale-95">
-              Contact Ops Hub
-            </button>
+          <div className="bg-white border border-slate-200 p-8 rounded-[2.5rem] shadow-nexer-sm">
+            <h3 className="text-sm font-black text-slate-800 mb-6 uppercase tracking-widest border-b border-slate-50 pb-4">Efficiency</h3>
+            <div className="space-y-6">
+              <div>
+                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest mb-2">
+                  <span className="text-slate-400">Response Speed</span>
+                  <span className="text-nexer-brand-primary">{stats.avgResponseTime}</span>
+                </div>
+                <div className="h-1.5 bg-slate-50 rounded-full overflow-hidden">
+                  <div className="h-full bg-nexer-brand-primary w-[75%]" />
+                </div>
+              </div>
+              <p className="text-[10px] text-slate-400 font-medium italic">
+                Your response time is 15% faster than the team average this week.
+              </p>
+            </div>
           </div>
         </div>
       </div>

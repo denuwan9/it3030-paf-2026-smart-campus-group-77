@@ -424,7 +424,6 @@ const NotificationPanel = () => {
   useEffect(() => {
     if (prevCountRef.current !== null && unreadCount > prevCountRef.current) {
       if (settings?.soundEnabled) {
-        console.log("Triggering notification sound. Count incremented from", prevCountRef.current, "to", unreadCount);
         playNotificationSound(0.5);
       }
     }

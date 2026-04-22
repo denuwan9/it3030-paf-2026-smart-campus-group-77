@@ -235,6 +235,7 @@ public class NotificationService {
         if (dto.getSystemAlerts()        != null) setting.setSystemAlerts(dto.getSystemAlerts());
         if (dto.getAnnouncementAlerts()  != null) setting.setAnnouncementAlerts(dto.getAnnouncementAlerts());
         if (dto.getSecurityAlerts()      != null) setting.setSecurityAlerts(dto.getSecurityAlerts());
+        if (dto.getTicketAlerts()        != null) setting.setTicketAlerts(dto.getTicketAlerts());
         if (dto.getSoundEnabled()         != null) setting.setSoundEnabled(dto.getSoundEnabled());
 
         return toSettingDTO(settingRepo.save(setting));
@@ -259,6 +260,7 @@ public class NotificationService {
             case SYSTEM       -> Boolean.TRUE.equals(s.getSystemAlerts());
             case ANNOUNCEMENT -> Boolean.TRUE.equals(s.getAnnouncementAlerts());
             case SECURITY     -> Boolean.TRUE.equals(s.getSecurityAlerts());
+            case TICKET       -> Boolean.TRUE.equals(s.getTicketAlerts());
         };
     }
 
@@ -281,7 +283,7 @@ public class NotificationService {
         NotificationSettingDTO dto = new NotificationSettingDTO();
         dto.setEmailEnabled(s.getEmailEnabled());
         dto.setBookingAlerts(s.getBookingAlerts());
-
+        dto.setTicketAlerts(s.getTicketAlerts());
         dto.setSystemAlerts(s.getSystemAlerts());
         dto.setAnnouncementAlerts(s.getAnnouncementAlerts());
         dto.setSecurityAlerts(s.getSecurityAlerts());

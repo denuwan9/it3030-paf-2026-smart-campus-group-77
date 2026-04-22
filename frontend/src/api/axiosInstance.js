@@ -39,9 +39,6 @@ axiosInstance.interceptors.response.use(
     } else if (status === 403) {
       // Forbidden: Show localized error
       toast.error('Access Denied: You do not have permission to perform this action.', { id: 'access-denied' });
-    } else if (status >= 500) {
-      // Server Error
-      toast.error('Server is currently unavailable. Please try again later.');
     }
     
     // We reject so the calling component can still handle specific 400 errors

@@ -21,6 +21,7 @@ public class NotificationSettingDTO {
 
     private Boolean emailEnabled;
     private Boolean bookingAlerts;
+    private Boolean ticketAlerts;
 
     private Boolean systemAlerts;
     private Boolean announcementAlerts;

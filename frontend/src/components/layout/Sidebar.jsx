@@ -12,7 +12,8 @@ import {
   Building2,
   User, 
   LogOut,
-  Calendar
+  Calendar,
+  Ticket
 } from 'lucide-react';
 
 const Sidebar = ({ isOpen, setIsOpen }) => {

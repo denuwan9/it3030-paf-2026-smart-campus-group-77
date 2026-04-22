@@ -285,10 +285,62 @@ const ManageFacilitiesPage = () => {
               <InputField label="Capacity" type="number" placeholder="e.g. 100" value={facilityForm.capacity} onChange={e=>setFacilityForm({...facilityForm,capacity:e.target.value})}/>
             </div>
             <SelectField label="Status" options={statusOpts} value={facilityForm.status} onChange={e=>setFacilityForm({...facilityForm,status:e.target.value})}/>
-            <InputField label="Image URL" placeholder="https://..." value={facilityForm.imageUrl} onChange={e=>setFacilityForm({...facilityForm,imageUrl:e.target.value})}/>
+            
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Facility Image</label>
+              <div className="flex items-center gap-4">
+                {facilityForm.imageUrl && (
+                  <div className="w-16 h-16 rounded-xl overflow-hidden border border-slate-200 flex-shrink-0">
+                    <img src={facilityForm.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
+                <label className="flex-1 cursor-pointer">
+                  <div className="px-4 py-2.5 bg-slate-50 border border-slate-200 border-dashed rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 transition-all flex items-center justify-center gap-2">
+                    <Plus className="w-4 h-4" /> {facilityForm.imageUrl ? 'Change Image' : 'Upload Image'}
+                  </div>
+                  <input type="file" className="hidden" accept="image/*" onChange={async (e) => {
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    if (editingFacility) {
+                      try {
+                        setSaving(true);
+                        const res = await facilityService.uploadImage(editingFacility.id, file);
+                        setFacilityForm({ ...facilityForm, imageUrl: res.data });
+                        toast.success('Image uploaded');
+                      } catch {
+                        toast.error('Image upload failed');
+                      } finally {
+                        setSaving(false);
+                      }
+                    } else {
+                      setFacilityForm({ ...facilityForm, pendingImage: file, imageUrl: URL.createObjectURL(file) });
+                    }
+                  }} />
+                </label>
+              </div>
+            </div>
+
             <div className="flex gap-3 pt-2">
               <button onClick={()=>setShowFacilityModal(false)} className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm rounded-xl transition-all">Cancel</button>
-              <button onClick={saveFacility} disabled={saving} className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+              <button onClick={async () => {
+                if (!facilityForm.name.trim()) { toast.error('Facility name is required'); return; }
+                setSaving(true);
+                try {
+                  const payload = { ...facilityForm, capacity: facilityForm.capacity ? parseInt(facilityForm.capacity) : null };
+                  if (editingFacility) { 
+                    await facilityService.updateFacility(editingFacility.id, payload); 
+                    toast.success('Facility updated'); 
+                  } else { 
+                    const res = await facilityService.createFacility(payload); 
+                    if (facilityForm.pendingImage) {
+                      await facilityService.uploadImage(res.data.id, facilityForm.pendingImage);
+                    }
+                    toast.success('Facility created'); 
+                  }
+                  setShowFacilityModal(false); fetchFacilities();
+                } catch { toast.error('Failed to save facility'); }
+                finally { setSaving(false); }
+              }} disabled={saving} className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm rounded-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2">
                 {saving && <Loader2 className="w-4 h-4 animate-spin"/>}{editingFacility ? 'Update' : 'Create'}
               </button>
             </div>

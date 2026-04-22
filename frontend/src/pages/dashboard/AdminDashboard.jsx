@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import StatCard from '../../components/StatCard';
-import { Package, Calendar, ArrowUpRight, TrendingUp, Users, Loader2, Building2 } from 'lucide-react';
+import { Package, Calendar, ArrowUpRight, TrendingUp, Users, Loader2, Building2, ShieldAlert } from 'lucide-react';
 import StatusBadge from '../../components/StatusBadge';
 import dashboardService from '../../services/dashboardService';
 import { formatDistanceToNow } from 'date-fns';
@@ -31,11 +31,41 @@ const AdminDashboard = () => {
   }, []);
 
   const stats = [
-    { label: 'Total Facilities', value: statsData?.totalFacilities || '0', icon: Building2, colorClass: 'bg-indigo-500', trend: 0 },
-    { label: 'Total Resources', value: statsData?.totalResources || '0', icon: Package, colorClass: 'bg-blue-500', trend: 0 },
-    { label: 'Active Bookings', value: statsData?.activeBookings || '0', icon: Calendar, colorClass: 'bg-amber-500', trend: 0 },
-
-    { label: 'Active Users', value: statsData?.activeUsers || '0', icon: Users, colorClass: 'bg-emerald-500', trend: 0 },
+    { 
+      label: 'Facilities', 
+      value: statsData?.totalFacilities || '0', 
+      icon: Building2, 
+      colorClass: 'bg-indigo-500', 
+      description: 'Physical campus spaces' 
+    },
+    { 
+      label: 'Resources', 
+      value: statsData?.totalResources || '0', 
+      icon: Package, 
+      colorClass: 'bg-blue-500', 
+      description: 'Inventory & equipment' 
+    },
+    { 
+      label: 'Bookings', 
+      value: statsData?.activeBookings || '0', 
+      icon: Calendar, 
+      colorClass: 'bg-amber-500', 
+      description: 'Confirmed reservations' 
+    },
+    { 
+      label: 'Incidents', 
+      value: statsData?.pendingTickets || '0', 
+      icon: ShieldAlert, 
+      colorClass: 'bg-rose-500', 
+      description: 'Pending support tickets' 
+    },
+    { 
+      label: 'Active Users', 
+      value: statsData?.activeUsers || '0', 
+      icon: Users, 
+      colorClass: 'bg-emerald-500', 
+      description: 'Registered campus members' 
+    },
   ];
 
   return (

@@ -24,6 +24,15 @@ const facilityService = {
   deleteFacility: async (id) => {
     const response = await axiosInstance.delete(`/facilities/${id}`);
     return response.data;
+  },
+
+  uploadImage: async (id, file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await axiosInstance.post(`/facilities/${id}/image`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+    return response.data;
   }
 };
 

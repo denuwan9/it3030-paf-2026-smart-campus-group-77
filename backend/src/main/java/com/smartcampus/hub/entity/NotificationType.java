@@ -8,5 +8,6 @@ public enum NotificationType {
 
     SYSTEM,
     ANNOUNCEMENT,
-    SECURITY
+    SECURITY,
+    TICKET
 }

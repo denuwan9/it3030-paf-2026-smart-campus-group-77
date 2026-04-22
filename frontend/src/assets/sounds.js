@@ -9,6 +9,11 @@ export const playNotificationSound = (volume = 0.4) => {
 
     const context = new AudioContext();
     
+    if (context.state === 'suspended') {
+      // Browsers block audio until first user interaction
+      context.close();
+      return;
+    }
     const playNote = (freq, vol, duration) => {
       const osc = context.createOscillator();
       const gain = context.createGain();

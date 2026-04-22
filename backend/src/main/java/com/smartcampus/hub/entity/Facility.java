@@ -40,7 +40,7 @@ public class Facility {
     @Builder.Default
     private FacilityStatus status = FacilityStatus.AVAILABLE;
 
-    @Column(name = "image_url")
+    @Column(name = "image_url", columnDefinition = "TEXT")
     private String imageUrl;
 
     @OneToMany(mappedBy = "facility", cascade = CascadeType.ALL, orphanRemoval = true)
