@@ -9,18 +9,9 @@ services:
     envVars:
       - key: PORT
         value: 8080
+      # Set the FRONTEND_URL manually in the Render Dashboard after deployment
       - key: FRONTEND_URL
-        fromService:
-          name: smart-campus-frontend
-          type: web
-          property: url
-      # The following should be set in the Render Dashboard for security:
-      # - DATABASE_URL
-      # - DATABASE_USERNAME
-      # - DATABASE_PASSWORD
-      # - CLOUDINARY_CLOUD_NAME
-      # - CLOUDINARY_API_KEY
-      # - CLOUDINARY_API_SECRET
+        value: http://localhost:5173 
 
   # Frontend Service (React/Vite)
   - type: web
@@ -34,8 +25,6 @@ services:
         source: /*
         destination: /index.html
     envVars:
+      # Set the VITE_API_URL manually in the Render Dashboard after deployment
       - key: VITE_API_URL
-        fromService:
-          name: smart-campus-backend
-          type: web
-          property: url
+        value: http://localhost:8080
