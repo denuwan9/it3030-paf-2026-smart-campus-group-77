@@ -11,7 +11,7 @@ services:
         value: http://localhost:5173
 
   # Frontend Service (React/Vite)
-  - type: static
+  - type: web
     name: smart-campus-frontend
     env: static
     rootDir: frontend
