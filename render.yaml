@@ -1,23 +1,22 @@
 services:
-  # Backend Service (Spring Boot)
+  # Backend Service (Spring Boot via Docker)
   - type: web
     name: smart-campus-backend
-    env: java
+    env: docker
     rootDir: backend
-    buildCommand: ./mvnw clean install -DskipTests
-    startCommand: java -jar target/*.jar
+    plan: free
     envVars:
       - key: PORT
         value: 8080
-      # Set the FRONTEND_URL manually in the Render Dashboard after deployment
       - key: FRONTEND_URL
-        value: http://localhost:5173 
+        value: http://localhost:5173
 
   # Frontend Service (React/Vite)
   - type: web
     name: smart-campus-frontend
     env: static
     rootDir: frontend
+    plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     routes:
@@ -25,6 +24,5 @@ services:
         source: /*
         destination: /index.html
     envVars:
-      # Set the VITE_API_URL manually in the Render Dashboard after deployment
       - key: VITE_API_URL
         value: http://localhost:8080
