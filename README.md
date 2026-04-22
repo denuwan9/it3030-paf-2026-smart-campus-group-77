@@ -8,7 +8,7 @@
 
 > **Elevating Campus Efficiency through Intelligent Automation.**
 >
-> The Smart Campus Operations Hub is a next-generation management system designed to streamline university life. From biometric and QR-based facility booking to real-time incident tracking and AI-driven career guidance, it provides a centralized platform for students, faculty, and technicians.
+> The Smart Campus Operations Hub is a next-generation management system designed to streamline university life. From biometric and QR-based facility booking to AI-driven career guidance, it provides a centralized platform for students, faculty, and technicians.
 
 ---
 
@@ -26,12 +26,7 @@
 *   **QR Check-in System**: Secure, contactless access validation using unique reservation QR codes.
 *   **Resource Inventory**: Centralized management of campus assets and their maintenance states.
 
-### 🛠 3. Incident & Maintenance Intelligence
-*   **Instant Reporting**: User-friendly ticketing system for reporting campus issues with priority levels.
-*   **Technician Dashboard**: Real-time task queues, performance metrics, and status updates for maintenance staff.
-*   **Automated Escalation**: Intelligent routing of tickets to the appropriate specialized teams.
-
-### 🔔 4. Omnichannel Notifications
+### 🔔 3. Omnichannel Notifications
 *   **Push & Email Alerts**: Real-time updates for booking status, security alerts, and system announcements.
 *   **Granular Preferences**: User-defined notification settings to control what, when, and how you receive alerts.
 *   **System Integrity**: Automated cleanup of archival notifications to maintain performance.
@@ -39,7 +34,7 @@
 ### 📊 5. Analytics & Strategic Reporting
 *   **Admin Command Center**: Visual dashboards with real-time utilization charts (Recharts).
 *   **Automated Reporting**: One-click PDF generation for user management, usage statistics, and maintenance logs (jsPDF).
-*   **Data-Driven Insights**: Insightful metrics on peak hours, facility popularity, and technician efficiency.
+*   **Data-Driven Insights**: Insightful metrics on peak hours and facility popularity.
 
 ---
 

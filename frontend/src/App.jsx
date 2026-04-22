@@ -28,8 +28,7 @@ import BookingsPage from './pages/dashboard/BookingsPage';
 import AdminBookingsPage from './pages/dashboard/AdminBookingsPage';
 import AdminCheckInVerifyPage from './pages/dashboard/AdminCheckInVerifyPage';
 import NotificationSettingsPage from './pages/dashboard/NotificationSettingsPage';
-import TicketsPage from './pages/dashboard/TicketsPage';
-import UserTicketsPage from './pages/dashboard/UserTicketsPage';
+
 import FacilitiesPage from './pages/dashboard/FacilitiesPage';
 import ManageFacilitiesPage from './pages/dashboard/ManageFacilitiesPage';
 
@@ -144,11 +143,7 @@ function App() {
                 </ProtectedRoute>
               } />
               
-              <Route path="/user/tickets" element={
-                <ProtectedRoute allowedRoles={['USER']}>
-                  <UserTicketsPage />
-                </ProtectedRoute>
-              } />
+
               
               {/* Admin Access ONLY */}
               <Route path="/admin" element={
@@ -182,12 +177,7 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              {/* Incident Tickets Module */}
-              <Route path="/tickets" element={
-                <ProtectedRoute allowedRoles={['ADMIN', 'TECHNICIAN']}>
-                  <TicketsPage />
-                </ProtectedRoute>
-              } />
+
 
               {/* Universal User Profile (Accessed by all logged-in roles) */}
               <Route path="/profile" element={

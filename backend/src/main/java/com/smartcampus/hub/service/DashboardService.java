@@ -26,7 +26,6 @@ public class DashboardService {
     private final ResourceRepository resourceRepository;
     private final FacilityRepository facilityRepository;
     private final UserRepository userRepository;
-    private final TicketRepository ticketRepository;
     private final NotificationRepository notificationRepository;
 
     @Transactional(readOnly = true)
@@ -38,13 +37,10 @@ public class DashboardService {
             List<?> bookings = bookingRepository.findUserBookings(user.getId(), BookingStatus.APPROVED, null, null);
             long activeBookings = bookings != null ? bookings.size() : 0;
 
-            long pendingTickets = ticketRepository.findByReporterIdOrderByCreatedAtDesc(user.getId()).stream()
-                    .filter(t -> t != null && (t.getStatus() == TicketStatus.OPEN || t.getStatus() == TicketStatus.IN_PROGRESS))
-                    .count();
+
             
             return DashboardStatsDTO.builder()
                     .activeBookings(activeBookings)
-                    .pendingTickets(pendingTickets)
                     .totalResources(resourceRepository.count())
                     .notificationsCount(notificationRepository.countByRecipientIdAndIsRead(user.getId(), false))
                     .build();
@@ -60,7 +56,6 @@ public class DashboardService {
             return AdminDashboardStatsDTO.builder()
                     .totalResources(resourceRepository.count())
                     .activeBookings(bookingRepository.findAllBookings(BookingStatus.APPROVED, null, null, null, null).size())
-                    .pendingTickets(ticketRepository.countByStatus(TicketStatus.OPEN) + ticketRepository.countByStatus(TicketStatus.IN_PROGRESS))
                     .activeUsers(userRepository.count())
                     .totalFacilities(facilityRepository.count())
                     .build();
@@ -109,26 +104,7 @@ public class DashboardService {
                         .build());
                 });
 
-            // 2. Fetch Tickets
-            List<Ticket> tickets;
-            if (isAdmin) {
-                tickets = ticketRepository.findAll();
-            } else {
-                tickets = ticketRepository.findByReporterIdOrderByCreatedAtDesc(user.getId());
-            }
 
-            tickets.stream()
-                .filter(t -> t != null)
-                .sorted(Comparator.comparing(t -> t.getCreatedAt() != null ? t.getCreatedAt() : Instant.MIN, Comparator.reverseOrder()))
-                .limit(10)
-                .forEach(t -> activities.add(RecentActivityDTO.builder()
-                        .id(t.getId().toString())
-                        .title(t.getTitle())
-                        .type("TICKET")
-                        .status(t.getStatus() != null ? t.getStatus().name() : "OPEN")
-                        .user(t.getReporter() != null ? t.getReporter().getFullName() : "Anonymous")
-                        .timestamp(t.getCreatedAt())
-                        .build()));
 
         } catch (Exception e) {
             log.warn("Partial failure in getRecentActivity: {}", e.getMessage());

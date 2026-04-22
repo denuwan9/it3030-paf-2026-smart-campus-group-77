@@ -37,9 +37,7 @@ public class NotificationSetting {
     @Builder.Default
     private Boolean bookingAlerts = true;
 
-    @Column(name = "ticket_alerts", nullable = false)
-    @Builder.Default
-    private Boolean ticketAlerts = true;
+
 
     @Column(name = "system_alerts", nullable = false)
     @Builder.Default
