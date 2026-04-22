@@ -41,6 +41,13 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     },
 
     { 
+      label: 'My Reports', 
+      to: '/user/tickets', 
+      icon: Ticket, 
+      roles: ['ROLE_USER'] 
+    },
+
+    { 
       label: 'User Management', 
       to: '/admin/users', 
       icon: ShieldCheck, 
@@ -63,6 +70,19 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       to: user?.role === 'ROLE_ADMIN' ? '/admin/bookings' : '/bookings',
       icon: Calendar,
       roles: ['ROLE_USER', 'ROLE_ADMIN']
+    },
+
+    { 
+      label: 'Ops Queue', 
+      to: '/admin/tickets', 
+      icon: Ticket, 
+      roles: ['ROLE_ADMIN'] 
+    },
+    { 
+      label: 'Work Orders', 
+      to: '/technician/tasks', 
+      icon: Ticket, 
+      roles: ['ROLE_TECHNICIAN'] 
     },
 
   ];

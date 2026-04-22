@@ -1,69 +1,170 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Clock, CheckCircle, AlertCircle, MessageSquare, ChevronRight, Wrench } from 'lucide-react';
+
+import { Ticket, Clock, CheckCircle, AlertCircle, MessageSquare, ChevronRight, Loader2, ClipboardList } from 'lucide-react';
+
 import StatusBadge from '../../components/StatusBadge';
+import dashboardService from '../../services/dashboardService';
+import ticketService from '../../services/ticketService';
+import { useNavigate } from 'react-router-dom';
+import { formatDistanceToNow, parseISO } from 'date-fns';
+import toast from 'react-hot-toast';
 
 const TechnicianDashboard = () => {
-  // Empty state for maintenance tasks
-  const tasks = [];
+  const [tasks, setTasks] = useState([]);
+  const [stats, setStats] = useState({ activeTasksCount: 0, resolvedTodayCount: 0, avgResponseTime: '15m' });
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [statsRes, tasksRes] = await Promise.all([
+          dashboardService.getTechnicianStats(),
+          ticketService.getTechnicianTasks()
+        ]);
+        setStats(statsRes.data);
+        setTasks(tasksRes.data.data.slice(0, 5)); // Show top 5 recent tasks
+      } catch (err) {
+        toast.error('Failed to sync dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-32 gap-4">
+        <Loader2 className="w-10 h-10 text-nexer-brand-primary animate-spin" />
+        <p className="text-xs font-black text-slate-400 uppercase tracking-widest">Syncing Dashboard...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8 min-h-[80vh]">
+    <div className="space-y-8 min-h-screen">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-slate-800 uppercase">Assigned Maintenance</h1>
-          <p className="text-slate-500 text-xs sm:text-sm mt-1 font-medium">Manage your assigned technical and facility tasks.</p>
-        </div>
-        <div className="flex items-center gap-3 bg-white p-3 rounded-2xl border border-slate-100 shadow-nexer-sm md:bg-transparent md:p-0 md:border-none md:shadow-none">
-          <div className="flex -space-x-2">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="w-8 h-8 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center text-[10px] font-black text-blue-700 shadow-sm uppercase">
-                T{i}
-              </div>
-            ))}
-          </div>
-          <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest ml-2">Technician Team Beta</p>
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-nexer-text-header">Mission Overview</h1>
+          <p className="text-nexer-text-muted text-xs sm:text-sm mt-1 font-medium italic">
+            {stats.activeTasksCount > 0 
+              ? `You have ${stats.activeTasksCount} active tasks in your queue.` 
+              : "Your queue is clear. Great work!"}
+          </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Active Task List Placeholder */}
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] px-2">Current Queue</h2>
-          
-          <div className="bg-white border-2 border-dashed border-slate-100 rounded-[2.5rem] py-20 flex flex-col items-center justify-center text-center px-6">
-            <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 text-slate-300">
-              <CheckCircle className="w-8 h-8" />
-            </div>
-            <h3 className="text-lg font-black text-slate-800 tracking-tight">All Caught Up!</h3>
-            <p className="text-slate-400 text-sm mt-1 max-w-xs font-medium">
-              There are currently no active maintenance tasks or incident reports assigned to your queue.
-            </p>
+          <div className="flex items-center justify-between px-2">
+            <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Queue</h2>
+            {tasks.length > 0 && (
+              <button 
+                onClick={() => navigate('/technician/tasks')}
+                className="text-[10px] font-black text-nexer-brand-primary uppercase tracking-widest hover:underline"
+              >
+                View Full Roster
+              </button>
+            )}
           </div>
+          
+          {tasks.length === 0 ? (
+            <div className="bg-white border border-slate-200 border-dashed rounded-[2rem] p-12 text-center flex flex-col items-center gap-4">
+              <ClipboardList className="w-8 h-8 text-slate-300" />
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No assigned tasks found</p>
+            </div>
+          ) : (
+            tasks.map((ticket, i) => (
+              <motion.div
+                key={ticket.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.05 }}
+                className="bg-white border border-slate-200 rounded-[2rem] p-4 sm:p-5 hover:border-nexer-brand-primary/30 hover:shadow-nexer-md transition-all group flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`p-3 rounded-2xl ${
+                    ticket.status === 'IN_PROGRESS' 
+                      ? 'bg-amber-50 text-amber-600' 
+                      : 'bg-nexer-brand-primary/10 text-nexer-brand-primary'
+                  }`}>
+                    <Ticket className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase">#{ticket.id.toString().substring(0, 8)}</span>
+                      <span className={`w-1.5 h-1.5 rounded-full ${
+                        ticket.priority === 'URGENT' ? 'bg-rose-500 animate-pulse' : 
+                        ticket.priority === 'HIGH' ? 'bg-rose-500' : 
+                        ticket.priority === 'MEDIUM' ? 'bg-amber-500' : 'bg-emerald-500'
+                      }`} />
+                    </div>
+                    <h3 className="text-base font-black text-nexer-text-header mt-0.5 group-hover:text-nexer-brand-primary transition-colors">
+                      {ticket.category}
+                    </h3>
+                    <div className="flex items-center gap-4 mt-2">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                        <Clock className="w-3 h-3" />
+                        <span>{formatDistanceToNow(parseISO(ticket.createdAt))} ago</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400">
+                        <AlertCircle className="w-3 h-3" />
+                        <span>{ticket.location}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex items-center justify-between sm:justify-end gap-4 w-full sm:w-auto pt-4 sm:pt-0 border-t border-slate-50 sm:border-none">
+                  <StatusBadge status={ticket.status} />
+                  <button 
+                    onClick={() => navigate(`/tickets/${ticket.id}`)}
+                    className="p-3 bg-slate-50 border border-slate-200 shadow-sm rounded-xl text-slate-400 hover:text-white hover:bg-nexer-brand-primary hover:border-nexer-brand-primary transition-all"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </motion.div>
+            ))
+          )}
         </div>
 
         {/* Quick Stats & Tools */}
         <div className="space-y-6">
-          <div className="bg-white border border-slate-100 p-6 rounded-[2rem] shadow-nexer-sm">
-            <h2 className="text-lg font-black text-slate-800 mb-6 tracking-tight">Queue Health</h2>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-inner">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Avg Response</p>
-                <p className="text-2xl font-black text-slate-800 mt-1">--<span className="text-xs text-slate-400 ml-1">min</span></p>
+          <div className="bg-white border border-slate-200 p-8 rounded-[2.5rem] shadow-nexer-md">
+            <h2 className="text-xs font-black text-nexer-text-header uppercase tracking-widest mb-6 border-b border-slate-50 pb-4">Performance Metrics</h2>
+            <div className="grid grid-cols-1 gap-4">
+              <div className="bg-slate-50/50 p-5 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Avg Response</p>
+                  <p className="text-xl font-black text-nexer-text-header mt-1">{stats.avgResponseTime}</p>
+                </div>
+                <div className="p-3 bg-white rounded-xl shadow-sm">
+                  <Clock className="w-4 h-4 text-nexer-brand-primary" />
+                </div>
               </div>
-              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 shadow-inner">
-                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Resolved Today</p>
-                <p className="text-2xl font-black text-emerald-600 mt-1">0</p>
+              <div className="bg-slate-50/50 p-5 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Resolved Today</p>
+                  <p className="text-xl font-black text-emerald-600 mt-1">{stats.resolvedTodayCount}</p>
+                </div>
+                <div className="p-3 bg-white rounded-xl shadow-sm">
+                  <CheckCircle className="w-4 h-4 text-emerald-500" />
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="bg-indigo-600 p-8 rounded-[2.5rem] shadow-nexer-lg text-white relative overflow-hidden group">
-            <div className="absolute -bottom-4 -right-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:scale-150 transition-transform" />
-            <h3 className="text-xl font-black mb-2 tracking-tight">System Status</h3>
-            <p className="text-indigo-100 text-xs mb-6 border-l-2 border-indigo-400 pl-3 font-medium">Contact System Administration if you notice anomalous patterns in campus facilities.</p>
-            <button className="w-full py-3 bg-white text-indigo-700 text-xs font-black uppercase tracking-widest rounded-xl hover:bg-indigo-50 transition-all active:scale-95 shadow-nexer-md">
-              Request Guidance
+          <div className="bg-slate-900 p-8 rounded-[2.5rem] shadow-xl text-white relative overflow-hidden group">
+            <Ticket className="absolute -bottom-6 -right-6 w-24 h-24 opacity-10 rotate-12 group-hover:scale-110 transition-transform text-nexer-brand-primary" />
+            <h3 className="text-lg font-black mb-3 text-white">Ops Support</h3>
+            <p className="text-white/60 text-xs mb-6 leading-relaxed">Need technical guidance or encountering safety hazards? Contact the operations hub immediately.</p>
+            <button className="w-full py-3.5 bg-white text-slate-900 text-[10px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-nexer-brand-primary hover:text-white transition-all shadow-lg active:scale-95">
+              Contact Ops Hub
             </button>
           </div>
         </div>

@@ -28,7 +28,10 @@ import BookingsPage from './pages/dashboard/BookingsPage';
 import AdminBookingsPage from './pages/dashboard/AdminBookingsPage';
 import AdminCheckInVerifyPage from './pages/dashboard/AdminCheckInVerifyPage';
 import NotificationSettingsPage from './pages/dashboard/NotificationSettingsPage';
-
+import UserTickets from './pages/dashboard/UserTickets';
+import AdminGlobalQueue from './pages/dashboard/AdminGlobalQueue';
+import TechnicianTasks from './pages/dashboard/TechnicianTasks';
+import TicketDetails from './pages/dashboard/TicketDetails';
 import FacilitiesPage from './pages/dashboard/FacilitiesPage';
 import ManageFacilitiesPage from './pages/dashboard/ManageFacilitiesPage';
 
@@ -144,6 +147,14 @@ function App() {
               } />
               
 
+              <Route path="/user/tickets" element={
+                <ProtectedRoute allowedRoles={['USER']}>
+                  <UserTickets />
+                </ProtectedRoute>
+              } />
+
+
+
               
               {/* Admin Access ONLY */}
               <Route path="/admin" element={
@@ -174,6 +185,26 @@ function App() {
               <Route path="/technician" element={
                 <ProtectedRoute allowedRoles={['TECHNICIAN']}>
                   <TechnicianDashboard />
+                </ProtectedRoute>
+              } />
+
+
+              {/* Incident Tickets Module */}
+              <Route path="/admin/tickets" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <AdminGlobalQueue />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/technician/tasks" element={
+                <ProtectedRoute allowedRoles={['TECHNICIAN', 'ADMIN']}>
+                  <TechnicianTasks />
+                </ProtectedRoute>
+              } />
+
+              <Route path="/tickets/:id" element={
+                <ProtectedRoute allowedRoles={['USER', 'ADMIN', 'TECHNICIAN']}>
+                  <TicketDetails />
                 </ProtectedRoute>
               } />
 

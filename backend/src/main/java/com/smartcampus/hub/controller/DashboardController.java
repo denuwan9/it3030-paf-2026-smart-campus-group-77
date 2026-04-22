@@ -4,6 +4,7 @@ import com.smartcampus.hub.dto.AdminDashboardStatsDTO;
 import com.smartcampus.hub.dto.ApiResponse;
 import com.smartcampus.hub.dto.DashboardStatsDTO;
 import com.smartcampus.hub.dto.RecentActivityDTO;
+import com.smartcampus.hub.dto.TechnicianDashboardStatsDTO;
 import com.smartcampus.hub.service.DashboardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -35,5 +36,11 @@ public class DashboardController {
     @GetMapping("/recent-activity")
     public ResponseEntity<ApiResponse<List<RecentActivityDTO>>> getRecentActivity() {
         return ResponseEntity.ok(ApiResponse.success("Recent activity fetched", dashboardService.getRecentActivity()));
+    }
+
+    @GetMapping("/technician-stats")
+    @PreAuthorize("hasRole('ROLE_TECHNICIAN') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<ApiResponse<TechnicianDashboardStatsDTO>> getTechnicianStats() {
+        return ResponseEntity.ok(ApiResponse.success("Technician stats fetched", dashboardService.getTechnicianStats()));
     }
 }
