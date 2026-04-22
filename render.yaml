@@ -10,17 +10,14 @@ services:
       - key: FRONTEND_URL
         value: http://localhost:5173
 
-  # Frontend Service (React/Vite)
+  # Frontend Service (React/Vite as a Web Service)
   - type: web
     name: smart-campus-frontend
-    env: static
+    env: node
     rootDir: frontend
     buildCommand: npm install && npm run build
-    staticPublishPath: dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    # Uses 'serve' to host the static files in a Node environment
+    startCommand: npx serve -s dist
     envVars:
       - key: VITE_API_URL
         value: http://localhost:8080
