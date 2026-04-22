@@ -4,16 +4,17 @@ services:
     name: smart-campus-backend
     env: docker
     rootDir: backend
-    plan: free  # Free tier for Web Services
+    # Plan is omitted to allow manual selection of "Free" in the UI
     envVars:
       - key: PORT
         value: 8080
       - key: FRONTEND_URL
         value: http://localhost:5173
 
-  # Frontend Service (Static Site - Always Free)
-  - type: static_site
+  # Frontend Service (Static Site)
+  - type: web
     name: smart-campus-frontend
+    env: static
     rootDir: frontend
     buildCommand: npm install && npm run build
     staticPublishPath: dist
