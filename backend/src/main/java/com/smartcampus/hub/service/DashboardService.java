@@ -44,7 +44,6 @@ public class DashboardService {
             
             return DashboardStatsDTO.builder()
                     .activeBookings(activeBookings)
-                    .pendingTickets(pendingTickets)
                     .totalResources(resourceRepository.count())
                     .notificationsCount(notificationRepository.countByRecipientIdAndIsRead(user.getId(), false))
                     .build();

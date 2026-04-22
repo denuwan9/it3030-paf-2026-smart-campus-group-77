@@ -9,7 +9,7 @@ import java.time.Instant;
 public class RecentActivityDTO {
     private String id;
     private String title;
-    private String type; // e.g., "BOOKING", "TICKET"
+    private String type; // e.g., "BOOKING"
     private String status;
     private String user;
     private Instant timestamp;

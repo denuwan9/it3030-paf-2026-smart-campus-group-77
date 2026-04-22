@@ -146,11 +146,15 @@ function App() {
                 </ProtectedRoute>
               } />
               
+
               <Route path="/user/tickets" element={
                 <ProtectedRoute allowedRoles={['USER']}>
                   <UserTickets />
                 </ProtectedRoute>
               } />
+
+
+
               
               {/* Admin Access ONLY */}
               <Route path="/admin" element={
@@ -184,6 +188,7 @@ function App() {
                 </ProtectedRoute>
               } />
 
+
               {/* Incident Tickets Module */}
               <Route path="/admin/tickets" element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
@@ -202,6 +207,8 @@ function App() {
                   <TicketDetails />
                 </ProtectedRoute>
               } />
+
+
 
               {/* Universal User Profile (Accessed by all logged-in roles) */}
               <Route path="/profile" element={

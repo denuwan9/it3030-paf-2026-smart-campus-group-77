@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+
 import { Ticket, Clock, CheckCircle, AlertCircle, MessageSquare, ChevronRight, Loader2, ClipboardList } from 'lucide-react';
+
 import StatusBadge from '../../components/StatusBadge';
 import dashboardService from '../../services/dashboardService';
 import ticketService from '../../services/ticketService';
@@ -56,7 +58,7 @@ const TechnicianDashboard = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Active Ticket List */}
+        {/* Active Task List Placeholder */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between px-2">
             <h2 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Live Queue</h2>

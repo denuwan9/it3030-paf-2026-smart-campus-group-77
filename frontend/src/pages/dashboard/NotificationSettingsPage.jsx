@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import {
   Bell,
   Calendar,
-  Ticket,
+
   Megaphone,
   Shield,
   Loader2,
@@ -72,7 +72,7 @@ const NotificationSettingsPage = () => {
         setSettings(res.data);
       } else {
         // Use defaults so the page still renders; user can still toggle and save
-        setSettings({ bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true, securityAlerts: true, soundEnabled: true });
+        setSettings({ bookingAlerts: true, systemAlerts: true, announcementAlerts: true, securityAlerts: true, soundEnabled: true });
         toast.error(res.message || 'Could not load notification settings');
       }
     } catch (error) {
@@ -80,7 +80,7 @@ const NotificationSettingsPage = () => {
       const msg = error?.response?.data?.message || error?.message || 'Could not load notification settings';
       toast.error(msg);
       // Use defaults so the page still renders
-      setSettings({ bookingAlerts: true, ticketAlerts: true, systemAlerts: true, announcementAlerts: true, securityAlerts: true, soundEnabled: true });
+      setSettings({ bookingAlerts: true, systemAlerts: true, announcementAlerts: true, securityAlerts: true, soundEnabled: true });
     } finally {
       setLoading(false);
     }
@@ -134,14 +134,7 @@ const NotificationSettingsPage = () => {
       label: 'Booking Alerts',
       description: 'Get notified when a facility booking is confirmed, cancelled, or updated',
     },
-    {
-      field: 'ticketAlerts',
-      icon: Ticket,
-      iconColor: 'text-amber-500',
-      iconBg: 'bg-amber-50',
-      label: 'Incident Tickets',
-      description: 'Receive updates when tickets are assigned, progressed, or resolved',
-    },
+
     {
       field: 'systemAlerts',
       icon: Shield,
