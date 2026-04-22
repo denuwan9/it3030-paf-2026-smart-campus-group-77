@@ -4,7 +4,6 @@ services:
     name: smart-campus-backend
     env: docker
     rootDir: backend
-    plan: free
     envVars:
       - key: PORT
         value: 8080
@@ -12,11 +11,10 @@ services:
         value: http://localhost:5173
 
   # Frontend Service (React/Vite)
-  - type: web
+  - type: static
     name: smart-campus-frontend
     env: static
     rootDir: frontend
-    plan: free
     buildCommand: npm install && npm run build
     staticPublishPath: dist
     routes:
